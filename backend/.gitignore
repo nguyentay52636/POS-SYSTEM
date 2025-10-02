@@ -1,0 +1,63 @@
+## Build results
+bin/
+obj/
+
+## Visual Studio / VSCode
+.vs/
+.vscode/
+
+## User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+## Logs
+*.log
+logs/
+
+## DotNet artifacts
+*.ide
+*.pidb
+*.svclog
+*.scc
+*.cache
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.nupkg
+*.snupkg
+
+## NuGet
+packages/
+*.nuget.props
+*.nuget.targets
+
+## Entity Framework
+Migrations/obj/
+
+## Config overrides
+appsettings.*.local.json
+appsettings.Local.json
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## Publish outputs
+*.Publish.xml
+**/wwwroot/**
+
+## Rider
+.idea/
+
+## Coverage
+TestResult*/
+coverage/
+*.coverage
+*.coveragexml
+
+
