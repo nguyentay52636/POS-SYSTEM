@@ -4,18 +4,11 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { usePathname } from "next/navigation"
 import {
-    Building2,
-    Users,
-    MessageSquare,
-    BarChart3,
-    Star,
-    DollarSign,
-    Settings,
+
     Menu,
     X,
     Home,
-    ShoppingCart,
-    Gift,
+
 
 } from "lucide-react"
 import HeaderAppSider from "./components/HeaderAppSider"
@@ -52,7 +45,6 @@ export function SiderBarAdmin() {
 
     return (
         <>
-            {/* Mobile Overlay */}
             {isMobile && isMobileOpen && (
                 <div className="fixed inset-0 bg-white   bg-opacity-50 z-40 md:hidden" onClick={() => setIsMobileOpen(false)} />
             )}

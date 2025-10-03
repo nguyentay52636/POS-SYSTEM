@@ -29,13 +29,7 @@ import { Settings } from "lucide-react"
         badge: null,
     },
 
-    {
-        name: "Quản lý Đánh giá",
-        href: "/admin/reviews",
-        icon: Star,
-        current: pathname === "/admin/reviews",
-        badge: "3",
-    },
+
     {
         name: "Quản lý đơn hàng",
         href: "/admin/orders",
@@ -64,13 +58,7 @@ import { Settings } from "lucide-react"
         current: pathname === "/admin/customers",
         badge: null,
     },
-    {
-        name: "Nhân viên",
-        href: "/admin/employee",
-        icon: Users,
-        current: pathname === "/admin/employee",
-        badge: null,
-    },
+
     {
         name: "Tài khoản",
         href: "/admin/account",
