@@ -49,6 +49,51 @@ subtotal : number
 createdAt : string
 updatedAt : string
   }
+  export interface IOrder { 
+    order_id : number
+    customer_id : number
+    user_id : number
+    promo_id : number
+    order_date : string
+    total_amount : number
+    status : string
+    createdAt : string
+    updatedAt : string
+  }
+
+// Extended Order interface for UI with related data
+export interface Order {
+    id: number;
+    customer_id: number;
+    user_id: number;
+    promo_id: number;
+    order_date: string;
+    total_amount: number;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    orderItems: OrderItem[];
+    user?: {
+        email: string;
+        address: string;
+        fullName: string;
+    };
+    customer?: {
+        name: string;
+        email: string;
+        phone: string;
+    };
+}
+
+export interface OrderItem {
+    productId: number;
+    quantity: number;
+    price: number;
+    product?: {
+        name: string;
+        image: string;
+    };
+}
   export interface IPayment { 
     payment_id : number
     order_id : number
@@ -123,4 +168,3 @@ createdAt : string
 updatedAt : string
 
 }
- 
