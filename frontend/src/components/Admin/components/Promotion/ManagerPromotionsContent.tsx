@@ -6,6 +6,7 @@ import { Plus } from "lucide-react"
 import { DialogEditPromotions, DialogViewDetailPromotions } from "./components/Dialog"
 import PaginationPromotions from "./components/PaginationPromotions"
 import TableManagerPromotions from "./components/TableManagerPromotions"
+import CardStats from "@/components/Admin/components/Promotion/components/CardStas"
 
 
 // Mock data
@@ -150,14 +151,14 @@ export default function ManagerPromotionsContent() {
                     </Button>
                 </div>
 
-                {/* 
-                <CardStas
+
+                <CardStats
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                     statusFilter={statusFilter}
                     setStatusFilter={setStatusFilter}
                     stats={stats}
-                /> */}
+                />
 
                 {/* Promotions Table */}
                 <TableManagerPromotions
