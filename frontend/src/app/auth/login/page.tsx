@@ -156,7 +156,7 @@ export default function LoginPage() {
                         <Button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full h-12 bg-green-700 hover:bg-green-800 text-white font-medium rounded-lg transition-all hover:scale-[1.03] active:scale-[0.98]"
+                            className=" cursor-pointer! w-full h-12 bg-green-700 hover:bg-green-800 text-white font-medium rounded-lg transition-all hover:scale-[1.03] active:scale-[0.98]"
                         >
                             {isLoading ? (
                                 <div className="flex items-center space-x-2">
@@ -175,12 +175,7 @@ export default function LoginPage() {
                                 Quên mật khẩu?
                             </Link>
                         </div>
-                        <div className="text-center text-gray-600">
-                            Chưa có tài khoản?{" "}
-                            <Link href="/auth/signup" className="text-green-700 hover:text-green-800 font-medium transition-colors">
-                                Đăng ký
-                            </Link>
-                        </div>
+
                     </form>
 
                     {/* Social Login */}
