@@ -1,4 +1,4 @@
-import { INhanVien } from "@/types/types"
+import { INhanVien, IUser, role } from "@/types/types"
 
 export const mockEmployees: INhanVien[] = [
   {
@@ -46,3 +46,33 @@ export const mockEmployees: INhanVien[] = [
 ]
 
 export default mockEmployees
+
+export const mockUsers: IUser[] = [
+  {
+    user_id: 1,
+    username: "admin",
+    password: "hashed_password_1",
+    full_name: "Admin One",
+    role: role.ADMIN,
+    createdAt: "2024-01-10T08:30:00Z",
+    updatedAt: "2024-06-15T12:00:00Z",
+  },
+  {
+    user_id: 2,
+    username: "john.doe",
+    password: "hashed_password_2",
+    full_name: "John Doe",
+    role: role.USER,
+    createdAt: "2024-02-05T09:15:00Z",
+    updatedAt: "2024-06-20T10:45:00Z",
+  },
+  {
+    user_id: 3,
+    username: "jane.smith",
+    password: "hashed_password_3",
+    full_name: "Jane Smith",
+    role: role.USER,
+    createdAt: "2024-03-12T14:00:00Z",
+    updatedAt: "2024-07-01T08:20:00Z",
+  },
+]
