@@ -19,7 +19,7 @@ export default function AdminRootLayout({
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
 
             <div className="flex">
-              <SiderBarAdmin />
+              {/* <SiderBarAdmin /> */}
               <div className="flex-1">
                 {children}
               </div>
