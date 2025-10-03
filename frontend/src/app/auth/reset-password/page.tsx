@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import Image from "next/image"
 import { Eye, EyeOff, Lock, ArrowLeft } from "lucide-react"
 
 export default function ResetPasswordPage() {
@@ -65,13 +66,48 @@ export default function ResetPasswordPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-white p-4">
-            <div className="w-full max-w-md flex flex-col justify-center items-center min-h-screen">
-                <div className="w-full space-y-4">
-                    <div className="text-center mb-2">
-                        <h1 className="text-3xl font-bold text-gray-900">Đặt lại mật khẩu</h1>
-                        <p className="text-gray-500 mt-2">Nhập mật khẩu mới cho tài khoản của bạn</p>
+        <div className="min-h-screen flex">
+            {/* Left Side - Hero Section */}
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-100 to-green-200 relative overflow-hidden">
+                <div className="flex flex-col justify-center px-12 z-10 max-w-lg">
+                    <h1 className="text-4xl font-bold text-gray-800 mb-6 leading-tight">
+                        Đặt lại mật khẩu tại {" "}
+                        <span className="text-green-700 bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent">
+                            GroceryMart
+                        </span>
+                    </h1>
+                    <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                        Hãy tạo mật khẩu mới để tiếp tục mua sắm an toàn.
+                    </p>
+                </div>
+                <div className="absolute bottom-0 right-0 w-3/5 h-3/5 rounded-tl-[4rem] overflow-hidden shadow-2xl">
+                    <Image
+                        src="/images/retail-login.jpg"
+                        alt="Grocery Store"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
+            </div>
+
+            {/* Right Side - Reset Form */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
+                <div className="w-full max-w-md space-y-6">
+                    {/* Mobile Logo */}
+                    <div className="lg:hidden flex flex-col items-center mb-4">
+                        <Image src="/logo-grocery.png" alt="GroceryMart Logo" width={60} height={60} className="rounded-lg" />
+                        <h2 className="text-2xl font-bold text-gray-800">GroceryMart</h2>
                     </div>
+
+                    {/* Form Header */}
+                    <div className="text-center lg:text-left">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Đặt lại mật khẩu</h2>
+                        <p className="text-gray-600 text-base">Nhập mật khẩu mới cho tài khoản của bạn</p>
+                    </div>
+
                     {error && (
                         <Alert variant="destructive">
                             <AlertDescription>{error}</AlertDescription>
@@ -109,16 +145,16 @@ export default function ResetPasswordPage() {
                                     placeholder="Nhập mật khẩu mới"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="pl-10 pr-10"
+                                    className="pl-10 pr-12"
                                     required
                                 />
-                                <button
-                                    type="button"
+                                <Button
+                                    variant={"ghost"}
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
                                 >
                                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
+                                </Button>
                             </div>
                         </div>
 
@@ -132,16 +168,16 @@ export default function ResetPasswordPage() {
                                     placeholder="Nhập lại mật khẩu mới"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="pl-10 pr-10"
+                                    className="pl-10 pr-12"
                                     required
                                 />
-                                <button
-                                    type="button"
+                                <Button
+                                    variant={"ghost"}
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
                                 >
                                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
+                                </Button>
                             </div>
                         </div>
 

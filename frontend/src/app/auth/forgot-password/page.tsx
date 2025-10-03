@@ -7,7 +7,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Star, ArrowLeft, Mail, CheckCircle } from "lucide-react"
+import { ArrowLeft, Mail, CheckCircle } from "lucide-react"
 
 export default function page() {
     const [email, setEmail] = useState("")
@@ -28,33 +28,27 @@ export default function page() {
     if (isSubmitted) {
         return (
             <div className="min-h-screen flex">
-                {/* Left Side - Hero Section */}
-                <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-50 to-green-100 relative overflow-hidden">
+                <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-100 to-green-200 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-green-400/20 to-green-600/20" />
-
-                    {/* Decorative Elements */}
                     <div className="absolute top-24 right-20 w-36 h-36 bg-green-200/30 rounded-full blur-xl" />
                     <div className="absolute bottom-36 left-12 w-24 h-24 bg-green-300/40 rounded-full blur-lg" />
 
-
-
-                    {/* Hero Content */}
                     <div className="flex flex-col justify-center px-12 z-10 max-w-lg">
-                        <h1 className="text-5xl font-bold text-gray-800 mb-6 leading-tight">
-                            Hỗ trợ{" "}
-                            <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
-                                luôn sẵn sàng!
+                        <h1 className="text-4xl font-bold text-gray-800 mb-6 leading-tight">
+                            Hỗ trợ đặt lại mật khẩu tại {" "}
+                            <span className="text-green-700 bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent">
+                                GroceryMart
                             </span>
                         </h1>
-                        <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                            Chúng tôi luôn ở đây để giúp bạn quay trở lại với cộng đồng SocialVibe.
+                        <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                            Chúng tôi luôn sẵn sàng giúp bạn quay lại mua sắm nhanh chóng.
                         </p>
                     </div>
 
                     {/* Hero Image */}
                     <div className="absolute bottom-0 right-0 w-3/5 h-3/5 rounded-tl-[4rem] overflow-hidden shadow-2xl">
                         <Image
-                            src="/images/retail-forgot-password.jpg"
+                            src="/images/retail-login.jpg"
                             alt="Support and community"
                             fill
                             className="object-cover"
@@ -64,7 +58,6 @@ export default function page() {
                     </div>
                 </div>
 
-                {/* Right Side - Success Message */}
                 <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
                     <div className="w-full max-w-md text-center space-y-8">
                         {/* Success Icon */}
@@ -124,12 +117,8 @@ export default function page() {
                 {/* Logo */}
                 <div className="absolute top-8 left-8 z-10">
                     <div className="flex items-center space-x-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                            <Star className="w-6 h-6 text-white" />
-                        </div>
-                        <span className="text-2xl font-bold text-gray-800">
-                            Social<span className="text-pink-500">Vibe</span>
-                        </span>
+                        <Image src="/logo-grocery.png" alt="GroceryMart Logo" width={40} height={40} className="rounded-lg" />
+                        <span className="text-2xl font-bold text-gray-800">GroceryMart</span>
                     </div>
                 </div>
 
@@ -149,7 +138,7 @@ export default function page() {
                 {/* Hero Image */}
                 <div className="absolute bottom-0 right-0 w-3/5 h-3/5 rounded-tl-[4rem] overflow-hidden shadow-2xl">
                     <Image
-                        src="/images/retail-forgot-password.jpg"
+                        src="/images/retail-login.jpg"
                         alt="Support and community"
                         fill
                         className="object-cover"
@@ -163,13 +152,9 @@ export default function page() {
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
                 <div className="w-full max-w-md space-y-8">
                     {/* Mobile Logo */}
-                    <div className="lg:hidden flex items-center justify-center space-x-2 mb-8">
-                        <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                            <Star className="w-6 h-6 text-white" />
-                        </div>
-                        <span className="text-2xl font-bold text-gray-800">
-                            Social<span className="text-pink-500">Vibe</span>
-                        </span>
+                    <div className="lg:hidden flex flex-col items-center mb-4">
+                        <Image src="/logo-grocery.png" alt="GroceryMart Logo" width={60} height={60} className="rounded-lg" />
+                        <h2 className="text-2xl font-bold text-gray-800">GroceryMart</h2>
                     </div>
 
                     {/* Form Header */}
