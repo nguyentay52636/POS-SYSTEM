@@ -2,7 +2,7 @@ import type React from "react"
 import "./globals.css"
 import { Suspense } from "react"
 import { ThemeProvider } from "@/components/ThemeProvider"
-import { SiderBarAdmin } from "@/components/Admin/components/SiderBar/ SiderBarAdmin"
+import ConditionalSidebar from "@/components/Admin/components/SiderBar/ConditionalSidebar"
 
 
 
@@ -19,7 +19,7 @@ export default function AdminRootLayout({
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
 
             <div className="flex">
-              {/* <SiderBarAdmin /> */}
+              <ConditionalSidebar />
               <div className="flex-1">
                 {children}
               </div>

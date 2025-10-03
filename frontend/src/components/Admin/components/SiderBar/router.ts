@@ -61,9 +61,9 @@ import { Settings } from "lucide-react"
 
     {
         name: "Tài khoản",
-        href: "/admin/account",
+        href: "/admin/users",
         icon: Users,
-        current: pathname === "/admin/account",
+        current: pathname === "/admin/users",
         badge: null,
     },
     {
