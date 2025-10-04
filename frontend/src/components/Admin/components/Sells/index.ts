@@ -1,0 +1,7 @@
+export { default as SellsContent } from './components/SellsContent'
+export { default as HeaderSells } from './components/HeaderSells'
+export { default as LeftPanelSells } from './components/LeftPanelSells'
+export { default as HeaderCartSells } from './components/HeaderCartSells'
+export { default as CartItem } from './components/CartSells/CartItem'
+export { default as DialogCustomer } from './components/DialogCustomer'
+export { default as DialogPayment } from './components/DialogPayment'
