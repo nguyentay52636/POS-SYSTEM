@@ -16,9 +16,9 @@ import { Settings } from "lucide-react"
     },
     {
         name: "Bán hàng",
-        href: "/admin/sell",
+        href: "/admin/sells",
         icon: ShoppingCart,
-        current: pathname === "/admin/sell",
+        current: pathname === "/admin/sells",
         badge: null,
     },
     {
