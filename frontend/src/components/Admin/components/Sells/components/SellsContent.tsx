@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -15,14 +14,21 @@ import {
     Minus,
     Trash2,
     CreditCard,
-
+    X,
+    Barcode,
+    Package,
+    Store,
+    TrendingUp,
 } from "lucide-react"
 import HeaderSells from "./HeaderSells"
 import LeftPanelSells from "./LeftPanelSells"
 import HeaderCartSells from "./HeaderCartSells"
 import CartItem from "./CartSells/CartItem"
 import PromotionCodeSells from "@/app/admin/orders/PromotionCodeSells"
-import DialogSelectedPayment from "./Dialog/DialogSelectedPayment"
+import { PaymentMethod as PaymentMethodType } from "@/types/paymentType"
+import { CustomerInfo } from "./CustomerForm"
+import DialogCustomer from "./DialogCustomer"
+import DialogPayment from "./DialogPayment"
 
 
 export interface ICategory {
@@ -66,13 +72,14 @@ export interface Transaction {
     total: number
     discount: number
     finalTotal: number
-    paymentMethod: "cash" | "card" | "transfer"
+    paymentMethod: string
     receivedAmount: number
     changeAmount: number
     createdAt: string
     cashier: string
     appliedPromotion?: IPromotion
     selectedEWallet?: string
+    customerInfo?: CustomerInfo
 }
 
 // Mock data
@@ -189,17 +196,71 @@ const mockPromotions: IPromotion[] = [
     },
 ]
 
+const mockPaymentMethods: PaymentMethodType[] = [
+    {
+        type: "cash",
+        label: "Tiền mặt",
+        description: "Thanh toán bằng tiền mặt khi nhận hàng",
+        category: "offline",
+    },
+    {
+        type: "card",
+        label: "Thẻ tín dụng",
+        description: "Thanh toán bằng thẻ Visa, Mastercard",
+        category: "offline",
+    },
+    {
+        type: "momo",
+        label: "MoMo",
+        description: "Thanh toán qua ví điện tử MoMo",
+        category: "online",
+        accountInfo: {
+            bankId: "MOMO",
+            bankAccount: "0123456789",
+            phoneNumber: "789",
+        },
+    },
+    {
+        type: "zalopay",
+        label: "ZaloPay",
+        description: "Thanh toán qua ví điện tử ZaloPay",
+        category: "online",
+        accountInfo: {
+            bankId: "ZALOPAY",
+            bankAccount: "0987654321",
+        },
+    },
+    {
+        type: "vnpay",
+        label: "VNPay",
+        description: "Thanh toán qua cổng VNPay",
+        category: "online",
+        vnpayInfo: {
+            merchantId: "VNPAY001",
+            merchantName: "Cửa hàng ABC",
+            store: "Store 001",
+            terminal: "Terminal 001",
+        },
+    },
+]
+
 export default function SellsContent() {
     const [cart, setCart] = useState<CartItem[]>([])
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<number | "all">("all")
     const [isPaymentOpen, setIsPaymentOpen] = useState(false)
-    const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "transfer">("cash")
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("")
     const [receivedAmount, setReceivedAmount] = useState<number>(0)
     const [promoCode, setPromoCode] = useState("")
     const [appliedPromotion, setAppliedPromotion] = useState<IPromotion | null>(null)
     const [promoError, setPromoError] = useState("")
     const [selectedEWallet, setSelectedEWallet] = useState<string>("")
+    const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
+        fullName: "",
+        phone: "",
+        email: "",
+    })
+    const [showCustomerForm, setShowCustomerForm] = useState(false)
 
     // Filter products
     const filteredProducts = mockProducts.filter((product) => {
@@ -265,12 +326,26 @@ export default function SellsContent() {
         setPromoCode("")
         setPromoError("")
         setSelectedEWallet("")
+        setSelectedPaymentMethod("")
+        setCustomerInfo({ fullName: "", phone: "", email: "" })
+        setShowCustomerForm(false)
     }
 
     // Handle payment
     const handlePayment = () => {
         if (cart.length === 0) return
+        setShowCustomerForm(true)
+    }
+
+    // Handle customer form next
+    const handleCustomerFormNext = () => {
+        setShowCustomerForm(false)
         setIsPaymentOpen(true)
+    }
+
+    // Handle customer info change
+    const handleCustomerInfoChange = (field: keyof CustomerInfo, value: string) => {
+        setCustomerInfo(prev => ({ ...prev, [field]: value }))
     }
 
     // Complete transaction
@@ -281,13 +356,14 @@ export default function SellsContent() {
             total: subtotal,
             discount: discountAmount,
             finalTotal: total,
-            paymentMethod,
+            paymentMethod: selectedPaymentMethod,
             receivedAmount,
             changeAmount: receivedAmount - total,
             createdAt: new Date().toISOString(),
             cashier: "Admin",
             appliedPromotion: appliedPromotion || undefined,
             selectedEWallet: selectedEWallet || undefined,
+            customerInfo: customerInfo,
         }
 
         console.log("Transaction completed:", transaction)
@@ -297,6 +373,7 @@ export default function SellsContent() {
         clearCart()
         setIsPaymentOpen(false)
         setReceivedAmount(0)
+        setSelectedPaymentMethod("")
 
         // Show success message or print receipt
         alert("Thanh toán thành công!")
@@ -404,18 +481,26 @@ export default function SellsContent() {
                 </div>
             </div>
 
-            {/* Payment Dialog */}
-            <DialogSelectedPayment
-                isPaymentOpen={isPaymentOpen}
-                setIsPaymentOpen={setIsPaymentOpen}
-                paymentMethod={paymentMethod}
-                setPaymentMethod={setPaymentMethod}
-                selectedEWallet={selectedEWallet}
-                setSelectedEWallet={setSelectedEWallet}
-                receivedAmount={receivedAmount}
-                setReceivedAmount={setReceivedAmount}
+            {/* Customer Form Dialog */}
+            <DialogCustomer
+                isOpen={showCustomerForm}
+                onClose={() => setShowCustomerForm(false)}
+                customerInfo={customerInfo}
+                onCustomerInfoChange={handleCustomerInfoChange}
+                onNext={handleCustomerFormNext}
                 total={total}
-                completeTransaction={completeTransaction}
+            />
+
+            {/* Payment Method Dialog */}
+            <DialogPayment
+                isOpen={isPaymentOpen}
+                onClose={() => setIsPaymentOpen(false)}
+                selectedPaymentMethod={selectedPaymentMethod}
+                onPaymentMethodChange={setSelectedPaymentMethod}
+                paymentMethods={mockPaymentMethods}
+                total={total}
+                customerInfo={customerInfo}
+                onPaymentComplete={completeTransaction}
             />
         </div>
     )
