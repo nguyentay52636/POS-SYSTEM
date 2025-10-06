@@ -1,4 +1,4 @@
-import { INhanVien, IUser, role, IOrder, IOrderItems, ICustomer, Order, OrderItem } from "@/types/types"
+import { INhanVien, IUser, role, IOrder, IOrderItems, ICustomer, Order, OrderItem, IProduct, ICategory, ISupplier } from "@/types/types"
 
 export const mockEmployees: INhanVien[] = [
   {
@@ -294,3 +294,6 @@ export const mockOrdersExtended: Order[] = [
     }
   }
 ]
+
+// Import product mock data
+export { mockProducts, mockCategories, mockSuppliers } from "@/components/Admin/components/Products/mock/data"

@@ -112,14 +112,18 @@ export interface OrderItem {
   } 
   export interface IProduct {  
     product_id : number
-    category_id : number
-    supplier_id : number
-    product_name : string
+    category_id : ICategory
+    supplier_id : ISupplier
+    product_name : string 
     barcode : string
     price: number
-    unit : string
+    image: string
+    unit : number
+    xuatXu : string
+    status : string
     createdAt : string
     updatedAt : string
+    hsd : string
   } 
   export interface ICustomer {
     customer_id : number
