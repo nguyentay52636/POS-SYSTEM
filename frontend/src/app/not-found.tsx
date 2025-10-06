@@ -44,7 +44,7 @@ export default function NotFound() {
                 transition={{ delay: 1, duration: 1 }}
                 className="absolute bottom-10 text-sm text-gray-400"
             >
-                © {new Date().getFullYear()} Tay Nguyen • Crafted with ❤️ & Next.js
+                © {new Date().getFullYear()} Tay Nguyen <br />
             </motion.div>
         </div>
     );

@@ -164,6 +164,8 @@ name : string
 phone : string
 email : string
 address : string
+description : string
+trangThai : "active" | "inactive"
 createdAt : string
 updatedAt : string
 }
