@@ -11,7 +11,7 @@ import { Settings } from "lucide-react"
         name: "Tổng quan",
         href: "/admin",
         icon: BarChart3,
-        current: pathname === "/admin/",
+        current: pathname === "/admin/sells",
         badge: null,
     },
     {

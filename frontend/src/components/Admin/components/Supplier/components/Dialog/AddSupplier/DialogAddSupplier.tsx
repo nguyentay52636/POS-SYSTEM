@@ -42,7 +42,7 @@ export default function DialogAddSupplier({
         <>
             <Button
                 onClick={() => setIsAddDialogOpen(true)}
-                className="bg-blue-600 text-white hover:bg-blue-700"
+                className="bg-blue-600 text-white hover:bg-green-800 cursor-pointer bg-green-700"
             >
                 <Plus className="h-4 w-4 mr-2" />
                 Thêm nhà cung cấp

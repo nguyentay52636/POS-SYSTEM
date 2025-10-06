@@ -23,7 +23,7 @@ export default function HeaderManagerUser({ handleAddAccount }: { handleAddAccou
             <div className="w-full sm:w-auto">
                 <Button
                     onClick={handleAddAccount}
-                    className="w-full mx-8 sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base px-4 py-2 sm:px-6 sm:py-2"
+                    className="w-full mx-8 sm:w-auto bg-green-700 text-white hover:bg-green-800 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base px-4 py-2 sm:px-6 sm:py-2"
                 >
                     <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span className="whitespace-nowrap">Thêm tài khoản</span>
