@@ -1,5 +1,5 @@
 import React from 'react'
-// import { FormPromotions } from '../FormPromotions/FormPromotions'
+import { FormPromotions } from '../FormPromotions/FormPromotions'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { KhuyenMai } from '../../ManagerPromotionsContent'
 interface DialogEditPromotionsProps {
@@ -17,16 +17,18 @@ export default function DialogEditPromotions({ isFormOpen, setIsFormOpen, select
                     <DialogHeader>
                         <DialogTitle>{selectedPromotion ? "Chỉnh sửa khuyến mãi" : "Thêm khuyến mãi mới"}</DialogTitle>
                     </DialogHeader>
-                    {/* <FormPromotions
+                    <FormPromotions
                         promotion={selectedPromotion || undefined}
                         onSubmit={handleSubmit}
                         onCancel={() => {
                             setIsFormOpen(false)
                             setSelectedPromotion(null)
                         }}
-                    /> */}
+                    />
                 </DialogContent>
             </Dialog>
         </>
     )
 }
+
+

@@ -35,9 +35,7 @@ export default function HeaderManagerSupplier({
                 <DialogAddSupplier
                     isAddDialogOpen={isAddDialogOpen}
                     setIsAddDialogOpen={setIsAddDialogOpen}
-                    handleAddSupplier={(data) => {
-
-                    }}
+                    handleAddSupplier={handleAddSupplier}
                 />
             </div>
         </>
