@@ -51,12 +51,20 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserResponseDto>> Create([FromBody] CreateUserDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
+        if (!ModelState.IsValid)
         {
-            return BadRequest("Username and Password are required");
+            return BadRequest(ModelState);
         }
-        var created = await _service.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = created.UserId }, created);
+
+        try
+        {
+            var created = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.UserId }, created);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
@@ -65,11 +73,24 @@ public class UserController : ControllerBase
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserResponseDto>> Update(int id, [FromBody] UpdateUserDto dto)
     {
-        var updated = await _service.UpdateAsync(id, dto);
-        if (updated == null) return NotFound();
-        return Ok(updated);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            var updated = await _service.UpdateAsync(id, dto);
+            if (updated == null) return NotFound();
+            return Ok(updated);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     /// <summary>
