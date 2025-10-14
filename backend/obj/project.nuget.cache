@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "TA3F2nsRB6c=",
+  "dgSpecHash": "tdmS08CAMC4=",
   "success": true,
   "projectFilePath": "/Users/m1lt43/Desktop/NET-1-project/backend/backend.csproj",
   "expectedPackageFiles": [
@@ -24,6 +24,7 @@
     "/Users/m1lt43/.nuget/packages/microsoft.entityframeworkcore.abstractions/9.0.9/microsoft.entityframeworkcore.abstractions.9.0.9.nupkg.sha512",
     "/Users/m1lt43/.nuget/packages/microsoft.entityframeworkcore.analyzers/9.0.9/microsoft.entityframeworkcore.analyzers.9.0.9.nupkg.sha512",
     "/Users/m1lt43/.nuget/packages/microsoft.entityframeworkcore.design/9.0.9/microsoft.entityframeworkcore.design.9.0.9.nupkg.sha512",
+    "/Users/m1lt43/.nuget/packages/microsoft.entityframeworkcore.inmemory/9.0.9/microsoft.entityframeworkcore.inmemory.9.0.9.nupkg.sha512",
     "/Users/m1lt43/.nuget/packages/microsoft.entityframeworkcore.relational/9.0.9/microsoft.entityframeworkcore.relational.9.0.9.nupkg.sha512",
     "/Users/m1lt43/.nuget/packages/microsoft.entityframeworkcore.sqlserver/9.0.9/microsoft.entityframeworkcore.sqlserver.9.0.9.nupkg.sha512",
     "/Users/m1lt43/.nuget/packages/microsoft.entityframeworkcore.tools/9.0.9/microsoft.entityframeworkcore.tools.9.0.9.nupkg.sha512",
