@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 
 namespace backend.Models;
 
-public partial class User
+public class User
 {
-    public int UserId { get; set; }
-
-    public string Username { get; set; } = null!;
-
-    public string Password { get; set; } = null!;
-
-    public string? FullName { get; set; }
-
-    public string? Role { get; set; }
-
-    public DateTime? CreatedAt { get; set; }
+public int UserId { get; set; }
+public DateTime? CreatedAt { get; set; }
+public string? FullName { get; set; }
+public string? Password { get; set; }
+public string? Role { get; set; }
+public string? Username { get; set; }
 }

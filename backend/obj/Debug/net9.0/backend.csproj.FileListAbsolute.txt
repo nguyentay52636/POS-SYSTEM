@@ -167,3 +167,6 @@
 /Users/m1lt43/Desktop/NET-1-project/backend/obj/Debug/net9.0/backend.genruntimeconfig.cache
 /Users/m1lt43/Desktop/NET-1-project/backend/obj/Debug/net9.0/ref/backend.dll
 /Users/m1lt43/Desktop/NET-1-project/backend/obj/Debug/net9.0/backend.sourcelink.json
+/Users/m1lt43/Desktop/NET-1-project/backend/bin/Debug/net9.0/Microsoft.EntityFrameworkCore.InMemory.dll
+/Users/m1lt43/Desktop/NET-1-project/backend/bin/Debug/net9.0/backend.xml
+/Users/m1lt43/Desktop/NET-1-project/backend/obj/Debug/net9.0/backend.xml

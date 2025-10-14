@@ -1,5 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace backend.Configurations
 {
@@ -15,6 +18,14 @@ namespace backend.Configurations
                     Version = "v1",
                     Description = "Point of Sale System - ASP.NET Core Web API"
                 });
+
+                // Include XML comments if available
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                if (File.Exists(xmlPath))
+                {
+                    c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+                }
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {

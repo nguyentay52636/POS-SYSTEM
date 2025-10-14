@@ -1,6 +1,64 @@
 @backend_HostAddress = http://localhost:5006
 
-GET {{backend_HostAddress}}/weatherforecast/
+
+
+# Users - List (no pagination)
+GET {{backend_HostAddress}}/api/User
 Accept: application/json
+
+###
+
+# Users - Create
+POST {{backend_HostAddress}}/api/User
+Content-Type: application/json
+
+{
+  "username": "john",
+  "password": "secret",
+  "fullName": "John Doe",
+  "role": "staff"
+}
+
+###
+
+# Users - Get by id
+@userId = 1
+GET {{backend_HostAddress}}/api/User/{{userId}}
+Accept: application/json
+
+###
+
+# Users - Update
+PUT {{backend_HostAddress}}/api/User/{{userId}}
+Content-Type: application/json
+
+{
+  "fullName": "John Updated",
+  "role": "admin"
+}
+
+###
+
+# Users - Delete
+DELETE {{backend_HostAddress}}/api/User/{{userId}}
+Accept: */*
+
+###
+
+# Users - Import JSON
+POST {{backend_HostAddress}}/api/User/import-json
+Content-Type: application/json
+
+[
+  { "username": "alice", "password": "pw", "fullName": "Alice", "role": "staff" },
+  { "username": "bob", "password": "pw", "fullName": "Bob", "role": "admin" }
+]
+
+###
+
+# Provided curl for quick manual test
+curl -X 'GET' \
+  '{{backend_HostAddress}}/api/User' \
+  -H 'accept: text/plain'
 
 ###

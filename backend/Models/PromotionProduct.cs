@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 
 namespace backend.Models;
 
-public partial class PromotionProduct
+public class PromotionProduct
 {
-    public int PromotionProductId { get; set; }
-
-    public int PromoId { get; set; }
-
-    public int ProductId { get; set; }
+public int PromotionProductId { get; set; }
+public int ProductId { get; set; }
+public int PromoId { get; set; }
 }

@@ -38,8 +38,9 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-
-        => optionsBuilder.UseSqlServer("Server=localhost,1433;Database=retail_store;User Id=sa;Password=Tay52636@;TrustServerCertificate=True;");
+    {
+        // Use configuration from Program.cs (DefaultConnection). Do not override here.
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
