@@ -38,6 +38,7 @@ public class CustomerController : ControllerBase
     /// </summary>
     /// <param name="id">Customer id</param>
     [HttpGet("{id:int}")]
+
     [ProducesResponseType(typeof(CustomerResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CustomerResponseDto>> GetById(int id)
