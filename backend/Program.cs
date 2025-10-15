@@ -13,21 +13,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocumentation();
 builder.Services.AddControllers();
 
-// Database
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseInMemoryDatabase("dev-db"));
-}
-else
-{
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-    );
-}
+// Database - Use SQL Server for all environments
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings));
+builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings));
 
 // DI
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -42,6 +33,14 @@ builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
+// Product
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
+// Customer
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+
 var app = builder.Build();
 
 app.UseSwagger();
@@ -51,52 +50,16 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+// Apply any pending EF Core migrations at startup to ensure DB schema is up-to-date
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+
 app.UseHttpsRedirection();
 
 app.MapControllers();
-
-// Seed sample users in Development for testing
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    if (!db.Users.Any())
-    {
-        db.Users.AddRange(
-            new User { Username = "john", Password = "secret", FullName = "John Doe", Role = "staff", CreatedAt = DateTime.UtcNow },
-            new User { Username = "alice", Password = "pw", FullName = "Alice", Role = "staff", CreatedAt = DateTime.UtcNow },
-            new User { Username = "bob", Password = "pw", FullName = "Bob", Role = "admin", CreatedAt = DateTime.UtcNow }
-        );
-        db.SaveChanges();
-    }
-
-    // Seed sample suppliers for testing
-    if (!db.Suppliers.Any())
-    {
-        db.Suppliers.AddRange(
-            new Supplier { Name = "ABC Suppliers Inc", Address = "123 Main St, New York, NY", Email = "contact@abc-suppliers.com", Phone = "+1-555-0100" },
-            new Supplier { Name = "Global Trade Co", Address = "456 Commerce Ave, Los Angeles, CA", Email = "info@globaltrade.com", Phone = "+1-555-0200" },
-            new Supplier { Name = "Premium Products Ltd", Address = "789 Business Blvd, Chicago, IL", Email = "sales@premiumproducts.com", Phone = "+1-555-0300" }
-        );
-        db.SaveChanges();
-    }
-
-    // Seed sample categories for testing
-    if (!db.Categories.Any())
-    {
-        db.Categories.AddRange(
-            new Category { CategoryName = "Electronics" },
-            new Category { CategoryName = "Clothing" },
-            new Category { CategoryName = "Food & Beverages" },
-            new Category { CategoryName = "Home & Garden" },
-            new Category { CategoryName = "Sports & Outdoors" },
-            new Category { CategoryName = "Books & Media" },
-            new Category { CategoryName = "Health & Beauty" },
-            new Category { CategoryName = "Toys & Games" }
-        );
-        db.SaveChanges();
-    }
-}
 
 app.Run();
 

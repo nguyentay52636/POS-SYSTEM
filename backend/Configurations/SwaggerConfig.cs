@@ -16,32 +16,8 @@ namespace backend.Configurations
                 {
                     Title = "POS System API",
                     Version = "v1",
-                    Description = @"
-## Point of Sale System API
-
-### Available Modules:
-- **Users**: User management and authentication
-- **Suppliers**: Supplier information and contacts
-- **Categories**: Product catalog categories
-- **Products**: Product inventory (coming soon)
-
-### Features:
-- RESTful API design
-- Pagination support
-- Search and filtering
-- Bulk import capabilities
-- Data validation and error handling
-"
+                    Description = "Point of Sale System API"
                 });
-
-                // Include XML comments if available
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                if (File.Exists(xmlPath))
-                {
-                    c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
-                }
-
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",

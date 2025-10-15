@@ -14,6 +14,7 @@ using backend.Extensions;
 
 namespace backend.Repositories;
 
+
 public interface ISupplierRepository
 {
     Task<Supplier> CreateAsync(Supplier supplier);
@@ -23,7 +24,8 @@ public interface ISupplierRepository
     Task<Supplier> UpdateAsync(Supplier supplier);
     Task<bool> DeleteAsync(int id);
 
-    
+
+
     Task<(IReadOnlyList<Supplier> Items, int Total)> SearchAsync(SupplierQueryParams query);
     Task<IReadOnlyList<Supplier>> ListAllAsync();
 }

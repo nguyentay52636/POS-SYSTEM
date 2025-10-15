@@ -93,8 +93,8 @@ public class ProductRepository : IProductRepository
         q = (query.SortBy?.ToLowerInvariant()) switch
         {
             "id" => q.OrderByIf(true, p => p.ProductId, desc),
-            "price" => q.OrderByIf(true, p => p.Price, desc),
-            "created" => q.OrderByIf(true, p => p.CreatedAt, desc),
+            "price" => q.OrderByIf(true, p => p.Price ?? 0, desc),
+            "created" => q.OrderByIf(true, p => p.CreatedAt ?? DateTime.MinValue, desc),
             _ => q.OrderByIf(true, p => p.ProductName!, desc)
         };
 
