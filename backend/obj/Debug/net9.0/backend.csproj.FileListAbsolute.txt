@@ -170,3 +170,5 @@
 /Users/m1lt43/Desktop/NET-1-project/backend/bin/Debug/net9.0/Microsoft.EntityFrameworkCore.InMemory.dll
 /Users/m1lt43/Desktop/NET-1-project/backend/bin/Debug/net9.0/backend.xml
 /Users/m1lt43/Desktop/NET-1-project/backend/obj/Debug/net9.0/backend.xml
+/Users/m1lt43/Desktop/NET-1-project/backend/bin/Debug/net9.0/AutoMapper.dll
+/Users/m1lt43/Desktop/NET-1-project/backend/bin/Debug/net9.0/AutoMapper.Extensions.Microsoft.DependencyInjection.dll

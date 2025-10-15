@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using backend.Models;
 using backend.DTOs;
+using backend.Extensions;
 
 namespace backend.Repositories;
 
@@ -65,38 +66,23 @@ public class UserRepository : IUserRepository
     {
         IQueryable<User> q = _db.Users.AsNoTracking();
 
-        if (!string.IsNullOrWhiteSpace(query.Username))
-        {
-            q = q.Where(u => u.Username != null && u.Username.Contains(query.Username));
-        }
+        // Apply filters using extension methods
+        q = q.WhereIf(!query.Username.IsNullOrWhiteSpace(),
+                u => u.Username != null && u.Username.Contains(query.Username!))
+            .WhereIf(!query.Role.IsNullOrWhiteSpace(),
+                u => u.Role == query.Role)
+            .WhereIf(!query.Keyword.IsNullOrWhiteSpace(),
+                u => (u.Username != null && u.Username.Contains(query.Keyword!)) ||
+                     (u.FullName != null && u.FullName.Contains(query.Keyword!)));
 
-        if (!string.IsNullOrWhiteSpace(query.Role))
-        {
-            q = q.Where(u => u.Role == query.Role);
-        }
-
-        if (!string.IsNullOrWhiteSpace(query.Keyword))
-        {
-            var keyword = query.Keyword;
-            q = q.Where(u =>
-                (u.Username != null && u.Username.Contains(keyword)) ||
-                (u.FullName != null && u.FullName.Contains(keyword))
-            );
-        }
-
+        // Apply sorting
         bool desc = string.Equals(query.SortDir, "desc", StringComparison.OrdinalIgnoreCase);
-        switch ((query.SortBy ?? string.Empty).ToLowerInvariant())
+        q = (query.SortBy?.ToLowerInvariant()) switch
         {
-            case "username":
-                q = desc ? q.OrderByDescending(u => u.Username) : q.OrderBy(u => u.Username);
-                break;
-            case "fullname":
-                q = desc ? q.OrderByDescending(u => u.FullName) : q.OrderBy(u => u.FullName);
-                break;
-            default:
-                q = desc ? q.OrderByDescending(u => u.CreatedAt) : q.OrderBy(u => u.CreatedAt);
-                break;
-        }
+            "username" => q.OrderByIf(true, u => u.Username!, desc),
+            "fullname" => q.OrderByIf(true, u => u.FullName!, desc),
+            _ => q.OrderByIf(true, u => u.CreatedAt ?? DateTime.MinValue, desc)
+        };
 
         int total = await q.CountAsync();
         int skip = Math.Max(0, (query.Page - 1) * query.PageSize);

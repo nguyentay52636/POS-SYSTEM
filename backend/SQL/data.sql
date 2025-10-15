@@ -15,7 +15,7 @@ IF OBJECT_ID('orders', 'U') IS NOT NULL DROP TABLE orders;
 IF OBJECT_ID('products', 'U') IS NOT NULL DROP TABLE products;
 IF OBJECT_ID('promotions', 'U') IS NOT NULL DROP TABLE promotions;
 IF OBJECT_ID('categories', 'U') IS NOT NULL DROP TABLE categories;
-IF OBJECT_ID('suppliers', 'U') IS NOT NULL DROP TABLE suppliers;
+IF OBJECT_ID(' ', 'U') IS NOT NULL DROP TABLE suppliers;
 IF OBJECT_ID('customers', 'U') IS NOT NULL DROP TABLE customers;
 IF OBJECT_ID('users', 'U') IS NOT NULL DROP TABLE users;
 GO

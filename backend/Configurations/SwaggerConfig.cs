@@ -16,17 +16,8 @@ namespace backend.Configurations
                 {
                     Title = "POS System API",
                     Version = "v1",
-                    Description = "Point of Sale System - ASP.NET Core Web API"
+                    Description = "Point of Sale System API"
                 });
-
-                // Include XML comments if available
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                if (File.Exists(xmlPath))
-                {
-                    c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
-                }
-
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",

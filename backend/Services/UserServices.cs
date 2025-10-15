@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using backend.DTOs;
 using backend.Models;
 using backend.Repositories;
+using AutoMapper;
 
 namespace backend.Services;
 
@@ -23,50 +24,57 @@ public interface IUserService
 public class UserService : IUserService
 {
     private readonly IUserRepository _repo;
+    private readonly IMapper _mapper;
+    private readonly IValidationService _validationService;
 
-    public UserService(IUserRepository repo)
+    public UserService(IUserRepository repo, IMapper mapper, IValidationService validationService)
     {
         _repo = repo;
+        _mapper = mapper;
+        _validationService = validationService;
     }
 
     public async Task<UserResponseDto> CreateAsync(CreateUserDto dto)
     {
-        var user = new User
+        // Validate business rules
+        var validation = await _validationService.ValidateCreateUserAsync(dto);
+        if (!validation.IsValid)
         {
-            Username = dto.Username,
-            Password = dto.Password, // In production, hash the password
-            FullName = dto.FullName,
-            Role = string.IsNullOrWhiteSpace(dto.Role) ? "staff" : dto.Role,
-            CreatedAt = DateTime.UtcNow
-        };
+            throw new ArgumentException(validation.GetErrorMessage());
+        }
 
+        var user = _mapper.Map<User>(dto);
         user = await _repo.CreateAsync(user);
-        return Map(user);
+        return _mapper.Map<UserResponseDto>(user);
     }
 
     public async Task<UserResponseDto?> GetByIdAsync(int id)
     {
         var user = await _repo.GetByIdAsync(id);
-        return user == null ? null : Map(user);
+        return user == null ? null : _mapper.Map<UserResponseDto>(user);
     }
 
     public async Task<UserResponseDto?> GetByUsernameAsync(string username)
     {
         var user = await _repo.GetByUsernameAsync(username);
-        return user == null ? null : Map(user);
+        return user == null ? null : _mapper.Map<UserResponseDto>(user);
     }
 
     public async Task<UserResponseDto?> UpdateAsync(int id, UpdateUserDto dto)
     {
+        // Validate business rules
+        var validation = await _validationService.ValidateUpdateUserAsync(id, dto);
+        if (!validation.IsValid)
+        {
+            throw new ArgumentException(validation.GetErrorMessage());
+        }
+
         var existing = await _repo.GetByIdAsync(id);
         if (existing == null) return null;
 
-        if (!string.IsNullOrWhiteSpace(dto.Password)) existing.Password = dto.Password;
-        if (!string.IsNullOrWhiteSpace(dto.FullName)) existing.FullName = dto.FullName;
-        if (!string.IsNullOrWhiteSpace(dto.Role)) existing.Role = dto.Role;
-
+        _mapper.Map(dto, existing);
         var updated = await _repo.UpdateAsync(existing);
-        return Map(updated);
+        return _mapper.Map<UserResponseDto>(updated);
     }
 
     public Task<bool> DeleteAsync(int id) => _repo.DeleteAsync(id);
@@ -79,43 +87,42 @@ public class UserService : IUserService
             Page = query.Page,
             PageSize = query.PageSize,
             TotalCount = total,
-            Items = items.Select(Map).ToArray()
+            Items = _mapper.Map<UserResponseDto[]>(items)
         };
     }
 
     public async Task<int> ImportAsync(IEnumerable<CreateUserDto> users)
     {
-        int inserted = 0;
+        var validUsers = new List<User>();
+
         foreach (var dto in users)
         {
             if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
-            {
                 continue;
+
+            var validation = await _validationService.ValidateCreateUserAsync(dto);
+            if (validation.IsValid)
+            {
+                validUsers.Add(_mapper.Map<User>(dto));
             }
-            var exists = await _repo.GetByUsernameAsync(dto.Username);
-            if (exists != null) continue;
-            await CreateAsync(dto);
-            inserted++;
         }
-        return inserted;
+
+        if (validUsers.Any())
+        {
+            // Bulk insert would be more efficient here
+            foreach (var user in validUsers)
+            {
+                await _repo.CreateAsync(user);
+            }
+        }
+
+        return validUsers.Count;
     }
 
     public async Task<UserResponseDto[]> ListAllAsync()
     {
         var items = await _repo.ListAllAsync();
-        return items.Select(Map).ToArray();
-    }
-
-    private static UserResponseDto Map(User user)
-    {
-        return new UserResponseDto
-        {
-            UserId = user.UserId,
-            Username = user.Username,
-            FullName = user.FullName,
-            Role = user.Role,
-            CreatedAt = user.CreatedAt
-        };
+        return _mapper.Map<UserResponseDto[]>(items);
     }
 }
 
