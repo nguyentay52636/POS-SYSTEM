@@ -5,9 +5,13 @@ using System.Net.Mime;
 
 namespace backend.Controllers;
 
+/// <summary>
+/// User management and authentication endpoints
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Produces(MediaTypeNames.Application.Json)]
+[Tags("Users")]
 public class UserController : ControllerBase
 {
     private readonly IUserService _service;

@@ -1,3 +1,8 @@
+
+
+
+
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +22,8 @@ public interface ISupplierRepository
     Task<Supplier?> GetByEmailAsync(string email);
     Task<Supplier> UpdateAsync(Supplier supplier);
     Task<bool> DeleteAsync(int id);
+
+    
     Task<(IReadOnlyList<Supplier> Items, int Total)> SearchAsync(SupplierQueryParams query);
     Task<IReadOnlyList<Supplier>> ListAllAsync();
 }

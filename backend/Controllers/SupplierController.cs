@@ -5,9 +5,13 @@ using System.Net.Mime;
 
 namespace backend.Controllers;
 
+/// <summary>
+/// Supplier management endpoints
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Produces(MediaTypeNames.Application.Json)]
+[Tags("Suppliers")]
 public class SupplierController : ControllerBase
 {
     private readonly ISupplierService _service;

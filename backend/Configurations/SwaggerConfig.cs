@@ -16,7 +16,22 @@ namespace backend.Configurations
                 {
                     Title = "POS System API",
                     Version = "v1",
-                    Description = "Point of Sale System - ASP.NET Core Web API"
+                    Description = @"
+## Point of Sale System API
+
+### Available Modules:
+- **Users**: User management and authentication
+- **Suppliers**: Supplier information and contacts
+- **Categories**: Product catalog categories
+- **Products**: Product inventory (coming soon)
+
+### Features:
+- RESTful API design
+- Pagination support
+- Search and filtering
+- Bulk import capabilities
+- Data validation and error handling
+"
                 });
 
                 // Include XML comments if available

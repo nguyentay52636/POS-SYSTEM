@@ -27,7 +27,7 @@ else
 }
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings));
+builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings));
 
 // DI
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -37,6 +37,10 @@ builder.Services.AddScoped<IValidationService, ValidationService>();
 // Supplier
 builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
+
+// Category
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 var app = builder.Build();
 
@@ -73,6 +77,22 @@ if (app.Environment.IsDevelopment())
             new Supplier { Name = "ABC Suppliers Inc", Address = "123 Main St, New York, NY", Email = "contact@abc-suppliers.com", Phone = "+1-555-0100" },
             new Supplier { Name = "Global Trade Co", Address = "456 Commerce Ave, Los Angeles, CA", Email = "info@globaltrade.com", Phone = "+1-555-0200" },
             new Supplier { Name = "Premium Products Ltd", Address = "789 Business Blvd, Chicago, IL", Email = "sales@premiumproducts.com", Phone = "+1-555-0300" }
+        );
+        db.SaveChanges();
+    }
+
+    // Seed sample categories for testing
+    if (!db.Categories.Any())
+    {
+        db.Categories.AddRange(
+            new Category { CategoryName = "Electronics" },
+            new Category { CategoryName = "Clothing" },
+            new Category { CategoryName = "Food & Beverages" },
+            new Category { CategoryName = "Home & Garden" },
+            new Category { CategoryName = "Sports & Outdoors" },
+            new Category { CategoryName = "Books & Media" },
+            new Category { CategoryName = "Health & Beauty" },
+            new Category { CategoryName = "Toys & Games" }
         );
         db.SaveChanges();
     }
