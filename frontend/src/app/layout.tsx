@@ -3,6 +3,7 @@ import "./globals.css"
 import { Suspense } from "react"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import ConditionalSidebar from "@/components/Admin/components/SiderBar/ConditionalSidebar"
+import { Toaster } from "sonner"
 
 
 
@@ -25,7 +26,7 @@ export default function AdminRootLayout({
               </div>
             </div>
 
-
+            <Toaster position="top-right" richColors />
           </ThemeProvider>
         </Suspense>
       </body>

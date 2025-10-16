@@ -74,7 +74,7 @@ export default function ManagerTableSuppliers({ suppliers, filteredSuppliers, se
                                                 Hoạt động
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-gray-600">{new Date(supplier.createdAt).toLocaleDateString()}</TableCell>
+                                        <TableCell className="text-gray-600">{new Date(supplier?.createdAt || "").toLocaleDateString()}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                                 <Button

@@ -1,7 +1,8 @@
 import axios from 'axios';
 
+// Use same-origin path so Next.js rewrites can proxy to backend and avoid CORS
 const baseApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: '/api',
 });
 
 if (typeof window !== 'undefined') {

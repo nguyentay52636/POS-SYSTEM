@@ -4,30 +4,37 @@ import React from 'react'
 import { Plus } from 'lucide-react'
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { SupplierForm } from '@/components/Admin/components/Supplier/components/Dialog/AddSupplier/SupplierForm'
-import { ISupplier } from '@/types/types'
+import { CreateSupplierDTO } from '@/apis/supplierApi'
 
 export interface DialogAddSupplierProps {
     isAddDialogOpen: boolean
     setIsAddDialogOpen: (open: boolean) => void
-    handleAddSupplier: (supplier: ISupplier) => void
+    handleAddSupplier: (supplier: CreateSupplierDTO) => void | Promise<void>
 }
+
 export default function DialogAddSupplier({ isAddDialogOpen, setIsAddDialogOpen, handleAddSupplier }: DialogAddSupplierProps) {
+    const handleSubmit = async (data: CreateSupplierDTO) => {
+        await handleAddSupplier(data)
+        setIsAddDialogOpen(false)
+    }
+
     return (
         <>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} >
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                     <Button className="bg-green-700 hover:bg-green-800">
                         <Plus className="h-4 w-4 mr-2" />
                         Thêm nhà cung cấp
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-6xl! max-h-[80vh] overflow-y-auto ">
+                <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Thêm nhà cung cấp mới</DialogTitle>
                     </DialogHeader>
-                    <SupplierForm onSubmit={() => {
-
-                    }} onCancel={() => setIsAddDialogOpen(false)} />
+                    <SupplierForm
+                        onSubmit={handleSubmit}
+                        onCancel={() => setIsAddDialogOpen(false)}
+                    />
                 </DialogContent>
             </Dialog>
         </>

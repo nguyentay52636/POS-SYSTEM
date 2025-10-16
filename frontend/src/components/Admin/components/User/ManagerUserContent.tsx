@@ -1,11 +1,10 @@
 "use client"
 import { useEffect, useMemo, useState } from 'react'
-import { mockUsers } from '@/Mock/data'
 import HeaderManagerUser from './components/HeaderManagerUser'
 import TableManagerUser from './components/TableManagerUser/TableManagerUser'
 import PaginationManagerUser from './components/PaginationManagerUser'
+import { getAllUsers } from '../../../../apis/userApi'
 import { IUser } from '@/types/types'
-
 export default function ManagerUserContent() {
     const [searchQuery, setSearchQuery] = useState("")
     const [loading, setLoading] = useState(true)
@@ -13,13 +12,19 @@ export default function ManagerUserContent() {
     const [users, setUsers] = useState<IUser[]>([])
 
     useEffect(() => {
-        try {
-            setUsers(mockUsers)
-        } catch (e: any) {
-            setError("Không thể tải dữ liệu giả lập")
-        } finally {
-            setLoading(false)
+        const fetchUsers = async () => {
+            try {
+                setLoading(true)
+                const usersData = await getAllUsers()
+                setUsers(usersData)
+                setError(null)
+            } catch (e: any) {
+                setError("Không thể tải dữ liệu")
+            } finally {
+                setLoading(false)
+            }
         }
+        fetchUsers()
     }, [])
 
     const filteredUsers = useMemo(() => {
