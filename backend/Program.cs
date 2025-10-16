@@ -18,7 +18,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings));
+builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings));
 
 // DI
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -40,6 +40,10 @@ builder.Services.AddScoped<IProductService, ProductService>();
 // Customer
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+// Promotion
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
 
 var app = builder.Build();
 
