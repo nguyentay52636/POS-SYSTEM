@@ -59,7 +59,7 @@ export default function TableManagerUser({ users, searchQuery, setSearchQuery }:
                                         <TableCell>
                                             <div className="flex items-center space-x-4">
                                                 <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-700">
-                                                    <AvatarImage src={"/placeholder.svg"} alt={u.username} />
+                                                    <AvatarImage src={u.avatar || "/placeholder.svg"} alt={u.username} />
                                                     <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
                                                         {u.username.charAt(0).toUpperCase()}
                                                     </AvatarFallback>

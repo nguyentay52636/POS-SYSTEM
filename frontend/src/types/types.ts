@@ -151,11 +151,12 @@ export interface OrderItem {
 export interface IUser { 
     user_id : number
     username : string
-    password : string
+    password?: string
     full_name : string
     role : role 
     createdAt : string
     updatedAt : string
+    avatar?: string
 }  
 export enum role {
     ADMIN = "admin",
@@ -163,13 +164,13 @@ export enum role {
     
 }
 export interface ISupplier {
-supplier_id : number
+supplier_id: number
 name : string
 phone : string
 email : string
 address : string
-description : string
-trangThai : "active" | "inactive"
-createdAt : string
-updatedAt : string
+description?: string
+trangThai?: "active" | "inactive"
+createdAt?: string
+updatedAt: string
 }

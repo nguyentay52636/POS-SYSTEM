@@ -3,12 +3,12 @@ import { Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import DialogAddSupplier from './Dialog/AddSupplier/DialogAddSupplier'
-import { ISupplier } from '@/types/types'
+import { CreateSupplierDTO } from '@/apis/supplierApi'
 
 interface HeaderManagerSupplierProps {
     isAddDialogOpen: boolean
     setIsAddDialogOpen: (open: boolean) => void
-    handleAddSupplier: (supplier: ISupplier) => void
+    handleAddSupplier: (supplier: CreateSupplierDTO) => void | Promise<void>
 }
 
 export default function HeaderManagerSupplier({

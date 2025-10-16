@@ -1,8 +1,9 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,36 +12,53 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Building2, MapPin, Phone, Mail, FileText } from "lucide-react"
 import { ISupplier } from "@/types/types"
+import { CreateSupplierDTO } from "@/apis/supplierApi"
 
+// Zod validation schema
+const supplierSchema = z.object({
+    name: z.string().min(2, "Tên nhà cung cấp phải có ít nhất 2 ký tự"),
+    phone: z.string()
+        .min(10, "Số điện thoại phải có ít nhất 10 số")
+        .regex(/^[0-9]+$/, "Số điện thoại chỉ được chứa số"),
+    email: z.string().email("Email không hợp lệ"),
+    address: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
+})
+
+type SupplierFormData = z.infer<typeof supplierSchema>
+
+export type { SupplierFormData }
 
 interface SupplierFormProps {
     supplier?: ISupplier
-    onSubmit: (data: Partial<ISupplier>) => void
+    onSubmit: (data: CreateSupplierDTO) => void | Promise<void>
     onCancel: () => void
 }
 
 export function SupplierForm({ supplier, onSubmit, onCancel }: SupplierFormProps) {
-    const [formData, setFormData] = useState<Partial<ISupplier>>({
-        supplier_id: supplier?.supplier_id || 0,
-        name: supplier?.name || "",
-        address: supplier?.address || "",
-        phone: supplier?.phone || "",
-        email: supplier?.email || "",
-        createdAt: supplier?.createdAt || "",
-        updatedAt: supplier?.updatedAt || "",
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+        setValue,
+        watch
+    } = useForm<SupplierFormData>({
+        resolver: zodResolver(supplierSchema),
+        defaultValues: {
+            name: supplier?.name || "",
+            phone: supplier?.phone || "",
+            email: supplier?.email || "",
+            address: supplier?.address || "",
+
+        }
     })
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        onSubmit(formData)
-    }
 
-    const handleChange = (field: keyof ISupplier, value: string) => {
-        setFormData((prev) => ({ ...prev, [field]: value }))
+    const onSubmitForm = async (data: SupplierFormData) => {
+        await onSubmit(data)
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 pt-4 rounded-lg">
+        <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-6 pt-4 rounded-lg">
             {/* Thông tin cơ bản */}
             <Card className="border-l-4 border-l-blue-500">
                 <CardHeader className="bg-blue-50">
@@ -50,41 +68,18 @@ export function SupplierForm({ supplier, onSubmit, onCancel }: SupplierFormProps
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="maNhaCungCap">Mã nhà cung cấp *</Label>
-                            <Input
-                                id="maNhaCungCap"
-                                value={formData.supplier_id}
-                                onChange={(e) => handleChange("supplier_id", e.target.value)}
-                                placeholder="VD: NCC001"
-                                disabled={!!supplier}
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="tenNhaCungCap">Tên nhà cung cấp *</Label>
-                            <Input
-                                id="tenNhaCungCap"
-                                value={formData.name}
-                                onChange={(e) => handleChange("name", e.target.value)}
-                                placeholder="Nhập tên nhà cung cấp"
-                                required
-                            />
-                        </div>
-                    </div>
                     <div className="space-y-2">
-                        <Label htmlFor="trangThai">Trạng thái</Label>
-                        <Select value={formData.trangThai} onValueChange={(value) => handleChange("trangThai", value as "active" | "inactive")}>
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="active">Đang hoạt động</SelectItem>
-                                <SelectItem value="inactive">Tạm ngưng</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <Label htmlFor="tenNhaCungCap">Tên nhà cung cấp *</Label>
+                        <Input
+                            id="tenNhaCungCap"
+                            {...register("name")}
+                            placeholder="Nhập tên nhà cung cấp"
+                        />
+                        {errors.name && (
+                            <p className="text-sm text-red-600">{errors.name.message}</p>
+                        )}
                     </div>
+
                 </CardContent>
             </Card>
 
@@ -105,11 +100,12 @@ export function SupplierForm({ supplier, onSubmit, onCancel }: SupplierFormProps
                             </Label>
                             <Input
                                 id="soDienThoai"
-                                value={formData.phone}
-                                onChange={(e) => handleChange("phone", e.target.value)}
+                                {...register("phone")}
                                 placeholder="VD: 0123456789"
-                                required
                             />
+                            {errors.phone && (
+                                <p className="text-sm text-red-600">{errors.phone.message}</p>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="email" className="flex items-center gap-2">
@@ -119,11 +115,12 @@ export function SupplierForm({ supplier, onSubmit, onCancel }: SupplierFormProps
                             <Input
                                 id="email"
                                 type="email"
-                                value={formData.email}
-                                onChange={(e) => handleChange("email", e.target.value)}
+                                {...register("email")}
                                 placeholder="VD: supplier@example.com"
-                                required
                             />
+                            {errors.email && (
+                                <p className="text-sm text-red-600">{errors.email.message}</p>
+                            )}
                         </div>
                     </div>
                     <div className="space-y-2">
@@ -133,45 +130,35 @@ export function SupplierForm({ supplier, onSubmit, onCancel }: SupplierFormProps
                         </Label>
                         <Textarea
                             id="diaChi"
-                            value={formData.address}
-                            onChange={(e) => handleChange("address", e.target.value)}
+                            {...register("address")}
                             placeholder="Nhập địa chỉ đầy đủ"
                             rows={3}
-                            required
                         />
+                        {errors.address && (
+                            <p className="text-sm text-red-600">{errors.address.message}</p>
+                        )}
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Mô tả */}
-            <Card className="border-l-4 border-l-orange-500">
-                <CardHeader className="bg-orange-50">
-                    <CardTitle className="flex items-center gap-2 text-orange-700">
-                        <FileText className="h-5 w-5" />
-                        Thông tin bổ sung
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 pt-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Mô tả</Label>
-                        <Textarea
-                            id="description"
-                            value={formData.description}
-                            onChange={(e) => handleChange("description", e.target.value)}
-                            placeholder="Mô tả về nhà cung cấp..."
-                            rows={4}
-                        />
-                    </div>
-                </CardContent>
-            </Card>
+
 
             {/* Buttons */}
             <div className="flex gap-3 justify-end">
-                <Button type="button" variant="outline" onClick={onCancel}>
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onCancel}
+                    disabled={isSubmitting}
+                >
                     Hủy
                 </Button>
-                <Button type="submit" className="bg-green-700 hover:bg-green-800">
-                    {supplier ? "Cập nhật" : "Thêm mới"}
+                <Button
+                    type="submit"
+                    className="bg-green-700 hover:bg-green-800"
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? "Đang xử lý..." : (supplier ? "Cập nhật" : "Thêm mới")}
                 </Button>
             </div>
         </form>
