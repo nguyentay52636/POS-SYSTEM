@@ -1,135 +1,247 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { KhuyenMai } from "../../ManagerPromotionsContent"
-import { SanPham } from "@/types/types"
-
-import { ProductSelectionCard } from "./Feature/ProductSelectionCard"
-import { PromotionInfoCard, type PromotionInfo } from "./Feature/PromotionInfoCard"
-import { DateRangeCard } from "./Base/DateRangeCard"
-import { DescriptionCard } from "./Base/DescriptionCard"
+import { Promotion } from "@/apis/promotionsApi"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { Calendar } from "lucide-react"
 
 interface PromotionFormProps {
-    promotion?: KhuyenMai
-    onSubmit: (promotion: Omit<KhuyenMai, "maKhuyenMai"> | KhuyenMai) => void
+    promotion?: Promotion
+    onSubmit: (promotion: Omit<Promotion, "promotionId"> | Promotion) => void
     onCancel: () => void
 }
 
-// Mock data for products
-const mockProducts: SanPham[] = [
-    {
-        maSanPham: "SP001",
-        tenSanPham: "Cà chua cherry",
-        donVi: "kg",
-        soLuongTon: 100,
-        maThuongHieu: "LOCAL",
-        maDanhMuc: "RAU_CU",
-        maLoai: "THUC_PHAM_TUOI",
-        moTa: "Cà chua cherry tươi ngon",
-        giaBan: 25000,
-        giaNhap: 20000,
-        hinhAnh: "/cherry-tomatoes.jpg",
-        xuatXu: "Đà Lạt",
-        hsd: "2025-12-31",
-        trangThai: "active",
-    },
-    {
-        maSanPham: "SP002",
-        tenSanPham: "Thịt ba chỉ",
-        donVi: "kg",
-        soLuongTon: 50,
-        maThuongHieu: "LOCAL",
-        maDanhMuc: "THIT_TUOI",
-        maLoai: "THUC_PHAM_TUOI",
-        moTa: "Thịt ba chỉ tươi",
-        giaBan: 180000,
-        giaNhap: 150000,
-        hinhAnh: "/pork-belly-meat.jpg",
-        xuatXu: "Việt Nam",
-        hsd: "2025-12-31",
-        trangThai: "active",
-    },
-    {
-        maSanPham: "SP003",
-        tenSanPham: "Sữa tươi TH True Milk",
-        donVi: "hộp",
-        soLuongTon: 200,
-        maThuongHieu: "TH",
-        maDanhMuc: "SUA",
-        maLoai: "DO_UONG",
-        moTa: "Sữa tươi tiệt trùng",
-        giaBan: 32000,
-        giaNhap: 28000,
-        hinhAnh: "/milk-carton-th-true-milk.jpg",
-        xuatXu: "Việt Nam",
-        hsd: "2025-12-31",
-        trangThai: "active",
-    },
-]
-
 export function FormPromotions({ promotion, onSubmit, onCancel }: PromotionFormProps) {
-    const [formData, setFormData] = useState({
-        maSanPham: promotion?.maSanPham || "",
-        tenKhachHangKhuyenMai: promotion?.tenKhachHangKhuyenMai || "",
-        phanTramGiamGia: promotion?.phanTramGiamGia || 0,
-        ngayBatDau: promotion?.ngayBatDau || "",
-        ngayKetThuc: promotion?.ngayKetThuc || "",
-        moTa: promotion?.moTa || "",
-        trangThai: promotion?.trangThai || ("active" as const),
+    const [formData, setFormData] = useState<Promotion>({
+        promoId: promotion?.promoId,
+        promoCode: promotion?.promoCode || "",
+        description: promotion?.description || "",
+        discountType: promotion?.discountType || "percentage",
+        discountValue: promotion?.discountValue || 0,
+        startDate: promotion?.startDate || "",
+        endDate: promotion?.endDate || "",
+        minOrderAmount: promotion?.minOrderAmount || 0,
+        usageLimit: promotion?.usageLimit || 1,
+        usedCount: promotion?.usedCount || 0,
+        status: promotion?.status || "active",
     })
-
-    const selectedProduct = mockProducts.find((p) => p.maSanPham === formData.maSanPham)
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (promotion) {
-            onSubmit({ ...formData, maKhuyenMai: promotion.maKhuyenMai })
-        } else {
+        if (promotion?.promoId) {
             onSubmit(formData)
+        } else {
+            const { promoId, ...newPromotion } = formData
+            onSubmit(newPromotion)
         }
     }
-
-    const promotionInfo: PromotionInfo = {
-        tenKhachHangKhuyenMai: formData.tenKhachHangKhuyenMai,
-        phanTramGiamGia: formData.phanTramGiamGia,
-        trangThai: formData.trangThai,
-    }
-
-    const priceAfterDiscount = selectedProduct && formData.phanTramGiamGia > 0
-        ? `${(selectedProduct.giaBan * (1 - formData.phanTramGiamGia / 100)).toLocaleString("vi-VN")}đ`
-        : undefined
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ProductSelectionCard
-                    products={mockProducts}
-                    selectedProductId={formData.maSanPham}
-                    onChange={(value) => setFormData((prev) => ({ ...prev, maSanPham: value }))}
-                />
+                {/* Promotion Code Card */}
+                <Card className="border-blue-200 bg-blue-50/30">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-blue-800">Thông tin mã khuyến mãi</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div>
+                            <Label htmlFor="promoCode" className="text-blue-700">
+                                Mã khuyến mãi *
+                            </Label>
+                            <Input
+                                id="promoCode"
+                                value={formData.promoCode}
+                                onChange={(e) => setFormData({ ...formData, promoCode: e.target.value })}
+                                placeholder="VD: SALE50, FREESHIP"
+                                className="border-blue-300 focus:border-blue-500"
+                                required
+                            />
+                        </div>
 
-                <PromotionInfoCard
-                    value={promotionInfo}
-                    onChange={(value) => setFormData((prev) => ({ ...prev, ...value }))}
-                    priceAfterDiscount={priceAfterDiscount}
-                />
+                        <div>
+                            <Label htmlFor="description" className="text-blue-700">
+                                Mô tả *
+                            </Label>
+                            <Textarea
+                                id="description"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                placeholder="Nhập mô tả chương trình khuyến mãi"
+                                className="border-blue-300 focus:border-blue-500 min-h-[100px]"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="status" className="text-blue-700">
+                                Trạng thái
+                            </Label>
+                            <Select
+                                value={formData.status}
+                                onValueChange={(value) => setFormData({ ...formData, status: value })}
+                            >
+                                <SelectTrigger className="border-blue-300 focus:border-blue-500">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">Đang hoạt động</SelectItem>
+                                    <SelectItem value="inactive">Tạm ngưng</SelectItem>
+                                    <SelectItem value="expired">Hết hạn</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Discount Info Card */}
+                <Card className="border-orange-200 bg-orange-50/30">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-orange-800">Thông tin giảm giá</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div>
+                            <Label htmlFor="discountType" className="text-orange-700">
+                                Loại giảm giá *
+                            </Label>
+                            <Select
+                                value={formData.discountType}
+                                onValueChange={(value) => setFormData({ ...formData, discountType: value })}
+                            >
+                                <SelectTrigger className="border-orange-300 focus:border-orange-500">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="percentage">Phần trăm (%)</SelectItem>
+                                    <SelectItem value="fixed">Cố định (VNĐ)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div>
+                            <Label htmlFor="discountValue" className="text-orange-700">
+                                Giá trị giảm *
+                            </Label>
+                            <Input
+                                id="discountValue"
+                                type="number"
+                                min="0"
+                                value={formData.discountValue}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, discountValue: Number(e.target.value) })
+                                }
+                                placeholder={formData.discountType === "percentage" ? "0-100" : "0"}
+                                className="border-orange-300 focus:border-orange-500"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="minOrderAmount" className="text-orange-700">
+                                Giá trị đơn hàng tối thiểu (VNĐ)
+                            </Label>
+                            <Input
+                                id="minOrderAmount"
+                                type="number"
+                                min="0"
+                                value={formData.minOrderAmount}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, minOrderAmount: Number(e.target.value) })
+                                }
+                                placeholder="0"
+                                className="border-orange-300 focus:border-orange-500"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
-            <DateRangeCard
-                startDate={formData.ngayBatDau}
-                endDate={formData.ngayKetThuc}
-                onChangeStart={(value) => setFormData((prev) => ({ ...prev, ngayBatDau: value }))}
-                onChangeEnd={(value) => setFormData((prev) => ({ ...prev, ngayKetThuc: value }))}
-            />
+            {/* Date Range Card */}
+            <Card className="border-green-200 bg-green-50/30">
+                <CardHeader className="pb-3">
+                    <CardTitle className="text-green-800 flex items-center gap-2">
+                        <Calendar className="h-5 w-5" />
+                        Thời gian áp dụng
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="startDate" className="text-green-700">
+                                Ngày bắt đầu *
+                            </Label>
+                            <Input
+                                id="startDate"
+                                type="datetime-local"
+                                value={formData.startDate}
+                                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                                className="border-green-300 focus:border-green-500"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="endDate" className="text-green-700">
+                                Ngày kết thúc *
+                            </Label>
+                            <Input
+                                id="endDate"
+                                type="datetime-local"
+                                value={formData.endDate}
+                                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                                className="border-green-300 focus:border-green-500"
+                                required
+                            />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
-            <DescriptionCard
-                value={formData.moTa}
-                onChange={(value) => setFormData((prev) => ({ ...prev, moTa: value }))}
-            />
+            {/* Usage Limit Card */}
+            <Card className="border-purple-200 bg-purple-50/30">
+                <CardHeader className="pb-3">
+                    <CardTitle className="text-purple-800">Giới hạn sử dụng</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="usageLimit" className="text-purple-700">
+                                Số lần sử dụng tối đa *
+                            </Label>
+                            <Input
+                                id="usageLimit"
+                                type="number"
+                                min="1"
+                                value={formData.usageLimit}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, usageLimit: Number(e.target.value) })
+                                }
+                                placeholder="1"
+                                className="border-purple-300 focus:border-purple-500"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="usedCount" className="text-purple-700">
+                                Đã sử dụng (chỉ đọc)
+                            </Label>
+                            <Input
+                                id="usedCount"
+                                type="number"
+                                value={formData.usedCount}
+                                disabled
+                                className="border-purple-300 bg-gray-100"
+                            />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             <div className="flex justify-end gap-3 pt-4 border-t">
                 <Button

@@ -1,95 +1,100 @@
 import React from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { KhuyenMai } from '../../ManagerPromotionsContent'
-// Using a minimal product shape for details view
-interface BasicProduct {
-    maSanPham: string
-    tenSanPham: string
-    hinhAnh: string
-    giaBan: number
-}
+import { Promotion } from '@/apis/promotionsApi'
 
 interface DialogViewDetailPromotionsProps {
     isDetailOpen: boolean
     setIsDetailOpen: (open: boolean) => void
-    selectedPromotion: KhuyenMai | null
-    getProductInfo: (maSanPham: string) => BasicProduct | undefined
+    selectedPromotion: Promotion | null
     getStatusBadge: (status: string) => React.ReactNode
 }
-export default function DialogViewDetailPromotions({ isDetailOpen, setIsDetailOpen, selectedPromotion, getProductInfo, getStatusBadge }: DialogViewDetailPromotionsProps) {
+
+export default function DialogViewDetailPromotions({
+    isDetailOpen,
+    setIsDetailOpen,
+    selectedPromotion,
+    getStatusBadge
+}: DialogViewDetailPromotionsProps) {
     return (
-        <>
-            <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-                <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                        <DialogTitle>Chi tiết khuyến mãi</DialogTitle>
-                    </DialogHeader>
-                    {selectedPromotion && (
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label className="text-sm font-medium text-gray-500">Mã khuyến mãi</Label>
-                                    <p className="text-lg font-semibold">{selectedPromotion.maKhuyenMai}</p>
-                                </div>
-                                <div>
-                                    <Label className="text-sm font-medium text-gray-500">Trạng thái</Label>
-                                    <div className="mt-1">{getStatusBadge(selectedPromotion.trangThai)}</div>
-                                </div>
-                            </div>
-
+        <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Chi tiết khuyến mãi</DialogTitle>
+                </DialogHeader>
+                {selectedPromotion && (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label className="text-sm font-medium text-gray-500">Tên chương trình</Label>
-                                <p className="text-lg">{selectedPromotion.tenKhachHangKhuyenMai}</p>
+                                <Label className="text-sm font-medium text-gray-500">Mã khuyến mãi</Label>
+                                <p className="text-lg font-semibold">{selectedPromotion.promoId}</p>
                             </div>
-
                             <div>
-                                <Label className="text-sm font-medium text-gray-500">Sản phẩm áp dụng</Label>
-                                {(() => {
-                                    const product = getProductInfo(selectedPromotion.maSanPham)
-                                    return product ? (
-                                        <div className="flex items-center gap-3 mt-2">
-                                            <img
-                                                src={product.hinhAnh || "/placeholder.svg"}
-                                                alt={product.tenSanPham}
-                                                className="w-16 h-16 rounded-lg object-cover"
-                                            />
-                                            <div>
-                                                <p className="font-medium">{product.tenSanPham}</p>
-                                                <p className="text-sm text-gray-500">Giá gốc: {product.giaBan.toLocaleString("vi-VN")}đ</p>
-                                                <p className="text-sm text-green-600 font-medium">
-                                                    Giá sau giảm:{" "}
-                                                    {(product.giaBan * (1 - selectedPromotion.phanTramGiamGia / 100)).toLocaleString("vi-VN")}đ
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ) : null
-                                })()}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label className="text-sm font-medium text-gray-500">Phần trăm giảm giá</Label>
-                                    <p className="text-2xl font-bold text-orange-600">{selectedPromotion.phanTramGiamGia}%</p>
-                                </div>
-                                <div>
-                                    <Label className="text-sm font-medium text-gray-500">Thời gian áp dụng</Label>
-                                    <p className="text-sm">
-                                        {new Date(selectedPromotion.ngayBatDau).toLocaleString("vi-VN")}
-                                        <br />
-                                        đến {new Date(selectedPromotion.ngayKetThuc).toLocaleString("vi-VN")}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <Label className="text-sm font-medium text-gray-500">Mô tả</Label>
-                                <p className="mt-1 text-gray-700">{selectedPromotion.moTa}</p>
+                                <Label className="text-sm font-medium text-gray-500">Trạng thái</Label>
+                                <div className="mt-1">{getStatusBadge(selectedPromotion.status)}</div>
                             </div>
                         </div>
-                    )}
-                </DialogContent>
-            </Dialog>
-        </>
+
+                        <div>
+                            <Label className="text-sm font-medium text-gray-500">Mã code khuyến mãi</Label>
+                            <p className="text-lg font-semibold text-blue-600">{selectedPromotion.promoCode}</p>
+                        </div>
+
+                        <div>
+                            <Label className="text-sm font-medium text-gray-500">Mô tả chương trình</Label>
+                            <p className="text-lg">{selectedPromotion.description}</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label className="text-sm font-medium text-gray-500">Loại giảm giá</Label>
+                                <p className="text-lg font-medium">
+                                    {selectedPromotion.discountType === 'percentage' ? 'Phần trăm' : 'Cố định'}
+                                </p>
+                            </div>
+                            <div>
+                                <Label className="text-sm font-medium text-gray-500">Giá trị giảm</Label>
+                                <p className="text-2xl font-bold text-orange-600">
+                                    {selectedPromotion.discountType === 'percentage'
+                                        ? `${selectedPromotion.discountValue}%`
+                                        : `${selectedPromotion.discountValue.toLocaleString("vi-VN")}đ`}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label className="text-sm font-medium text-gray-500">Thời gian bắt đầu</Label>
+                                <p className="text-sm">
+                                    {new Date(selectedPromotion.startDate).toLocaleString("vi-VN")}
+                                </p>
+                            </div>
+                            <div>
+                                <Label className="text-sm font-medium text-gray-500">Thời gian kết thúc</Label>
+                                <p className="text-sm">
+                                    {new Date(selectedPromotion.endDate).toLocaleString("vi-VN")}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label className="text-sm font-medium text-gray-500">Giá trị đơn hàng tối thiểu</Label>
+                                <p className="text-lg font-medium">
+                                    {selectedPromotion.minOrderAmount.toLocaleString("vi-VN")}đ
+                                </p>
+                            </div>
+                            <div>
+                                <Label className="text-sm font-medium text-gray-500">Số lần sử dụng</Label>
+                                <p className="text-lg">
+                                    <span className="font-bold text-green-600">{selectedPromotion.usedCount}</span>
+                                    <span className="text-gray-500"> / {selectedPromotion.usageLimit}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </DialogContent>
+        </Dialog>
     )
 }
