@@ -1,5 +1,6 @@
 "use client"
-import { useState } from "react"
+
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Plus } from "lucide-react"
@@ -7,118 +8,106 @@ import { DialogEditPromotions, DialogViewDetailPromotions } from "./components/D
 import PaginationPromotions from "./components/PaginationPromotions"
 import TableManagerPromotions from "./components/TableManagerPromotions"
 import CardStats from "@/components/Admin/components/Promotion/components/CardStas"
-
-
-// Mock data
-export interface KhuyenMai {
-    maKhuyenMai: string
-    maSanPham: string
-    tenKhachHangKhuyenMai: string
-    phanTramGiamGia: number
-    ngayBatDau: string
-    ngayKetThuc: string
-    moTa: string
-    trangThai: "active" | "inactive" | "expired"
-}
-const mockPromotions: KhuyenMai[] = [
-    {
-        maKhuyenMai: "KM001",
-        maSanPham: "SP001",
-        tenKhachHangKhuyenMai: "Khuyến mãi cà chua cherry cuối tuần",
-        phanTramGiamGia: 20,
-        ngayBatDau: "2024-01-15T00:00",
-        ngayKetThuc: "2024-01-21T23:59",
-        moTa: "Giảm giá 20% cho cà chua cherry trong tuần này",
-        trangThai: "active",
-    },
-    {
-        maKhuyenMai: "KM002",
-        maSanPham: "SP002",
-        tenKhachHangKhuyenMai: "Flash sale thịt ba chỉ",
-        phanTramGiamGia: 15,
-        ngayBatDau: "2024-01-10T00:00",
-        ngayKetThuc: "2024-01-20T23:59",
-        moTa: "Giảm giá đặc biệt cho thịt ba chỉ tươi",
-        trangThai: "active",
-    },
-    {
-        maKhuyenMai: "KM003",
-        maSanPham: "SP003",
-        tenKhachHangKhuyenMai: "Khuyến mãi sữa tươi TH",
-        phanTramGiamGia: 10,
-        ngayBatDau: "2024-01-01T00:00",
-        ngayKetThuc: "2024-01-10T23:59",
-        moTa: "Giảm giá sữa tươi TH True Milk",
-        trangThai: "expired",
-    },
-]
-
-const mockProducts = [
-    { maSanPham: "SP001", tenSanPham: "Cà chua cherry", hinhAnh: "/cherry-tomatoes.jpg", giaBan: 25000 },
-    { maSanPham: "SP002", tenSanPham: "Thịt ba chỉ", hinhAnh: "/pork-belly-meat.jpg", giaBan: 180000 },
-    { maSanPham: "SP003", tenSanPham: "Sữa tươi TH True Milk", hinhAnh: "/milk-carton-th-true-milk.jpg", giaBan: 32000 },
-]
+import { Promotion, getAllPromotions, addPromotions, deletePromotions, updatePromotions } from "@/apis/promotionsApi"
+import { toast } from "sonner"
 
 export default function ManagerPromotionsContent() {
-    const [promotions, setPromotions] = useState<KhuyenMai[]>(mockPromotions)
-    const [searchTerm, setSearchTerm] = useState("")
-    const [statusFilter, setStatusFilter] = useState<string>("all")
+    const [promotions, setPromotions] = useState<Promotion[]>([])
+    const [filteredPromotions, setFilteredPromotions] = useState<Promotion[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [isDetailOpen, setIsDetailOpen] = useState(false)
-    const [selectedPromotion, setSelectedPromotion] = useState<KhuyenMai | null>(null)
+    const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null)
+    const [searchTerm, setSearchTerm] = useState("")
+    const [statusFilter, setStatusFilter] = useState("all")
+    const fetchPromotions = async () => {
+        try {
+            setIsLoading(true)
+            const data = await getAllPromotions()
+            setPromotions(data)
+            setIsLoading(false)
+        } catch (error) {
+            setError("Không thể tải danh sách khuyến mãi")
+            setIsLoading(false)
+            toast.error("Không thể tải danh sách khuyến mãi")
+        }
+    }
+    useEffect(() => {
+        fetchPromotions()
+    }, [])
 
-    const filteredPromotions = promotions.filter((promotion) => {
-        const matchesSearch =
-            promotion.tenKhachHangKhuyenMai.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            promotion.maKhuyenMai.toLowerCase().includes(searchTerm.toLowerCase())
-        const matchesStatus = statusFilter === "all" || promotion.trangThai === statusFilter
-        return matchesSearch && matchesStatus
-    })
+    useEffect(() => {
+        let filtered = promotions
+        if (searchTerm) {
+            filtered = filtered.filter(
+                (p) =>
+                    p.promoCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    p.description?.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        }
+        if (statusFilter !== "all") {
+            filtered = filtered.filter((p) => p.status === statusFilter)
+        }
 
-    // Stats calculations
+        setFilteredPromotions(filtered)
+    }, [promotions, searchTerm, statusFilter])
+
     const stats = {
         total: promotions.length,
-        active: promotions.filter((p) => p.trangThai === "active").length,
-        expired: promotions.filter((p) => p.trangThai === "expired").length,
-        avgDiscount: Math.round(promotions.reduce((sum, p) => sum + p.phanTramGiamGia, 0) / promotions.length),
+        active: promotions.filter((p) => p.status === "active").length,
+        expired: promotions.filter((p) => p.status === "expired").length,
+        avgDiscount: promotions.length > 0
+            ? Math.round(promotions.reduce((sum, p) => sum + p.discountValue, 0) / promotions.length)
+            : 0,
     }
 
-    const handleSubmit = (promotionData: Omit<KhuyenMai, "maKhuyenMai"> | KhuyenMai) => {
-        if ("maKhuyenMai" in promotionData) {
-            // Update existing
-            setPromotions((prev) => prev.map((p) => (p.maKhuyenMai === promotionData.maKhuyenMai ? promotionData : p)))
-        } else {
-            // Add new
-            const newPromotion: KhuyenMai = {
-                ...promotionData,
-                maKhuyenMai: `KM${String(promotions.length + 1).padStart(3, "0")}`,
+    const handleSubmit = async (promotionData: Omit<Promotion, "promotionId"> | Promotion) => {
+        try {
+            if ("promoId" in promotionData && promotionData.promoId) {
+                await updatePromotions(promotionData.promoId, promotionData)
+                toast.success("Cập nhật khuyến mãi thành công")
+            } else {
+                await addPromotions(promotionData as Promotion)
+                toast.success("Thêm khuyến mãi thành công")
             }
-            setPromotions((prev) => [...prev, newPromotion])
+            setIsFormOpen(false)
+            fetchPromotions()
+        } catch (error) {
+            toast.error("Có lỗi xảy ra khi lưu khuyến mãi")
+            console.error("Error saving promotion:", error)
         }
-        setIsFormOpen(false)
-        setSelectedPromotion(null)
     }
 
-    const handleEdit = (promotion: KhuyenMai) => {
+    const handleEdit = (promotion: Promotion) => {
         setSelectedPromotion(promotion)
         setIsFormOpen(true)
     }
 
-    const handleDelete = (maKhuyenMai: string) => {
-        setPromotions((prev) => prev.filter((p) => p.maKhuyenMai !== maKhuyenMai))
-    }
-
-    const handleViewDetail = (promotion: KhuyenMai) => {
+    const handleViewDetail = (promotion: Promotion) => {
         setSelectedPromotion(promotion)
         setIsDetailOpen(true)
+    }
+
+    const handleDelete = async (promoId: number) => {
+        if (confirm("Bạn có chắc chắn muốn xóa khuyến mãi này?")) {
+            try {
+                await deletePromotions(promoId)
+                toast.success("Xóa khuyến mãi thành công")
+                fetchPromotions()
+            } catch (error) {
+                toast.error("Không thể xóa khuyến mãi")
+                console.error("Error deleting promotion:", error)
+            }
+        }
     }
 
     const getStatusBadge = (status: string) => {
         switch (status) {
             case "active":
-                return <Badge className="">Đang hoạt động</Badge>
+                return <Badge className="bg-green-100 text-green-700 border-green-300">Đang hoạt động</Badge>
             case "inactive":
-                return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300    ">Tạm ngưng</Badge>
+                return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300">Tạm ngưng</Badge>
             case "expired":
                 return <Badge className="bg-red-100 text-red-700 border-red-300">Hết hạn</Badge>
             default:
@@ -126,12 +115,32 @@ export default function ManagerPromotionsContent() {
         }
     }
 
-    const getProductInfo = (maSanPham: string) => {
-        return mockProducts.find((p) => p.maSanPham === maSanPham)
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Đang tải dữ liệu...</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <div className="text-center text-red-600">
+                    <p className="text-xl font-semibold">{error}</p>
+                    <Button onClick={fetchPromotions} className="mt-4">
+                        Thử lại
+                    </Button>
+                </div>
+            </div>
+        )
     }
 
     return (
-        <div className=" p-6">
+        <div className="p-6">
             <div className="px-4 space-y-6">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -151,7 +160,7 @@ export default function ManagerPromotionsContent() {
                     </Button>
                 </div>
 
-
+                {/* Stats and Filters */}
                 <CardStats
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
@@ -163,15 +172,15 @@ export default function ManagerPromotionsContent() {
                 {/* Promotions Table */}
                 <TableManagerPromotions
                     filteredPromotions={filteredPromotions}
-                    getProductInfo={getProductInfo}
                     handleViewDetail={handleViewDetail}
                     handleEdit={handleEdit}
                     handleDelete={handleDelete}
                     getStatusBadge={getStatusBadge}
                 />
-                <PaginationPromotions
-                    totalItems={promotions.length}
-                />
+
+                {/* Pagination */}
+                <PaginationPromotions totalItems={filteredPromotions.length} />
+
                 {/* Form Dialog */}
                 <DialogEditPromotions
                     isFormOpen={isFormOpen}
@@ -181,11 +190,11 @@ export default function ManagerPromotionsContent() {
                     setSelectedPromotion={setSelectedPromotion}
                 />
 
+                {/* Detail Dialog */}
                 <DialogViewDetailPromotions
                     isDetailOpen={isDetailOpen}
                     setIsDetailOpen={setIsDetailOpen}
                     selectedPromotion={selectedPromotion}
-                    getProductInfo={getProductInfo}
                     getStatusBadge={getStatusBadge}
                 />
             </div>

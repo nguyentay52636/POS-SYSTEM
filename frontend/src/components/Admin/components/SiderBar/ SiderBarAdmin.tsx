@@ -60,7 +60,6 @@ export function SiderBarAdmin() {
                 </Button>
             )}
 
-            {/* Sidebar */}
             <div
                 className={`
           ${isMobile ? "fixed" : "relative"} 

@@ -60,6 +60,9 @@ public class UpdatePromotionDto
     [Range(0, int.MaxValue, ErrorMessage = "Usage limit must be 0 or greater")]
     public int? UsageLimit { get; set; }
 
+    [Range(0, int.MaxValue, ErrorMessage = "Used count must be 0 or greater")]
+    public int? UsedCount { get; set; }
+
     [RegularExpression("^(active|inactive|expired)$", ErrorMessage = "Status must be 'active', 'inactive', or 'expired'")]
     public string? Status { get; set; }
 }
