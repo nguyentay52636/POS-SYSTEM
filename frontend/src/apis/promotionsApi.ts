@@ -18,7 +18,7 @@ try {
 const {data} = await baseApi.get('/Promotion') ; 
 return data; 
 }catch (error : any) { 
-throw new error;
+throw error;
 }
 }
 const addPromotions = async ({promoCode,description,discountType,discountValue,startDate,endDate,minOrderAmount,usageLimit,usedCount,status} : Promotion)=>  {
@@ -38,7 +38,7 @@ try {
     const {data} = await baseApi.post('/Promotion',newPromotion) ;
     return data;
 }catch (error :any) { 
- throw new error
+ throw error
 }
 }
 const deletePromotions = async (promotionId : number)=> {
@@ -46,7 +46,7 @@ const deletePromotions = async (promotionId : number)=> {
         const {data} = await baseApi.delete(`/Promotion/${promotionId}`) ;
         return data;
     }catch (error :any) { 
-        throw new error
+        throw error
     }
  } 
 const updatePromotions = async (promotionId : number,promotion : Promotion)=> {
@@ -54,7 +54,7 @@ const updatePromotions = async (promotionId : number,promotion : Promotion)=> {
         const {data} = await baseApi.put(`/Promotion/${promotionId}`,promotion) ;
         return data;
     }catch (error :any) { 
-        throw new error
+        throw error
     }
 }
 const  searchPromotions = async (promotionCode : string)=> { 
@@ -62,7 +62,7 @@ try {
 const {data} = await baseApi.get(`/Promotion/search/${promotionCode}`) ;
 return data;
 }catch(error:any) {
-    throw new error
+    throw error
 }
 } 
 const getPromotionActive = async ()=> {
@@ -70,7 +70,7 @@ const getPromotionActive = async ()=> {
         const {data} = await baseApi.get('/Promotion/active') ;
         return data;
     }catch(error:any) {
-        throw new error
+        throw error
     }
 }
 

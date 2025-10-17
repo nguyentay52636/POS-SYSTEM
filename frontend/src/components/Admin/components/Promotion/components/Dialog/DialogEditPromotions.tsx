@@ -7,7 +7,7 @@ interface DialogEditPromotionsProps {
     isFormOpen: boolean
     setIsFormOpen: (open: boolean) => void
     selectedPromotion: Promotion | null
-    handleSubmit: (promotion: Omit<Promotion, "promotionId"> | Promotion) => void
+    handleSubmit: (promotion: Omit<Promotion, "promoId"> | Promotion) => void
     setSelectedPromotion: (promotion: Promotion | null) => void
 }
 

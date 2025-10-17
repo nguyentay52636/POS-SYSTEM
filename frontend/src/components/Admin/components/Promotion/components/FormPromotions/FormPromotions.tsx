@@ -13,7 +13,7 @@ import { Calendar } from "lucide-react"
 
 interface PromotionFormProps {
     promotion?: Promotion
-    onSubmit: (promotion: Omit<Promotion, "promotionId"> | Promotion) => void
+    onSubmit: (promotion: Omit<Promotion, "promoId"> | Promotion) => void
     onCancel: () => void
 }
 
@@ -132,14 +132,12 @@ export function FormPromotions({ promotion, onSubmit, onCancel }: PromotionFormP
                             <Input
                                 id="discountValue"
                                 type="number"
-                                min="0"
                                 value={formData.discountValue}
                                 onChange={(e) =>
                                     setFormData({ ...formData, discountValue: Number(e.target.value) })
                                 }
-                                placeholder={formData.discountType === "percentage" ? "0-100" : "0"}
+                                placeholder={formData.discountType === "percentage" ? "0" : "0"}
                                 className="border-orange-300 focus:border-orange-500"
-                                required
                             />
                         </div>
 
@@ -150,7 +148,6 @@ export function FormPromotions({ promotion, onSubmit, onCancel }: PromotionFormP
                             <Input
                                 id="minOrderAmount"
                                 type="number"
-                                min="0"
                                 value={formData.minOrderAmount}
                                 onChange={(e) =>
                                     setFormData({ ...formData, minOrderAmount: Number(e.target.value) })

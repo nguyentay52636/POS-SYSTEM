@@ -77,7 +77,7 @@ export default function ViewDetailsSuppliers({
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Calendar className="h-4 w-4 text-gray-500" />
-                                        <span className="text-gray-700">Ngày tạo: {new Date(selectedSupplier.createdAt).toLocaleDateString()}</span>
+                                        <span className="text-gray-700">Ngày tạo: {selectedSupplier.createdAt ? new Date(selectedSupplier.createdAt).toLocaleDateString() : "-"}</span>
                                     </div>
                                 </div>
                             </div>
