@@ -10,6 +10,7 @@ import TableManagerPromotions from "./components/TableManagerPromotions"
 import CardStats from "@/components/Admin/components/Promotion/components/CardStas"
 import { Promotion, getAllPromotions, addPromotions, deletePromotions, updatePromotions } from "@/apis/promotionsApi"
 import { toast } from "sonner"
+// removed unused DialogAddPromotions
 
 export default function ManagerPromotionsContent() {
     const [promotions, setPromotions] = useState<Promotion[]>([])
@@ -62,7 +63,7 @@ export default function ManagerPromotionsContent() {
             : 0,
     }
 
-    const handleSubmit = async (promotionData: Omit<Promotion, "promotionId"> | Promotion) => {
+    const handleSubmit = async (promotionData: Omit<Promotion, "promoId"> | Promotion) => {
         try {
             if ("promoId" in promotionData && promotionData.promoId) {
                 await updatePromotions(promotionData.promoId, promotionData)
@@ -197,6 +198,7 @@ export default function ManagerPromotionsContent() {
                     selectedPromotion={selectedPromotion}
                     getStatusBadge={getStatusBadge}
                 />
+                {/* Add flow is handled by DialogEditPromotions when selectedPromotion is null */}
             </div>
         </div>
     )
