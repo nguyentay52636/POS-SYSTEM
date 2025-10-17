@@ -1,6 +1,13 @@
 -------------------------------------------------
 -- XÓA BẢNG CŨ NẾU TỒN TẠI (đúng thứ tự FK)
 -------------------------------------------------
+IF DB_ID('system_pos') IS NOT NULL
+BEGIN
+    USE master;
+    DROP DATABASE system_pos;
+END;
+GO
+
 CREATE DATABASE system_pos;
 GO
 
@@ -15,7 +22,7 @@ IF OBJECT_ID('orders', 'U') IS NOT NULL DROP TABLE orders;
 IF OBJECT_ID('products', 'U') IS NOT NULL DROP TABLE products;
 IF OBJECT_ID('promotions', 'U') IS NOT NULL DROP TABLE promotions;
 IF OBJECT_ID('categories', 'U') IS NOT NULL DROP TABLE categories;
-IF OBJECT_ID(' ', 'U') IS NOT NULL DROP TABLE suppliers;
+IF OBJECT_ID('suppliers', 'U') IS NOT NULL DROP TABLE suppliers;
 IF OBJECT_ID('customers', 'U') IS NOT NULL DROP TABLE customers;
 IF OBJECT_ID('users', 'U') IS NOT NULL DROP TABLE users;
 GO
@@ -63,7 +70,8 @@ CREATE TABLE users (
     [password] NVARCHAR(255) NOT NULL,
     full_name NVARCHAR(100) NULL,
     role INT NOT NULL CONSTRAINT DF_users_role DEFAULT (2),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT UQ_users_username UNIQUE (username)
 );
 GO
 
@@ -74,14 +82,15 @@ CREATE TABLE promotions (
     promo_id INT IDENTITY(1,1) PRIMARY KEY,
     promo_code NVARCHAR(50) NOT NULL,
     description NVARCHAR(255) NULL,
-    discount_type NVARCHAR(255) NOT NULL CHECK (discount_type IN ('percent', 'fixed')),
+    discount_type NVARCHAR(20) NOT NULL CHECK (discount_type IN ('percent', 'fixed')),
     discount_value DECIMAL(10,2) NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     min_order_amount DECIMAL(10,2) DEFAULT 0,
     usage_limit INT DEFAULT 0,
     used_count INT DEFAULT 0,
-    status NVARCHAR(255) NOT NULL CHECK (status IN ('active', 'inactive')) DEFAULT 'active'
+    status NVARCHAR(20) NOT NULL CHECK (status IN ('active', 'inactive')) DEFAULT 'active',
+    CONSTRAINT UQ_promotions_promo_code UNIQUE (promo_code)
 );
 GO
 
@@ -98,7 +107,8 @@ CREATE TABLE products (
     unit NVARCHAR(20) DEFAULT 'pcs',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT FK_products_categories FOREIGN KEY (category_id) REFERENCES categories(category_id),
-    CONSTRAINT FK_products_suppliers FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id)
+    CONSTRAINT FK_products_suppliers FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id),
+    CONSTRAINT UQ_products_barcode UNIQUE (barcode)
 );
 GO
 
@@ -135,8 +145,8 @@ CREATE TABLE orders (
     user_id INT NULL,
     promo_id INT NULL,
     order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status NVARCHAR(255) NOT NULL CHECK (status IN ('pending', 'paid', 'canceled')) DEFAULT 'pending',
-    total_amount DECIMAL(10,2) NULL,
+    status NVARCHAR(20) NOT NULL CHECK (status IN ('pending', 'paid', 'canceled')) DEFAULT 'pending',
+    total_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
     discount_amount DECIMAL(10,2) DEFAULT 0,
     CONSTRAINT FK_orders_customers FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
     CONSTRAINT FK_orders_users FOREIGN KEY (user_id) REFERENCES users(user_id),
@@ -167,8 +177,18 @@ CREATE TABLE payments (
     payment_id INT IDENTITY(1,1) PRIMARY KEY,
     order_id INT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
-    payment_method NVARCHAR(255) NOT NULL CHECK (payment_method IN ('cash', 'card', 'bank_transfer', 'e-wallet')) DEFAULT 'cash',
+    payment_method NVARCHAR(20) NOT NULL CHECK (payment_method IN ('cash', 'card', 'bank_transfer', 'e-wallet')) DEFAULT 'cash',
     payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT FK_payments_orders FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
+GO
+
+-------------------------------------------------
+-- TẠO CHỈ MỤC (INDEX) ĐỂ CẢI THIỆN HIỆU SUẤT
+-------------------------------------------------
+CREATE INDEX idx_products_barcode ON products(barcode);
+CREATE INDEX idx_promotions_promo_code ON promotions(promo_code);
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_inventory_product_id ON inventory(product_id);
+CREATE INDEX idx_orders_order_date ON orders(order_date);
 GO
