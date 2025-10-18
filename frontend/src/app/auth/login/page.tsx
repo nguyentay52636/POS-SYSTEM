@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Chrome, Eye, EyeOff, Facebook } from "lucide-react"
-
+import { IUser } from "@/types/types"
 export default function LoginPage() {
-    const [email, setEmail] = useState("")
+    const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -24,8 +24,7 @@ export default function LoginPage() {
         setIsLoading(true)
         setError("")
 
-        // Simulate login validation
-        if (!email || !password) {
+        if (!username || !password) {
             setError("Vui lòng nhập đầy đủ thông tin")
             setIsLoading(false)
             return
@@ -36,12 +35,14 @@ export default function LoginPage() {
             setIsLoading(false)
             const mockUser = {
                 id: "1",
-                name: "Demo User",
-                email: email,
-                avatar: "/placeholder.svg?height=40&width=40&text=User",
+                username: username,
+                password: password,
+                role: "admin",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
             }
             localStorage.setItem("user", JSON.stringify(mockUser))
-            router.push("/")
+            router.push("/admin")
         }, 800)
     }
 
@@ -126,8 +127,8 @@ export default function LoginPage() {
                                 id="email"
                                 type="text"
                                 placeholder="Nhập email hoặc tên đăng nhập"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 className="h-12 px-4 border-gray-300 focus:ring-2 focus:ring-green-700 focus:border-green-700 rounded-lg transition-colors"
                             />
                         </div>
