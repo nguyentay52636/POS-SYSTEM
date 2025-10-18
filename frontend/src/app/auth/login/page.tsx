@@ -33,57 +33,25 @@ export default function LoginPage() {
         }
     }, [isAuthenticated, router])
 
-    // Validation functions
-    const validateUsername = (value: string): string | undefined => {
+    const validateUsername = (value: string) => {
         if (!value.trim()) {
             return "Vui lòng nhập email hoặc tên đăng nhập"
         }
-
-        // Check if it looks like an email
-        const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/
-
-        if (!usernameRegex.test(value)) {
-            return "Tên đăng nhập phải có 3-20 ký tự và chỉ chứa chữ cái, số và dấu gạch dưới"
-        }
-
-        return undefined
+        return value;
     }
 
-    const validatePassword = (value: string): string | undefined => {
+    const validatePassword = (value: string) => {
         if (!value) {
             return "Vui lòng nhập mật khẩu"
         }
-
-        if (value.length < 6) {
-            return "Mật khẩu phải có ít nhất 6 ký tự"
-        }
-
-        if (value.length > 50) {
-            return "Mật khẩu không được vượt quá 50 ký tự"
-        }
-
-        return undefined
-    }
-
-    const validateForm = (): boolean => {
-        const errors: { username?: string; password?: string; general?: string } = {}
-
-        const usernameError = validateUsername(username)
-        const passwordError = validatePassword(password)
-
-        if (usernameError) errors.username = usernameError
-        if (passwordError) errors.password = passwordError
-
-        setValidationErrors(errors)
-        return Object.keys(errors).length === 0
+        return value;
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setValidationErrors({})
 
-        // Validate form before submission
-        if (!validateForm()) {
+        if (!validateUsername(username) || !validatePassword(password)) {
             return
         }
 
@@ -91,10 +59,8 @@ export default function LoginPage() {
             const result = await dispatch(loginThunk({ username, password }))
 
             if (loginThunk.fulfilled.match(result)) {
-                // Login successful, redirect to admin
                 router.push("/admin")
             } else if (loginThunk.rejected.match(result)) {
-                // Handle login failure
                 setValidationErrors({
                     general: "Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng kiểm tra lại."
                 })
@@ -260,7 +226,7 @@ export default function LoginPage() {
                         >
                             {isLoading ? (
                                 <div className="flex items-center space-x-2">
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <div className=" w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     <span>Đang đăng nhập...</span>
                                 </div>
                             ) : (

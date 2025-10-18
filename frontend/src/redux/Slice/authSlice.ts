@@ -19,9 +19,20 @@ const getFromLocalStorage = (key: string, defaultValue: string) => {
   return defaultValue;
 };
 
-const isAuthenticated = JSON.parse(getFromLocalStorage('isAuthenticated', 'false'))
-const currentUser = JSON.parse(getFromLocalStorage('currentUser', 'null'))
-const token = getFromLocalStorage('token', '')
+// Parse localStorage data safely
+const parseLocalStorageData = (key: string, defaultValue: any) => {
+  try {
+    const data = getFromLocalStorage(key, JSON.stringify(defaultValue));
+    return JSON.parse(data);
+  } catch (error) {
+    console.error(`Error parsing ${key} from localStorage:`, error);
+    return defaultValue;
+  }
+};
+
+const isAuthenticated = parseLocalStorageData('isAuthenticated', false);
+const currentUser = parseLocalStorageData('currentUser', null);
+const token = getFromLocalStorage('token', '');
 
 console.log('Loading from localStorage:', {
   isAuthenticated,
@@ -42,7 +53,6 @@ export const loginThunk = createAsyncThunk(
     async ({ username, password }: { username: string; password: string }, { rejectWithValue }) => {
       try {
         const response = await login(username, password);
-        // Assuming the API returns a token in the data
         return response;
       } catch (error) {
         return rejectWithValue((error as Error).message || 'Login failed');
@@ -57,7 +67,6 @@ export const loginThunk = createAsyncThunk(
         return rejectWithValue((error as Error).message || 'Register failed');
     }
   })    
-  // Create the auth slice
   const authSlice = createSlice({
     name: 'auth',
     initialState,
@@ -99,11 +108,9 @@ export const loginThunk = createAsyncThunk(
           state.isLoading = false;
           state.error = null;
           
-          // Xử lý response trực tiếp từ API
           if (action.payload) {
-            // API trả về trực tiếp user data và token
             const userData = action.payload.user;
-            const token = action.payload.accessToken;
+            const token = action.payload.token; // Sửa từ accessToken thành token
             
             console.log('User data:', userData);
             console.log('Token:', token);
@@ -113,20 +120,33 @@ export const loginThunk = createAsyncThunk(
               state.token = token;
               state.isAuthenticated = true;
       
-              // Lưu thông tin user vào localStorage với đầy đủ thông tin
               const userDataToSave = {
                 ...userData,
-                id: userData._id, // Sử dụng _id từ MongoDB
+                id: userData.userId, // Sửa từ user_id thành userId
               };
               console.log('Saving user data to localStorage:', userDataToSave);
       
               if (typeof window !== 'undefined') {
-                localStorage.setItem('currentUser', JSON.stringify(userDataToSave));
-                localStorage.setItem('token', token);
-                localStorage.setItem('isAuthenticated', 'true');
+                try {
+                  localStorage.setItem('currentUser', JSON.stringify(userDataToSave));
+                  localStorage.setItem('token', token);
+                  localStorage.setItem('isAuthenticated', 'true');
+                  
+                  // Verify data was saved
+                  const savedUser = localStorage.getItem('currentUser');
+                  const savedToken = localStorage.getItem('token');
+                  const savedAuth = localStorage.getItem('isAuthenticated');
+                  
+                  console.log('Verification - Saved user:', savedUser);
+                  console.log('Verification - Saved token:', savedToken);
+                  console.log('Verification - Saved auth:', savedAuth);
+                  
+                  console.log('Data saved to localStorage successfully');
+                } catch (error) {
+                  console.error('Error saving to localStorage:', error);
+                  state.error = 'Lỗi lưu thông tin đăng nhập';
+                }
               }
-              
-              console.log('Data saved to localStorage successfully');
             } else {
               console.error('Missing user data or token in response');
               state.error = 'Dữ liệu người dùng không hợp lệ';
@@ -143,7 +163,6 @@ export const loginThunk = createAsyncThunk(
           state.error = action.payload as string;
           state.isAuthenticated = false;
           
-          // Xóa thông tin cũ trong localStorage khi login thất bại
           if (typeof window !== 'undefined') {
             localStorage.removeItem('currentUser');
             localStorage.removeItem('token');
@@ -174,6 +193,6 @@ export const loginThunk = createAsyncThunk(
   });
   
   export const { logout, setCredentials, clearError, resetRegistrationSuccess } = authSlice.actions;
-  export { register }; // Export register function
+  export { register }; 
   export default authSlice.reducer;
   export const selectAuth = (state: RootState) => state.auth;
