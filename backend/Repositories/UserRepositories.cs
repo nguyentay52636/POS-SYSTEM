@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using backend.Models;
 using backend.DTOs;
 using backend.Extensions;
+using backend.Enums;
 
 namespace backend.Repositories;
 
@@ -70,7 +71,7 @@ public class UserRepository : IUserRepository
         q = q.WhereIf(!query.Username.IsNullOrWhiteSpace(),
                 u => u.Username != null && u.Username.Contains(query.Username!))
             .WhereIf(!query.Role.IsNullOrWhiteSpace(),
-                u => u.Role == query.Role)
+                u => u.Role == UserRoleHelper.GetRoleValue(query.Role!))
             .WhereIf(!query.Keyword.IsNullOrWhiteSpace(),
                 u => (u.Username != null && u.Username.Contains(query.Keyword!)) ||
                      (u.FullName != null && u.FullName.Contains(query.Keyword!)));

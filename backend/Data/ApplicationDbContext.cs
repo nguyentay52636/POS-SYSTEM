@@ -305,9 +305,7 @@ public partial class ApplicationDbContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("password");
             entity.Property(e => e.Role)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .HasDefaultValue("staff")
+                .HasDefaultValue(1)
                 .HasColumnName("role");
             entity.Property(e => e.Username)
                 .HasMaxLength(50)

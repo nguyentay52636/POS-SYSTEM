@@ -1,6 +1,7 @@
 using backend.DTOs;
 using backend.Models;
 using backend.Repositories;
+using backend.Enums;
 
 namespace backend.Services;
 
@@ -32,7 +33,7 @@ public class ValidationService : IValidationService
         }
 
         // Validate role
-        if (!string.IsNullOrWhiteSpace(dto.Role) && !IsValidRole(dto.Role))
+        if (!string.IsNullOrWhiteSpace(dto.Role) && !UserRoleHelper.IsValidRole(dto.Role))
         {
             result.AddError("Role", "Invalid role. Must be 'admin' or 'staff'");
         }
@@ -53,7 +54,7 @@ public class ValidationService : IValidationService
         }
 
         // Validate role if provided
-        if (!string.IsNullOrWhiteSpace(dto.Role) && !IsValidRole(dto.Role))
+        if (!string.IsNullOrWhiteSpace(dto.Role) && !UserRoleHelper.IsValidRole(dto.Role))
         {
             result.AddError("Role", "Invalid role. Must be 'admin' or 'staff'");
         }
@@ -74,11 +75,6 @@ public class ValidationService : IValidationService
         return result;
     }
 
-    private static bool IsValidRole(string role)
-    {
-        return role.Equals("admin", StringComparison.OrdinalIgnoreCase) ||
-               role.Equals("staff", StringComparison.OrdinalIgnoreCase);
-    }
 }
 
 public class ValidationResult
