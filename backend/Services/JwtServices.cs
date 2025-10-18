@@ -7,7 +7,12 @@ using System.Text;
 
 namespace backend.Services
 {
-    public class JwtService
+    public interface IJwtService
+    {
+        (string Token, DateTime ExpiresAt) GenerateToken(string username, string userId, string role);
+    }
+
+    public class JwtService : IJwtService
     {
         private readonly JwtConfig _jwtConfig;
 
@@ -16,13 +21,16 @@ namespace backend.Services
             _jwtConfig = jwtConfig.Value;
         }
 
-        public string GenerateToken(string username, string role)
+        public (string Token, DateTime ExpiresAt) GenerateToken(string username, string userId, string role)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var expiresAt = DateTime.UtcNow.AddMinutes(_jwtConfig.ExpireMinutes);
+
             var claims = new[]
             {
+                new Claim(ClaimTypes.NameIdentifier, userId),
                 new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.Role, role)
             };
@@ -31,11 +39,11 @@ namespace backend.Services
                 issuer: _jwtConfig.Issuer,
                 audience: _jwtConfig.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_jwtConfig.ExpireMinutes),
+                expires: expiresAt,
                 signingCredentials: creds
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return (new JwtSecurityTokenHandler().WriteToken(token), expiresAt);
         }
     }
 }

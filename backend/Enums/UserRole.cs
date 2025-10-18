@@ -2,6 +2,7 @@ namespace backend.Enums;
 
 public enum UserRole
 {
+    Customer = 0,
     Staff = 1,
     Admin = 2
 }
@@ -12,9 +13,10 @@ public static class UserRoleHelper
     {
         return roleValue switch
         {
+            0 => "customer",
             1 => "staff",
             2 => "admin",
-            _ => "staff"
+            _ => "customer"
         };
     }
 
@@ -22,19 +24,20 @@ public static class UserRoleHelper
     {
         return roleName?.ToLowerInvariant() switch
         {
+            "customer" => 0,
             "staff" => 1,
             "admin" => 2,
-            _ => 1
+            _ => 0
         };
     }
 
     public static bool IsValidRole(string roleName)
     {
-        return roleName?.ToLowerInvariant() is "staff" or "admin";
+        return roleName?.ToLowerInvariant() is "customer" or "staff" or "admin";
     }
 
     public static bool IsValidRole(int roleValue)
     {
-        return roleValue is 1 or 2;
+        return roleValue is 0 or 1 or 2;
     }
 }
