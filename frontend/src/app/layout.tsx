@@ -4,6 +4,7 @@ import { Suspense } from "react"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import ConditionalSidebar from "@/components/Admin/components/SiderBar/ConditionalSidebar"
 import { Toaster } from "sonner"
+import ReduxProvider from "@/components/ReduxProvider"
 
 
 
@@ -17,17 +18,19 @@ export default function AdminRootLayout({
       <body>
 
         <Suspense fallback={null}>
-          <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          <ReduxProvider>
+            <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
 
-            <div className="flex">
-              <ConditionalSidebar />
-              <div className="flex-1">
-                {children}
+              <div className="flex">
+                <ConditionalSidebar />
+                <div className="flex-1">
+                  {children}
+                </div>
               </div>
-            </div>
 
-            <Toaster position="top-right" richColors />
-          </ThemeProvider>
+              <Toaster position="top-right" richColors />
+            </ThemeProvider>
+          </ReduxProvider>
         </Suspense>
       </body>
     </html>

@@ -11,9 +11,17 @@ isLoading : boolean
 error : string | null
 registrationSuccess : boolean
 }
-const isAuthenticated = JSON.parse(localStorage.getItem('isAuthenticated') || 'false')
-const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null')
-const token = localStorage.getItem('token')
+// Safe localStorage access for SSR
+const getFromLocalStorage = (key: string, defaultValue: string) => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(key) || defaultValue;
+  }
+  return defaultValue;
+};
+
+const isAuthenticated = JSON.parse(getFromLocalStorage('isAuthenticated', 'false'))
+const currentUser = JSON.parse(getFromLocalStorage('currentUser', 'null'))
+const token = getFromLocalStorage('token', '')
 
 console.log('Loading from localStorage:', {
   isAuthenticated,
@@ -58,10 +66,12 @@ export const loginThunk = createAsyncThunk(
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
-        localStorage.removeItem('token');
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('isAuthenticated');
-        window.location.reload();
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('isAuthenticated');
+          window.location.reload();
+        }
       },
       setCredentials: (state, action: PayloadAction<{ user: IUser; token: string }>) => {
         state.user = action.payload.user;
@@ -110,9 +120,11 @@ export const loginThunk = createAsyncThunk(
               };
               console.log('Saving user data to localStorage:', userDataToSave);
       
-              localStorage.setItem('currentUser', JSON.stringify(userDataToSave));
-              localStorage.setItem('token', token);
-              localStorage.setItem('isAuthenticated', 'true');
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('currentUser', JSON.stringify(userDataToSave));
+                localStorage.setItem('token', token);
+                localStorage.setItem('isAuthenticated', 'true');
+              }
               
               console.log('Data saved to localStorage successfully');
             } else {
@@ -132,9 +144,11 @@ export const loginThunk = createAsyncThunk(
           state.isAuthenticated = false;
           
           // Xóa thông tin cũ trong localStorage khi login thất bại
-          localStorage.removeItem('currentUser');
-          localStorage.removeItem('token');
-          localStorage.removeItem('isAuthenticated');
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('token');
+            localStorage.removeItem('isAuthenticated');
+          }
           
           console.log('Login failed:', action.payload);
         });

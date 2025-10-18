@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -10,40 +10,122 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Chrome, Eye, EyeOff, Facebook } from "lucide-react"
-import { IUser } from "@/types/types"
+import { useDispatch, useSelector } from "react-redux"
+import { loginThunk } from "@/redux/Slice/authSlice"
+import { AppDispatch, RootState } from "@/redux/store"
 export default function LoginPage() {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState("")
+    const [validationErrors, setValidationErrors] = useState<{
+        username?: string
+        password?: string
+        general?: string
+    }>({})
     const router = useRouter()
+
+    const dispatch = useDispatch<AppDispatch>()
+    const { isLoading, error, isAuthenticated } = useSelector((state: RootState) => state.auth)
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.push("/admin")
+        }
+    }, [isAuthenticated, router])
+
+    // Validation functions
+    const validateUsername = (value: string): string | undefined => {
+        if (!value.trim()) {
+            return "Vui lòng nhập email hoặc tên đăng nhập"
+        }
+
+        // Check if it looks like an email
+        const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/
+
+        if (!usernameRegex.test(value)) {
+            return "Tên đăng nhập phải có 3-20 ký tự và chỉ chứa chữ cái, số và dấu gạch dưới"
+        }
+
+        return undefined
+    }
+
+    const validatePassword = (value: string): string | undefined => {
+        if (!value) {
+            return "Vui lòng nhập mật khẩu"
+        }
+
+        if (value.length < 6) {
+            return "Mật khẩu phải có ít nhất 6 ký tự"
+        }
+
+        if (value.length > 50) {
+            return "Mật khẩu không được vượt quá 50 ký tự"
+        }
+
+        return undefined
+    }
+
+    const validateForm = (): boolean => {
+        const errors: { username?: string; password?: string; general?: string } = {}
+
+        const usernameError = validateUsername(username)
+        const passwordError = validatePassword(password)
+
+        if (usernameError) errors.username = usernameError
+        if (passwordError) errors.password = passwordError
+
+        setValidationErrors(errors)
+        return Object.keys(errors).length === 0
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        setIsLoading(true)
-        setError("")
+        setValidationErrors({})
 
-        if (!username || !password) {
-            setError("Vui lòng nhập đầy đủ thông tin")
-            setIsLoading(false)
+        // Validate form before submission
+        if (!validateForm()) {
             return
         }
 
-        // Simulate loading
-        setTimeout(() => {
-            setIsLoading(false)
-            const mockUser = {
-                id: "1",
-                username: username,
-                password: password,
-                role: "admin",
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
+        try {
+            const result = await dispatch(loginThunk({ username, password }))
+
+            if (loginThunk.fulfilled.match(result)) {
+                // Login successful, redirect to admin
+                router.push("/admin")
+            } else if (loginThunk.rejected.match(result)) {
+                // Handle login failure
+                setValidationErrors({
+                    general: "Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng kiểm tra lại."
+                })
             }
-            localStorage.setItem("user", JSON.stringify(mockUser))
-            router.push("/admin")
-        }, 800)
+        } catch (error) {
+            console.error('Login error:', error)
+            setValidationErrors({
+                general: "Có lỗi xảy ra. Vui lòng thử lại sau."
+            })
+        }
+    }
+
+    // Real-time validation handlers
+    const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        setUsername(value)
+
+        // Clear username error when user starts typing
+        if (validationErrors.username) {
+            setValidationErrors(prev => ({ ...prev, username: undefined }))
+        }
+    }
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        setPassword(value)
+
+        // Clear password error when user starts typing
+        if (validationErrors.password) {
+            setValidationErrors(prev => ({ ...prev, password: undefined }))
+        }
     }
 
     return (
@@ -116,9 +198,13 @@ export default function LoginPage() {
 
                     {/* Login Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {error && (
-                            <div className="text-red-500 text-sm text-center">{error}</div>
+                        {/* General error message */}
+                        {(error || validationErrors.general) && (
+                            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                                {error || validationErrors.general}
+                            </div>
                         )}
+
                         <div className="space-y-2">
                             <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                                 Email hoặc Tên đăng nhập
@@ -128,10 +214,17 @@ export default function LoginPage() {
                                 type="text"
                                 placeholder="Nhập email hoặc tên đăng nhập"
                                 value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="h-12 px-4 border-gray-300 focus:ring-2 focus:ring-green-700 focus:border-green-700 rounded-lg transition-colors"
+                                onChange={handleUsernameChange}
+                                className={`h-12 px-4 rounded-lg transition-colors ${validationErrors.username
+                                    ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500'
+                                    : 'border-gray-300 focus:ring-2 focus:ring-green-700 focus:border-green-700'
+                                    }`}
                             />
+                            {validationErrors.username && (
+                                <p className="text-red-500 text-xs mt-1">{validationErrors.username}</p>
+                            )}
                         </div>
+
                         <div className="space-y-2">
                             <Label htmlFor="password" className="text-sm font-medium text-gray-700">
                                 Mật khẩu
@@ -142,8 +235,11 @@ export default function LoginPage() {
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="h-12 px-4 pr-12 border-gray-300 focus:ring-2 focus:ring-green-700 focus:border-green-700 rounded-lg transition-colors"
+                                    onChange={handlePasswordChange}
+                                    className={`h-12 px-4 pr-12 rounded-lg transition-colors ${validationErrors.password
+                                        ? 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500'
+                                        : 'border-gray-300 focus:ring-2 focus:ring-green-700 focus:border-green-700'
+                                        }`}
                                 />
                                 <button
                                     type="button"
@@ -153,6 +249,9 @@ export default function LoginPage() {
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
                             </div>
+                            {validationErrors.password && (
+                                <p className="text-red-500 text-xs mt-1">{validationErrors.password}</p>
+                            )}
                         </div>
                         <Button
                             type="submit"
