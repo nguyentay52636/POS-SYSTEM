@@ -10,12 +10,14 @@ export default function ManagerUserContent() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [users, setUsers] = useState<IUser[]>([])
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 setLoading(true)
                 const usersData = await getAllUsers()
+                console.log(usersData)
                 setUsers(usersData)
                 setError(null)
             } catch (e: any) {
@@ -57,7 +59,7 @@ export default function ManagerUserContent() {
     return (
         <div className=" bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
             <div className="p-6 space-y-8">
-                <HeaderManagerUser handleAddAccount={handleAddAccount} />
+                <HeaderManagerUser isAddDialogOpen={isAddDialogOpen} setIsAddDialogOpen={setIsAddDialogOpen} />
                 {error ? (
                     <div>Error</div>
                 ) : (
