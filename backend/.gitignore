@@ -59,4 +59,6 @@ TestResult*/
 coverage/
 *.coverage
 *.coveragexml
-
+# Bỏ qua các thư mục build của .NET
+[Bb]in/
+[Oo]bj/
