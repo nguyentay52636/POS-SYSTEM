@@ -25,13 +25,16 @@ export default function ManagerPromotionsContent() {
     const fetchPromotions = async () => {
         try {
             setIsLoading(true)
+            setError(null) // Clear previous errors
             const data = await getAllPromotions()
             setPromotions(data)
             setIsLoading(false)
-        } catch (error) {
-            setError("Không thể tải danh sách khuyến mãi")
+        } catch (error: any) {
+            console.error("Error fetching promotions:", error)
+            const errorMessage = error.response?.data?.message || error.message || "Không thể tải danh sách khuyến mãi"
+            setError(errorMessage)
             setIsLoading(false)
-            toast.error("Không thể tải danh sách khuyến mãi")
+            toast.error(errorMessage)
         }
     }
     useEffect(() => {
@@ -129,12 +132,44 @@ export default function ManagerPromotionsContent() {
 
     if (error) {
         return (
-            <div className="flex items-center justify-center h-96">
-                <div className="text-center text-red-600">
-                    <p className="text-xl font-semibold">{error}</p>
-                    <Button onClick={fetchPromotions} className="mt-4">
-                        Thử lại
-                    </Button>
+            <div className="p-6">
+                <div className="px-4 space-y-6">
+                    {/* Header - Always show even on error */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">Quản lý Khuyến mãi</h1>
+                            <p className="text-gray-600 mt-1">Quản lý các chương trình khuyến mãi và giảm giá</p>
+                        </div>
+                        <Button
+                            onClick={() => {
+                                setSelectedPromotion(null)
+                                setIsFormOpen(true)
+                            }}
+                            className="bg-green-700 hover:bg-green-800 text-white"
+                        >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Thêm khuyến mãi
+                        </Button>
+                    </div>
+
+                    {/* Error message */}
+                    <div className="flex items-center justify-center h-96">
+                        <div className="text-center text-red-600">
+                            <p className="text-xl font-semibold">{error}</p>
+                            <Button onClick={fetchPromotions} className="mt-4">
+                                Thử lại
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Form Dialog */}
+                    <DialogEditPromotions
+                        isFormOpen={isFormOpen}
+                        setIsFormOpen={setIsFormOpen}
+                        selectedPromotion={selectedPromotion}
+                        handleSubmit={handleSubmit}
+                        setSelectedPromotion={setSelectedPromotion}
+                    />
                 </div>
             </div>
         )

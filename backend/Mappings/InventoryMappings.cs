@@ -15,5 +15,6 @@ public class InventoryMappings : Profile
             .ForMember(dest => dest.InventoryId, opt => opt.Ignore())
             .ForMember(dest => dest.ProductId, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+        CreateMap<CreateInventoryDto, Inventory>();
     }
 }
