@@ -7,7 +7,16 @@ import { Input } from '@/components/ui/input'
 import { IUser } from '@/types/types'
 import ActionTableUser from './ActionTableUser'
 
-export default function TableManagerUser({ users, searchQuery, setSearchQuery }: { users: IUser[], searchQuery: string, setSearchQuery: React.Dispatch<React.SetStateAction<string>> }) {
+interface TableManagerUserProps {
+    users: IUser[];
+    searchQuery: string;
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+    onView: (user: IUser) => void;
+    onEdit: (user: IUser) => void;
+    onDelete: (user: IUser) => void;
+}
+
+export default function TableManagerUser({ users, searchQuery, setSearchQuery, onView, onEdit, onDelete }: TableManagerUserProps) {
     return (
         <Card className="shadow-xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
@@ -92,7 +101,12 @@ export default function TableManagerUser({ users, searchQuery, setSearchQuery }:
                                             </span>
                                         </TableCell>
                                         <TableCell>
-                                            <ActionTableUser />
+                                            <ActionTableUser 
+                                                user={u} 
+                                                onView={onView}
+                                                onEdit={onEdit}
+                                                onDelete={onDelete}
+                                            />
                                         </TableCell>
                                     </TableRow>
 
