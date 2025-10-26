@@ -80,7 +80,16 @@ export default function TableManagerUser({ users, searchQuery, setSearchQuery }:
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <span className="text-sm text-gray-600 dark:text-gray-400">{new Date(u.createdAt).toLocaleString()}</span>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                                                {new Date(u.createdAt).toLocaleDateString('vi-VN', {
+                                                    year: 'numeric',
+                                                    month: '2-digit',
+                                                    day: '2-digit',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    second: '2-digit'
+                                                })}
+                                            </span>
                                         </TableCell>
                                         <TableCell>
                                             <ActionTableUser />
