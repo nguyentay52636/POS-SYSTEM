@@ -1,26 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "/Users/m1lt43/Desktop/NET-1-project/backend/backend.csproj": {}
+    "C:\\Users\\T480s\\Desktop\\POS-SYSTEM\\backend\\backend.csproj": {}
   },
   "projects": {
-    "/Users/m1lt43/Desktop/NET-1-project/backend/backend.csproj": {
+    "C:\\Users\\T480s\\Desktop\\POS-SYSTEM\\backend\\backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/m1lt43/Desktop/NET-1-project/backend/backend.csproj",
+        "projectUniqueName": "C:\\Users\\T480s\\Desktop\\POS-SYSTEM\\backend\\backend.csproj",
         "projectName": "backend",
-        "projectPath": "/Users/m1lt43/Desktop/NET-1-project/backend/backend.csproj",
-        "packagesPath": "/Users/m1lt43/.nuget/packages/",
-        "outputPath": "/Users/m1lt43/Desktop/NET-1-project/backend/obj/",
+        "projectPath": "C:\\Users\\T480s\\Desktop\\POS-SYSTEM\\backend\\backend.csproj",
+        "packagesPath": "C:\\Users\\T480s\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\T480s\\Desktop\\POS-SYSTEM\\backend\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/m1lt43/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\T480s\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "/usr/local/share/dotnet/library-packs": {},
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -103,7 +108,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
