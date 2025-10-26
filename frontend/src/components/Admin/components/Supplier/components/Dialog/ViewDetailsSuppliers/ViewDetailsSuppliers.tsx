@@ -12,7 +12,6 @@ interface ViewDetailsSuppliersProps {
     setIsDetailDialogOpen: (open: boolean) => void
     selectedSupplier: ISupplier | null
     setSelectedSupplier: (supplier: ISupplier | null) => void
-    handleEditSupplier: (data: Partial<ISupplier>) => void
     setIsEditDialogOpen: (open: boolean) => void
     setIsImportDialogOpen: (open: boolean) => void
 }
@@ -23,7 +22,6 @@ export default function ViewDetailsSuppliers({
     setIsDetailDialogOpen,
     selectedSupplier,
     setSelectedSupplier,
-    handleEditSupplier,
     setIsEditDialogOpen,
     setIsImportDialogOpen
 }: ViewDetailsSuppliersProps) {

@@ -1,13 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ISupplier } from "@/types/types"
+import { ISupplier, SanPham } from "@/types/types"
 import StatsCard from "./components/StatsCard"
 import SearchAction from "./components/TableManagerSupplier/SearchAction"
 import ManagerTableSuppliers from "./components/TableManagerSupplier/ManagerTableSuppliers"
 import PaginationSuppliers from "./components/TableManagerSupplier/PaginationSuppliers"
 import HeaderManagerSupplier from "./components/HeaderManagerSupplier"
 import ImportCard from "./components/Dialog/ImportCard/ImportCard"
+import ViewDetailsSuppliers from "./components/Dialog/ViewDetailsSuppliers/ViewDetailsSuppliers"
+import DialogEditSupplier from "./components/Dialog/EditSupplier/DialogEditSupplier"
 import { getAllSuppliers, addSupplier, updateSupplier, deleteSupplier, CreateSupplierDTO, UpdateSupplierDTO } from "@/apis/supplierApi"
 import { toast } from "sonner"
 
@@ -22,6 +24,133 @@ export default function SuppliersContent() {
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
     const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
 
+    // Normalize supplier data để xử lý naming convention inconsistency
+    const normalizeSupplier = (supplier: any): ISupplier => {
+        return {
+            ...supplier,
+            supplier_id: supplier.supplier_id || supplier.supplierId,
+            supplierId: supplier.supplierId || supplier.supplier_id
+        }
+    }
+
+    // Mock products data for ViewDetailsSuppliers
+    const mockProducts: SanPham[] = [
+        {
+            maSanPham: "SP001",
+            tenSanPham: "Táo đỏ New Zealand",
+            donVi: "kg",
+            soLuongTon: 100,
+            maThuongHieu: "TH001",
+            maDanhMuc: "DM001",
+            maLoai: "L001",
+            moTa: "Táo nhập khẩu từ New Zealand",
+            giaBan: 85000,
+            giaNhap: 65000,
+            hinhAnh: "/images/products/apple-red.jpg",
+            xuatXu: "New Zealand",
+            hsd: "2024-12-31",
+            trangThai: "active",
+            categoryName: "Trái cây",
+            brandName: "Fresh",
+            typeName: "Trái cây tươi"
+        },
+        {
+            maSanPham: "SP002",
+            tenSanPham: "Cam Valencia",
+            donVi: "kg",
+            soLuongTon: 150,
+            maThuongHieu: "TH001",
+            maDanhMuc: "DM001",
+            maLoai: "L001",
+            moTa: "Cam nhập khẩu",
+            giaBan: 45000,
+            giaNhap: 35000,
+            hinhAnh: "/images/products/orange.jpg",
+            xuatXu: "Tây Ban Nha",
+            hsd: "2024-12-31",
+            trangThai: "active",
+            categoryName: "Trái cây",
+            brandName: "Fresh",
+            typeName: "Trái cây tươi"
+        },
+        {
+            maSanPham: "SP003",
+            tenSanPham: "Rau xà lách",
+            donVi: "bó",
+            soLuongTon: 80,
+            maThuongHieu: "TH002",
+            maDanhMuc: "DM002",
+            maLoai: "L002",
+            moTa: "Rau tươi",
+            giaBan: 15000,
+            giaNhap: 10000,
+            hinhAnh: "/images/products/lettuce.jpg",
+            xuatXu: "Việt Nam",
+            hsd: "2024-12-31",
+            trangThai: "active",
+            categoryName: "Rau củ",
+            brandName: "Fresh",
+            typeName: "Rau củ"
+        },
+        {
+            maSanPham: "SP004",
+            tenSanPham: "Thịt bò thăn",
+            donVi: "kg",
+            soLuongTon: 50,
+            maThuongHieu: "TH003",
+            maDanhMuc: "DM003",
+            maLoai: "L003",
+            moTa: "Thịt bò nhập khẩu",
+            giaBan: 450000,
+            giaNhap: 380000,
+            hinhAnh: "/images/products/beef.jpg",
+            xuatXu: "Úc",
+            hsd: "2024-12-31",
+            trangThai: "active",
+            categoryName: "Thịt",
+            brandName: "Premium",
+            typeName: "Thịt tươi"
+        },
+        {
+            maSanPham: "SP005",
+            tenSanPham: "Cá hồi fillet",
+            donVi: "kg",
+            soLuongTon: 30,
+            maThuongHieu: "TH004",
+            maDanhMuc: "DM004",
+            maLoai: "L004",
+            moTa: "Cá hồi Na Uy",
+            giaBan: 320000,
+            giaNhap: 280000,
+            hinhAnh: "/images/products/salmon.jpg",
+            xuatXu: "Na Uy",
+            hsd: "2024-12-31",
+            trangThai: "active",
+            categoryName: "Hải sản",
+            brandName: "Premium",
+            typeName: "Hải sản tươi"
+        },
+        {
+            maSanPham: "SP006",
+            tenSanPham: "Nước suối Lavie",
+            donVi: "chai",
+            soLuongTon: 200,
+            maThuongHieu: "TH005",
+            maDanhMuc: "DM005",
+            maLoai: "L005",
+            moTa: "Nước suối tinh khiết",
+            giaBan: 8000,
+            giaNhap: 6000,
+            hinhAnh: "/images/products/water.jpg",
+            xuatXu: "Việt Nam",
+            hsd: "2024-12-31",
+            trangThai: "active",
+            categoryName: "Đồ uống",
+            brandName: "Lavie",
+            typeName: "Nước uống"
+        }
+    ]
+
     // Fetch suppliers on component mount
     useEffect(() => {
         fetchSuppliers()
@@ -31,7 +160,10 @@ export default function SuppliersContent() {
         try {
             setLoading(true)
             const data = await getAllSuppliers()
-            setSuppliers(data)
+            // Normalize data để xử lý naming convention
+            const normalizedData = data.map(normalizeSupplier)
+            console.log("Fetched and normalized suppliers:", normalizedData)
+            setSuppliers(normalizedData)
         } catch (error) {
             console.error("Error fetching suppliers:", error)
             toast.error("Không thể tải danh sách nhà cung cấp")
@@ -58,7 +190,8 @@ export default function SuppliersContent() {
     const handleAddSupplier = async (data: CreateSupplierDTO) => {
         try {
             const newSupplier = await addSupplier(data)
-            setSuppliers([...suppliers, newSupplier])
+            const normalizedSupplier = normalizeSupplier(newSupplier)
+            setSuppliers([...suppliers, normalizedSupplier])
             setIsAddDialogOpen(false)
             toast.success("Thêm nhà cung cấp thành công!")
         } catch (error) {
@@ -68,14 +201,29 @@ export default function SuppliersContent() {
         }
     }
 
-    const handleEditSupplier = async (data: UpdateSupplierDTO) => {
-        if (!selectedSupplier) return
+    const handleEditSupplier = async (supplierId: number, data: UpdateSupplierDTO) => {
+        if (!supplierId) {
+            toast.error("Lỗi: Không tìm thấy mã nhà cung cấp")
+            return
+        }
 
         try {
-            const updatedSupplier = await updateSupplier(selectedSupplier.supplier_id, data)
-            setSuppliers(suppliers.map((s) =>
-                s.supplier_id === selectedSupplier.supplier_id ? updatedSupplier : s
-            ))
+            console.log("Updating supplier with ID:", supplierId, "Data:", data)
+            const updatedSupplier = await updateSupplier(supplierId, data)
+            console.log("Updated supplier from API:", updatedSupplier)
+            
+            // Normalize supplier data trước khi cập nhật vào state
+            const normalizedSupplier = normalizeSupplier(updatedSupplier)
+            console.log("Normalized supplier:", normalizedSupplier)
+            
+            // Cập nhật danh sách suppliers - xử lý cả supplier_id và supplierId
+            setSuppliers(suppliers.map((s) => {
+                const currentId = s.supplier_id || s.supplierId
+                const isMatch = currentId === supplierId
+                console.log(`Comparing supplier ${s.name}: currentId=${currentId}, supplierId=${supplierId}, match=${isMatch}`)
+                return isMatch ? normalizedSupplier : s
+            }))
+            
             setIsEditDialogOpen(false)
             setSelectedSupplier(null)
             toast.success("Cập nhật nhà cung cấp thành công!")
@@ -90,7 +238,11 @@ export default function SuppliersContent() {
 
         try {
             await deleteSupplier(supplierId)
-            setSuppliers(suppliers.filter((s) => s.supplier_id !== supplierId))
+            // Xử lý cả supplier_id và supplierId khi filter
+            setSuppliers(suppliers.filter((s) => {
+                const currentId = s.supplier_id || s.supplierId
+                return currentId !== supplierId
+            }))
             toast.success("Xóa nhà cung cấp thành công!")
         } catch (error) {
             console.error("Error deleting supplier:", error)
@@ -151,12 +303,29 @@ export default function SuppliersContent() {
 
                 <PaginationSuppliers totalItems={filteredSuppliers.length} />
 
+                <ViewDetailsSuppliers
+                    mockProducts={mockProducts}
+                    isDetailDialogOpen={isDetailDialogOpen}
+                    setIsDetailDialogOpen={setIsDetailDialogOpen}
+                    selectedSupplier={selectedSupplier}
+                    setSelectedSupplier={setSelectedSupplier}
+                    setIsEditDialogOpen={setIsEditDialogOpen}
+                    setIsImportDialogOpen={setIsImportDialogOpen}
+                />
+
                 <ImportCard
                     isImportDialogOpen={isImportDialogOpen}
                     setIsImportDialogOpen={setIsImportDialogOpen}
                     selectedSupplier={selectedSupplier}
                     setSelectedSupplier={setSelectedSupplier}
                     handleImportGoods={handleImportGoods}
+                />
+
+                <DialogEditSupplier
+                    isEditDialogOpen={isEditDialogOpen}
+                    setIsEditDialogOpen={setIsEditDialogOpen}
+                    selectedSupplier={selectedSupplier}
+                    handleEditSupplier={handleEditSupplier}
                 />
             </div>
         </div>
