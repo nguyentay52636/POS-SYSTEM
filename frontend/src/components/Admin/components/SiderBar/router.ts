@@ -67,9 +67,9 @@ import { Settings } from "lucide-react"
     },
     {
         name : "Quản lý phiếu nhập",
-        href: "/admin/receipt",
+        href: "/admin/receipts",
         icon: ShoppingCart,
-        current: pathname === "/admin/receipt",
+        current: pathname === "/admin/receipts",
         badge: null,
     },
     {
