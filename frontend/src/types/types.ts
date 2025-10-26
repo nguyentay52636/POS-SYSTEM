@@ -162,6 +162,7 @@ export enum role {
 }
 export interface ISupplier {
   supplier_id: number;
+  supplierId?: number; // Backend trả về camelCase, hỗ trợ cả hai
   name: string;
   phone: string;
   email: string;
