@@ -102,12 +102,12 @@ export interface IPayment {
   createdAt: string;
   updatedAt: string;
 }
-export interface IIventory {
+export interface IInventory {
   inventory_id: number;
   product_id: number;
   quantity: number;
-  createdAt: string;
-  updatedAt: string;
+  updated_at: string;
+  product?: IProduct; // Full product information
 }
 export interface IProduct {
   product_id: number;
