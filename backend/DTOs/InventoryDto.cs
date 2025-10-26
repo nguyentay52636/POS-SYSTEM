@@ -10,7 +10,6 @@ public class InventoryResponseDto
     public string? ProductName { get; set; }
     public int Quantity { get; set; }
     public DateTime? UpdatedAt { get; set; }
-    
 }
 
 public class UpdateInventoryDto
@@ -18,12 +17,3 @@ public class UpdateInventoryDto
     [Required(ErrorMessage = "Quantity is required")]
     public int Quantity { get; set; }
 }
-public class CreateInventoryDto
-    {
-        [Required(ErrorMessage = "ProductId is required")]
-        public int ProductId { get; set; }
-
-        [Required(ErrorMessage = "Quantity is required")]
-        [Range(0, int.MaxValue, ErrorMessage = "Quantity must be non-negative")]
-        public int Quantity { get; set; }
-    }
