@@ -3,8 +3,8 @@ namespace backend.Enums;
 public enum UserRole
 {
     Customer = 0,
-    Staff = 1,
-    Admin = 2
+    Admin = 1,
+    Staff = 2
 }
 
 public static class UserRoleHelper
@@ -14,8 +14,8 @@ public static class UserRoleHelper
         return roleValue switch
         {
             0 => "customer",
-            1 => "staff",
-            2 => "admin",
+            1 => "admin",
+            2 => "staff",
             _ => "customer"
         };
     }
@@ -25,8 +25,8 @@ public static class UserRoleHelper
         return roleName?.ToLowerInvariant() switch
         {
             "customer" => 0,
-            "staff" => 1,
-            "admin" => 2,
+            "admin" => 1,
+            "staff" => 2,
             _ => 0
         };
     }

@@ -37,7 +37,8 @@ public class UserResponseDto
     public int UserId { get; set; }
     public string? Username { get; set; }
     public string? FullName { get; set; }
-    public int Role { get; set; }
+    public int Role { get; set; }  // 1 = Admin, 2 = Staff, 0 = Customer
+    public string RoleName { get; set; } = string.Empty;  // "admin", "staff", "customer"
     public DateTime? CreatedAt { get; set; }
 }
 

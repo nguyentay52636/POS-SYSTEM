@@ -11,21 +11,57 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Plus } from "lucide-react"
+import { toast } from "sonner"
+
+import { createUser, CreateUserRequest } from "@/apis/userApi";
 
 export default function DialogAddUser({ isAddDialogOpen, setIsAddDialogOpen }: { isAddDialogOpen: boolean, setIsAddDialogOpen: (open: boolean) => void }) {
     const [user, setUser] = useState({
         username: "",
-        fullName: "",
-        role: "1",
-        createdAt: new Date().toISOString().slice(0, 10),
+        password: "",
+        full_name: "",
+        role: "1", // Default to admin (1)
     })
+    const [isLoading, setIsLoading] = useState(false)
 
     const handleChange = (field: string, value: string) => {
         setUser((prev) => ({ ...prev, [field]: value }))
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        setIsLoading(true)
+        
+        try {
+            const userData: CreateUserRequest = {
+                username: user.username,
+                password: user.password,
+                fullName: user.full_name, // Try fullName instead of full_name
+                role: user.role,
+            }
+            
+            console.log("Sending user data:", userData); // Debug log
+            
+            await createUser(userData)
+            toast.success("Tạo tài khoản thành công!")
+            
+            // Reset form
+            setUser({
+                username: "",
+                password: "",
+                full_name: "",
+                role: "1", // Default to admin (1)
+            })
+            
+            // Close dialog
+            setIsAddDialogOpen(false)
+            
+        } catch (error) {
+            console.error("Failed to create user:", error)
+            toast.error("Tạo tài khoản thất bại!")
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -59,12 +95,24 @@ export default function DialogAddUser({ isAddDialogOpen, setIsAddDialogOpen }: {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="fullName">Họ và tên</Label>
+                            <Label htmlFor="password">Mật khẩu</Label>
                             <Input
-                                id="fullName"
+                                id="password"
+                                type="password"
+                                placeholder="Nhập mật khẩu"
+                                value={user.password}
+                                onChange={(e) => handleChange("password", e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="full_name">Họ và tên</Label>
+                            <Input
+                                id="full_name"
                                 placeholder="Nhập họ và tên"
-                                value={user.fullName}
-                                onChange={(e) => handleChange("fullName", e.target.value)}
+                                value={user.full_name}
+                                onChange={(e) => handleChange("full_name", e.target.value)}
                                 required
                             />
                         </div>
@@ -79,24 +127,16 @@ export default function DialogAddUser({ isAddDialogOpen, setIsAddDialogOpen }: {
                                     <SelectValue placeholder="Chọn vai trò" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="1">Quản trị viên</SelectItem>
-                                    <SelectItem value="2">Người dùng</SelectItem>
+                                    <SelectItem value="1">Admin</SelectItem>
+                                    <SelectItem value="2">Staff</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="createdAt">Ngày tạo</Label>
-                            <Input
-                                type="date"
-                                id="createdAt"
-                                value={user.createdAt}
-                                onChange={(e) => handleChange("createdAt", e.target.value)}
-                            />
-                        </div>
-
                         <div className="flex justify-end pt-2">
-                            <Button type="submit">Lưu</Button>
+                            <Button type="submit" disabled={isLoading}>
+                                {isLoading ? "Đang tạo..." : "Lưu"}
+                            </Button>
                         </div>
                     </form>
                 </DialogContent>
