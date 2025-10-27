@@ -1,26 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "/Users/m1lt43/Desktop/NET-1-project/backend/backend.csproj": {}
+    "C:\\Users\\Admin\\Desktop\\POS-SYSTEM\\backend\\backend.csproj": {}
   },
   "projects": {
-    "/Users/m1lt43/Desktop/NET-1-project/backend/backend.csproj": {
+    "C:\\Users\\Admin\\Desktop\\POS-SYSTEM\\backend\\backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/m1lt43/Desktop/NET-1-project/backend/backend.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\Desktop\\POS-SYSTEM\\backend\\backend.csproj",
         "projectName": "backend",
-        "projectPath": "/Users/m1lt43/Desktop/NET-1-project/backend/backend.csproj",
-        "packagesPath": "/Users/m1lt43/.nuget/packages/",
-        "outputPath": "/Users/m1lt43/Desktop/NET-1-project/backend/obj/",
+        "projectPath": "C:\\Users\\Admin\\Desktop\\POS-SYSTEM\\backend\\backend.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Desktop\\POS-SYSTEM\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/m1lt43/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -103,7 +102,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
