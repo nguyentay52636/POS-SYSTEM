@@ -17,13 +17,7 @@ export default function ManagerCustomerHeader() {
                     </div>
                 </div>
             </div>
-            <Button
-
-                className="bg-green-800  hover:bg-green-700 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-                <Plus className="h-4 w-4 mr-2" />
-                Thêm khách hàng
-            </Button>
+          
         </div>
     )
 }
