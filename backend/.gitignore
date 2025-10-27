@@ -59,5 +59,7 @@ TestResult*/
 coverage/
 *.coverage
 *.coveragexml
-
+# .NET Build artifacts (Tệp build tự động)
+[Bb]in/
+[Oo]bj/
 
