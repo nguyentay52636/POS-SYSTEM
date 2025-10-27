@@ -1,0 +1,32 @@
+services:
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: pos_sql
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Tay52636@
+    ports:
+      # map ra máy bạn là 1434
+      - "1434:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pos_backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:5006
+      # Backend kết nối SQL qua tên service "sql" trong mạng docker (cổng nội bộ 1433)
+      - ConnectionStrings__DefaultConnection=Server=sql,1433;Database=system_pos;User Id=sa;Password=Tay52636@;TrustServerCertificate=True;Connection Timeout=30;
+    ports:
+      - "5006:5006"
+    depends_on:
+      - sql
+    restart: unless-stopped
+
+volumes:
+  sqldata:
