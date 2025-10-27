@@ -20,8 +20,16 @@ interface DialogViewDetailsProps {
 }
 
 export default function DialogViewDetails({ user, isViewDialogOpen, setIsViewDialogOpen }: DialogViewDetailsProps) {
-    const getRoleName = (role: role) => {
-        // return role === role.ADMIN ? "admin" : role === role.USER ? "Người dùng" : "Khách hàng"
+    const getRoleName = (roleValue: role) => {
+        if (roleValue === role.ADMIN) return "Admin"
+        if (roleValue === role.STAFF) return "Staff"
+        return "User"
+    }
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return ""
+        const date = new Date(dateString)
+        return date.toLocaleString("vi-VN")
     }
 
     return (
@@ -38,7 +46,7 @@ export default function DialogViewDetails({ user, isViewDialogOpen, setIsViewDia
                             id="username"
                             value={user.username}
                             readOnly
-                            className="bg-gray-50"
+                            className="bg-gray-50 dark:bg-gray-800"
                         />
                     </div>
 
@@ -48,30 +56,38 @@ export default function DialogViewDetails({ user, isViewDialogOpen, setIsViewDia
                             id="fullName"
                             value={user.full_name}
                             readOnly
-                            className="bg-gray-50"
+                            className="bg-gray-50 dark:bg-gray-800"
                         />
                     </div>
 
                     <div className="space-y-2">
                         <Label>Vai trò</Label>
                         <Input
-                            // value={getRoleName(user.role)}
-                            value={user.role}
+                            value={getRoleName(user.role)}
                             readOnly
-                            className="bg-gray-50"
+                            className="bg-gray-50 dark:bg-gray-800"
                         />
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="createdAt">Ngày tạo</Label>
                         <Input
-                            type="date"
-                            id="createdAt"
-                            value={user.createdAt}
+                            value={formatDate(user.createdAt)}
                             readOnly
-                            className="bg-gray-50"
+                            className="bg-gray-50 dark:bg-gray-800"
                         />
                     </div>
+
+                    {user.updatedAt && user.updatedAt !== user.createdAt && (
+                        <div className="space-y-2">
+                            <Label htmlFor="updatedAt">Ngày cập nhật</Label>
+                            <Input
+                                value={formatDate(user.updatedAt)}
+                                readOnly
+                                className="bg-gray-50 dark:bg-gray-800"
+                            />
+                        </div>
+                    )}
 
                     <div className="flex justify-end pt-2">
                         <Button

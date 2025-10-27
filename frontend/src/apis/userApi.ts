@@ -4,7 +4,8 @@ import { IUser, role } from "@/types/types";
 export interface User {
   userId: number;
   username: string;
-  full_name: string;
+  full_name?: string;
+  fullName?: string;
   avatar?: string;
   role: string | number;
   createdAt: string;
@@ -30,7 +31,7 @@ export const mapUserToIUser = (u: User): IUser => ({
   user_id: u.userId,
   username: u.username,
   password: undefined,
-  full_name: u.full_name,
+  full_name: u.full_name || u.fullName || "",
   role: getRoleDisplay(u.role),
   createdAt: u.createdAt,
   updatedAt: u.updatedAt || u.createdAt,
@@ -114,6 +115,58 @@ export const createUser = async (
     console.error("Error creating user:", error);
     console.error("Response data:", error?.response?.data);
     console.error("Request data:", error?.config?.data);
+    throw error;
+  }
+};
+
+export interface UpdateUserRequest {
+  username: string;
+  fullName: string;
+  role: string | number;
+  avatar?: string;
+}
+
+export const updateUser = async (
+  userId: number,
+  userData: UpdateUserRequest
+): Promise<IUser> => {
+  try {
+    // Convert role to API format before sending
+    const apiData: any = {
+      username: userData.username,
+      role: convertRoleForAPI(userData.role),
+    };
+
+    // Add both field names to see which backend expects
+    if (userData.fullName) {
+      apiData.fullName = userData.fullName;
+      apiData.full_name = userData.fullName;
+    }
+    if (userData.avatar) {
+      apiData.avatar = userData.avatar;
+    }
+
+    console.log("Updating user with data:", apiData);
+
+    const { data } = await baseApi.put<User>(`/User/${userId}`, apiData);
+    console.log("User updated successfully:", data);
+    return mapUserToIUser(data);
+  } catch (error: any) {
+    console.error("Error updating user:", error);
+    console.error("Response data:", error?.response?.data);
+    console.error("Request data:", error?.config?.data);
+    throw error;
+  }
+};
+
+export const deleteUser = async (userId: number): Promise<void> => {
+  try {
+    console.log("Deleting user with ID:", userId);
+    await baseApi.delete(`/User/${userId}`);
+    console.log("User deleted successfully");
+  } catch (error: any) {
+    console.error("Error deleting user:", error);
+    console.error("Response data:", error?.response?.data);
     throw error;
   }
 };

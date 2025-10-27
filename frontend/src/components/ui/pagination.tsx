@@ -65,7 +65,7 @@ export default function Pagination({
   };
 
   return (
-    <div className={`flex flex-col md:flex-row justify-between items-center mt-6 px-4 py-4 bg-white rounded-xl shadow-sm border border-gray-100 ${className}`}>
+    <div className={`flex flex-col md:flex-row justify-between items-center mt-6 px-4 py-4  rounded-xl shadow-sm border border-gray-100 ${className}`}>
       {/* Rows per page selector */}
       <div className="flex items-center space-x-3 mb-4 md:mb-0">
         <span className="text-sm text-gray-700">Hiển thị</span>

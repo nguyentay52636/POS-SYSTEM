@@ -1,9 +1,10 @@
 import React from 'react'
-import Inventory from '@/components/Admin/components/Inventory/Inventory'
+import Receipts from '@/components/Admin/components/Receipts/Receipts'
+
 export default function page() {
     return (
         <>
-            <Inventory />
+            <Receipts />
         </>
     )
 }

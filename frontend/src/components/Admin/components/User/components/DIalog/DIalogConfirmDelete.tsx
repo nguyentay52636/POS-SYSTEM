@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import {
     Dialog,
     DialogContent,
@@ -7,6 +7,8 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, X } from "lucide-react"
+import { toast } from "sonner"
+import { deleteUser } from "@/apis/userApi"
 import { IUser } from "@/types/types"
 
 
@@ -24,9 +26,24 @@ export default function DialogConfirmDelete({
     setIsDeleteDialogOpen,
     onConfirmDelete
 }: DialogConfirmDeleteProps) {
-    const handleConfirmDelete = () => {
-        onConfirmDelete(user.user_id.toString())
-        setIsDeleteDialogOpen(false)
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleConfirmDelete = async () => {
+        setIsLoading(true)
+        
+        try {
+            await deleteUser(user.user_id)
+            toast.success("Xóa người dùng thành công!")
+            
+            // Call the callback to refresh the list
+            onConfirmDelete(user.user_id.toString())
+            setIsDeleteDialogOpen(false)
+        } catch (error) {
+            console.error("Failed to delete user:", error)
+            toast.error("Xóa người dùng thất bại!")
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -63,6 +80,7 @@ export default function DialogConfirmDelete({
                             type="button"
                             variant="outline"
                             onClick={() => setIsDeleteDialogOpen(false)}
+                            disabled={isLoading}
                         >
                             <X className="h-4 w-4 mr-2" />
                             Hủy
@@ -71,9 +89,10 @@ export default function DialogConfirmDelete({
                             type="button"
                             variant="destructive"
                             onClick={handleConfirmDelete}
+                            disabled={isLoading}
                         >
                             <AlertTriangle className="h-4 w-4 mr-2" />
-                            Xóa
+                            {isLoading ? "Đang xóa..." : "Xóa"}
                         </Button>
                     </div>
                 </div>

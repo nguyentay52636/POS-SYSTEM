@@ -102,12 +102,12 @@ export interface IPayment {
   createdAt: string;
   updatedAt: string;
 }
-export interface IIventory {
+export interface IInventory {
   inventory_id: number;
   product_id: number;
   quantity: number;
-  createdAt: string;
-  updatedAt: string;
+  updated_at: string;
+  product?: IProduct; // Full product information
 }
 export interface IProduct {
   product_id: number;
@@ -162,6 +162,7 @@ export enum role {
 }
 export interface ISupplier {
   supplier_id: number;
+  supplierId?: number; // Backend trả về camelCase, hỗ trợ cả hai
   name: string;
   phone: string;
   email: string;
@@ -170,4 +171,25 @@ export interface ISupplier {
   trangThai?: "active" | "inactive";
   createdAt?: string;
   updatedAt: string;
+}
+export interface IImportReceipt {
+  import_id: number;
+  supplier_id: number;
+  user_id: number;
+  import_date: string;
+  total_amount: number;
+  status: string;
+  note?: string;
+  supplier?: ISupplier;
+  user?: IUser;
+  import_items?: IImportItem[];
+}
+export interface IImportItem {
+  import_item_id: number;
+  import_id: number;
+  product_id: number;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+  product?: IProduct;
 }

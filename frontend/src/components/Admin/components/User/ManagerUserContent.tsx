@@ -3,14 +3,25 @@ import { useEffect, useMemo, useState } from 'react'
 import HeaderManagerUser from './components/HeaderManagerUser'
 import TableManagerUser from './components/TableManagerUser/TableManagerUser'
 import PaginationManagerUser from './components/PaginationManagerUser'
+import DialogAddUser from './components/DIalog/DialogAddUser'
+import DialogEditUser from './components/DIalog/DIalogEditUser'
+import DialogViewDetails from './components/DIalog/DIalogVIewDetails'
+import DialogConfirmDelete from './components/DIalog/DIalogConfirmDelete'
 import { getAllUsers } from '../../../../apis/userApi'
 import { IUser } from '@/types/types'
+
 export default function ManagerUserContent() {
     const [searchQuery, setSearchQuery] = useState("")
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [users, setUsers] = useState<IUser[]>([])
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+    
+    // Dialog states
+    const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -40,6 +51,42 @@ export default function ManagerUserContent() {
     }, [users, searchQuery])
 
     const handleAddAccount = () => { }
+    
+    // Handlers for table actions
+    const handleView = (user: IUser) => {
+        setSelectedUser(user)
+        setIsViewDialogOpen(true)
+    }
+    
+    const handleEdit = (user: IUser) => {
+        setSelectedUser(user)
+        setIsEditDialogOpen(true)
+    }
+    
+    const handleDelete = (user: IUser) => {
+        setSelectedUser(user)
+        setIsDeleteDialogOpen(true)
+    }
+    
+    const handleUpdateUser = async () => {
+        // Refresh the user list
+        try {
+            const usersData = await getAllUsers()
+            setUsers(usersData)
+        } catch (e: any) {
+            console.error("Failed to refresh users:", e)
+        }
+    }
+    
+    const handleConfirmDelete = async () => {
+        // Refresh the user list
+        try {
+            const usersData = await getAllUsers()
+            setUsers(usersData)
+        } catch (e: any) {
+            console.error("Failed to refresh users:", e)
+        }
+    }
 
     if (loading) {
         return (
@@ -68,8 +115,41 @@ export default function ManagerUserContent() {
                             users={filteredUsers}
                             searchQuery={searchQuery}
                             setSearchQuery={setSearchQuery}
+                            onView={handleView}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
                         />
                         <PaginationManagerUser totalItems={filteredUsers.length} />
+                    </>
+                )}
+                
+                {/* Dialogs */}
+                <DialogAddUser 
+                    isAddDialogOpen={isAddDialogOpen}
+                    setIsAddDialogOpen={setIsAddDialogOpen}
+                />
+                
+                {selectedUser && (
+                    <>
+                        <DialogEditUser
+                            user={selectedUser}
+                            isEditDialogOpen={isEditDialogOpen}
+                            setIsEditDialogOpen={setIsEditDialogOpen}
+                            onUpdateUser={handleUpdateUser}
+                        />
+                        
+                        <DialogViewDetails
+                            user={selectedUser}
+                            isViewDialogOpen={isViewDialogOpen}
+                            setIsViewDialogOpen={setIsViewDialogOpen}
+                        />
+                        
+                        <DialogConfirmDelete
+                            user={selectedUser}
+                            isDeleteDialogOpen={isDeleteDialogOpen}
+                            setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+                            onConfirmDelete={handleConfirmDelete}
+                        />
                     </>
                 )}
             </div>

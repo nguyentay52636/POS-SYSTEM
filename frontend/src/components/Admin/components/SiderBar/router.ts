@@ -1,4 +1,4 @@
-import { BarChart3 } from "lucide-react"
+import { BarChart3, Warehouse } from "lucide-react"
 import { Building2 } from "lucide-react"
 import { DollarSign } from "lucide-react"
 import { Star } from "lucide-react"
@@ -56,6 +56,27 @@ import { Settings } from "lucide-react"
         href: "/admin/promotions",
         icon: Gift,
         current: pathname === "/admin/promotions",
+        badge: null,
+    },
+    {
+        name: "Quản lý tồn kho",
+        href: "/admin/inventorys",
+        icon: Warehouse,
+        current: pathname === "/admin/inventorys",
+        badge: null,
+    },
+    {
+        name : "Quản lý phiếu nhập",
+        href: "/admin/receipts",
+        icon: ShoppingCart,
+        current: pathname === "/admin/receipts",
+        badge: null,
+    },
+    {
+        name : "Quản lý phiếu xuất",
+        href: "/admin/inventory-outvoices",
+        icon: ShoppingCart,
+        current: pathname === "/admin/inventory-outvoices",
         badge: null,
     },
     {

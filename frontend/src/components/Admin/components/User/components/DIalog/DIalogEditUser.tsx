@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Edit } from "lucide-react"
+import { toast } from "sonner"
+import { updateUser, UpdateUserRequest } from "@/apis/userApi"
 import { IUser, role } from "@/types/types"
 
 
@@ -35,19 +37,45 @@ export default function DialogEditUser({
         updatedAt: "",
         avatar: "",
     })
+    const [isLoading, setIsLoading] = useState(false)
 
-
+    // Load user data when dialog opens
+    useEffect(() => {
+        if (user && isEditDialogOpen) {
+            setEditedUser(user)
+        }
+    }, [user, isEditDialogOpen])
 
     const handleChange = (field: string, value: string) => {
         setEditedUser((prev) => ({ ...prev, [field]: value }))
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        onUpdateUser(editedUser)
-        setIsEditDialogOpen(false)
-        console.log("User updated:", editedUser)
-        alert("✅ Cập nhật người dùng thành công!")
+        setIsLoading(true)
+        
+        try {
+            const userData: UpdateUserRequest = {
+                username: editedUser.username,
+                fullName: editedUser.full_name,
+                role: editedUser.role, // This will be converted by updateUser API
+            }
+            
+            console.log("Updating user with data:", userData)
+            
+            await updateUser(editedUser.user_id, userData)
+            toast.success("Cập nhật người dùng thành công!")
+            
+            // Call the callback to refresh the list
+            onUpdateUser(editedUser)
+            setIsEditDialogOpen(false)
+            
+        } catch (error) {
+            console.error("Failed to update user:", error)
+            toast.error("Cập nhật người dùng thất bại!")
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -73,12 +101,12 @@ export default function DialogEditUser({
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="fullName">Họ và tên</Label>
+                        <Label htmlFor="full_name">Họ và tên</Label>
                         <Input
-                            id="fullName"
+                            id="full_name"
                             placeholder="Nhập họ và tên"
                             value={editedUser.full_name}
-                            onChange={(e) => handleChange("fullName", e.target.value)}
+                            onChange={(e) => handleChange("full_name", e.target.value)}
                             required
                         />
                     </div>
@@ -93,20 +121,10 @@ export default function DialogEditUser({
                                 <SelectValue placeholder="Chọn vai trò" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="1">Quản trị viên</SelectItem>
-                                <SelectItem value="2">Người dùng</SelectItem>
+                                <SelectItem value={role.ADMIN}>Admin</SelectItem>
+                                <SelectItem value={role.STAFF}>Staff</SelectItem>
                             </SelectContent>
                         </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="createdAt">Ngày tạo</Label>
-                        <Input
-                            type="date"
-                            id="createdAt"
-                            value={editedUser.createdAt}
-                            onChange={(e) => handleChange("createdAt", e.target.value)}
-                        />
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2">
@@ -114,12 +132,13 @@ export default function DialogEditUser({
                             type="button"
                             variant="outline"
                             onClick={() => setIsEditDialogOpen(false)}
+                            disabled={isLoading}
                         >
                             Hủy
                         </Button>
-                        <Button type="submit">
+                        <Button type="submit" disabled={isLoading}>
                             <Edit className="h-4 w-4 mr-2" />
-                            Cập nhật
+                            {isLoading ? "Đang cập nhật..." : "Cập nhật"}
                         </Button>
                     </div>
                 </form>
