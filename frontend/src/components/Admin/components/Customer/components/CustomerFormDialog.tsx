@@ -52,7 +52,12 @@ export default function CustomerFormDialog({ open, onClose, onSave, editing, bus
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => !busy && !v ? onClose() : null}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen: boolean) => {
+        if (!busy && !isOpen) onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{editing ? "Sửa khách hàng" : "Thêm khách hàng"}</DialogTitle>

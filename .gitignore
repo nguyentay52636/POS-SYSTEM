@@ -1,0 +1,49 @@
+# ==========================
+# Global ignore
+# ==========================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+.env
+.env.local
+.vscode/
+.idea/
+
+# ==========================
+# Node / Frontend
+# ==========================
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+package-lock.json
+
+# Build outputs
+dist/
+build/
+
+# ==========================
+# .NET / Backend
+# ==========================
+bin/
+obj/
+*.user
+*.suo
+*.dbmdl
+*.jfm
+*.pdb
+*.dll
+*.cache
+
+# Publish folders
+publish/
+wwwroot/
+
+# ==========================
+# Optional files
+# ==========================
+*.swp
+*.bak
+*.orig
+*.rej
