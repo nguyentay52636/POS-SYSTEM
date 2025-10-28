@@ -1,10 +1,26 @@
+"use client";
+
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Phone, Filter, Users, Mail, MapPin, Edit, Trash2 } from "lucide-react";
+import { Phone, Filter, Users, Mail, MapPin, MoreHorizontal, Pencil, Trash2, Search, AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Customer } from "@/apis/customerApi";
 
 type Props = {
@@ -24,6 +40,9 @@ export default function TableManagerCustomer({
   onDelete,
   busy = false,
 }: Props) {
+  // track row đang mở dialog xác nhận xoá
+  const [dialogOpen, setDialogOpen] = useState<Customer | null>(null);
+
   return (
     <Card className="shadow-xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
       <CardHeader className="pb-4">
@@ -76,7 +95,7 @@ export default function TableManagerCustomer({
 
               <TableBody>
                 {customers.map((c, index) => (
-                  <TableRow key={c.customerId ?? `${c.name}-${index}`}> 
+                  <TableRow key={c.customerId ?? `${c.name}-${index}`}>
                     <TableCell>
                       <div className="flex items-center space-x-4">
                         <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-700">
@@ -116,26 +135,96 @@ export default function TableManagerCustomer({
                       </div>
                     </TableCell>
 
+                    <TableCell>
+                      {/* Menu ba chấm */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 p-0"
+                            disabled={busy}
+                            aria-label="Hành động"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
 
-                    <TableCell className="space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => c.customerId && onEdit(c.customerId)}
-                        disabled={busy}
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Sửa
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => c.customerId && onDelete(c.customerId)}
-                        disabled={busy}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Xoá
-                      </Button>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => c.customerId && onEdit(c.customerId)}>
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Chỉnh sửa
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setDialogOpen(c)}
+                            className="text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Xóa khách hàng
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      {/* Dialog xác nhận xoá (theo mẫu User) */}
+                      {dialogOpen?.customerId === c.customerId && (
+                        <Dialog open={!!dialogOpen} onOpenChange={(v) => !v && setDialogOpen(null)}>
+                          <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2 text-red-600">
+                                <AlertTriangle className="h-5 w-5" />
+                                Xác nhận xóa khách hàng
+                              </DialogTitle>
+                            </DialogHeader>
+
+                            <div className="space-y-4 mt-2">
+                              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                <p className="text-sm text-red-800">
+                                  Bạn có chắc chắn muốn xóa khách hàng này không?
+                                </p>
+                                <p className="text-sm text-red-700 mt-2 font-medium">
+                                  Họ và tên:{" "}
+                                  <span className="font-semibold">{c.name ?? "Không rõ"}</span>
+                                </p>
+                                <p className="text-sm text-red-700">
+                                  Email: <span className="font-semibold">{c.email ?? "-"}</span>
+                                </p>
+                              </div>
+
+                              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                <p className="text-sm text-yellow-800">
+                                  ⚠️ Hành động này không thể hoàn tác!
+                                </p>
+                              </div>
+
+                              <div className="flex justify-end gap-2 pt-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => setDialogOpen(null)}
+                                  disabled={busy}
+                                >
+                                  <X className="h-4 w-4 mr-2" />
+                                  Hủy
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    if (c.customerId) onDelete(c.customerId);
+                                    setDialogOpen(null);
+                                  }}
+                                  disabled={busy}
+                                >
+                                  <AlertTriangle className="h-4 w-4 mr-2" />
+                                  Xóa
+                                </Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

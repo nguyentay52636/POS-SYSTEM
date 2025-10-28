@@ -59,7 +59,6 @@ export default function ManagerCustomerContent() {
   }, [customers, searchQuery]);
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Bạn chắc chắn muốn xoá khách hàng này?")) return;
     setRefreshing(true);
     try {
       await deleteCustomer(id);
