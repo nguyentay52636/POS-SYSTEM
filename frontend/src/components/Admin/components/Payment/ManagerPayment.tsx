@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,20 +93,36 @@ export default function ManagerPayment() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-emerald-100 text-emerald-600 grid place-items-center">₫</div>
-          <div>
-            <h1 className="text-2xl font-semibold">Quản lý thanh toán</h1>
-            <p className="text-sm text-muted-foreground">Theo dõi & thao tác các thanh toán trong hệ thống</p>
-          </div>
-        </div>
-        <Button onClick={onAdd} className="gap-2">
-          <Plus className="h-4 w-4" /> Thêm thanh toán
-        </Button>
-      </div>
+    <div className="space-y-6 ">
+      <div className="w-full mx-auto max-w-screen-2xl px-[clamp(12px,3vw,28px)] pt-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6">
+          {/* Bên trái: icon + tiêu đề */}
+          <div className="flex items-center gap-3">
+            {/* Icon gradient hiển thị dấu $ */}
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+              <span className="text-white text-lg font-bold">$</span>
+            </div>
 
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Quản lý thanh toán
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Theo dõi và thao tác các thanh toán trong hệ thống
+              </p>
+            </div>
+          </div>
+
+          {/* Bên phải: nút thêm thanh toán */}
+          <Button
+            onClick={onAdd}
+            className="bg-emerald-700 hover:bg-emerald-800 text-white flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Thêm thanh toán
+          </Button>
+        </div>
+      </div>
       <Card className="border-none shadow-md">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-3">
@@ -126,7 +142,6 @@ export default function ManagerPayment() {
           </div>
         </CardHeader>
 
-        <Separator />
 
         <CardContent className="pt-4">
           <TableManagerPayment

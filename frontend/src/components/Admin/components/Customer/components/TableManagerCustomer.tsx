@@ -89,7 +89,7 @@ export default function TableManagerCustomer({
                   <TableHead className="font-semibold">Khách hàng</TableHead>
                   <TableHead className="font-semibold">Liên hệ</TableHead>
                   <TableHead className="font-semibold">Địa chỉ</TableHead>
-                  <TableHead className="font-semibold">Hành Động</TableHead>
+                  <TableHead className="font-semibold">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
 

@@ -80,12 +80,8 @@ export default function PaymentFormDialog({
             await onSubmit(payload, initial?.paymentId);
           })}
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label>Mã đơn hàng</Label>
-              <Input type="number" {...register("orderId", { valueAsNumber: true })} required />
-            </div>
-
+          <div className="grid grid-cols-1 gap-4">
+            
             <div>
               <Label>Số tiền</Label>
               <Input type="number" step="0.01" {...register("amount", { valueAsNumber: true })} required />
@@ -101,16 +97,16 @@ export default function PaymentFormDialog({
                   <SelectValue placeholder="Chọn phương thức" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="cash">Tiền mặt</SelectItem>
-                  <SelectItem value="card">Thẻ</SelectItem>
-                  <SelectItem value="e-wallet">Ví điện tử</SelectItem>
-                  <SelectItem value="bank_transfer">Chuyển khoản</SelectItem>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="card">Card</SelectItem>
+                  <SelectItem value="e-wallet">E-wallet	</SelectItem>
+                  <SelectItem value="bank_transfer">Bank Transfer	</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label>Ngày giờ</Label>
+              <Label>Ngày tạo</Label>
               {/* datetime-local */}
               <Input type="datetime-local" {...register("paymentDate")} required />
             </div>
