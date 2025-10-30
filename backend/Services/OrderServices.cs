@@ -234,18 +234,25 @@ public class OrderService : IOrderService
         var order = await _orderRepo.GetByIdAsync(id);
         if (order == null) return null;
 
-        // Validate status transition
-        if (order.Status == "canceled")
-        {
+        // Chuẩn hoá trạng thái hiện tại và trạng thái mới về EN: pending|paid|canceled
+        var current = NormalizeStatus(order.Status);            // "pending" | "paid" | "canceled"
+        var target  = NormalizeStatus(dto.Status);              // map "DaDuyet" -> "paid", "ChoDuyet" -> "pending", ...
+
+        // Rule chặn
+        if (current == "canceled")
             throw new ArgumentException("Cannot update status of a canceled order");
-        }
 
-        if (order.Status == "paid" && dto.Status != "canceled")
-        {
+        if (current == "paid" && target != "canceled")
             throw new ArgumentException("Cannot change status of a paid order except to canceled");
+
+        // Cho phép: pending -> paid | canceled ; paid -> canceled
+        if (current == target)
+        {
+            // Không đổi gì, trả về chi tiết hiện tại
+            return await GetOrderResponseDtoAsync(id);
         }
 
-        var success = await _orderRepo.UpdateOrderStatusAsync(id, dto.Status);
+        var success = await _orderRepo.UpdateOrderStatusAsync(id, target);
         if (!success) return null;
 
         return await GetOrderResponseDtoAsync(id);
@@ -391,5 +398,31 @@ public class OrderService : IOrderService
         }
 
         return orderDto;
+    }
+    private static string NormalizeStatus(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return "pending";
+        var s = raw.Trim().ToLowerInvariant();
+
+        return s switch
+        {
+            // EN
+            "pending"   => "pending",
+            "paid"      => "paid",
+            "approved"  => "paid",       // nếu trước đây có dùng "approved"
+
+            "canceled"  => "canceled",
+            "cancelled" => "canceled",
+
+            // VN
+            "choduyet"  => "pending",
+            "đangduyet" => "pending",
+
+            "daduyet"   => "paid",
+
+            "dahuy"     => "canceled",
+
+            _ => "pending"
+        };
     }
 }
