@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { IPayment } from "@/apis/paymentApi";
+import ActionTablePayment from "./ActionTablePayment";
 
 export default function TableManagerPayment({
   rows,
@@ -27,17 +28,20 @@ export default function TableManagerPayment({
   formatCurrency: (n: number) => string;
   formatDate: (iso: string) => string;
 }) {
+  // ✅ tính tổng tiền (chỉ khi có dữ liệu)
+  const totalAmount = rows?.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+
   return (
     <div className="rounded-md border bg-background">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead className="w-[110px]">Payment</TableHead>
-            <TableHead className="w-[100px]">Order</TableHead>
-            <TableHead className="w-[140px]">Số tiền</TableHead>
-            <TableHead className="min-w-[160px]">Phương thức</TableHead>
-            <TableHead className="min-w-[180px]">Ngày giờ</TableHead>
-            <TableHead className="w-[130px] text-center">Hành động</TableHead>
+          <TableRow className="bg-muted/100 font-semibold">
+            <TableHead className="w-[110px] text-center">Mã Thanh Toán</TableHead>
+            <TableHead className="w-[100px] text-center">Mã hoá đơn</TableHead>
+            <TableHead className="w-[140px] text-center">Số tiền</TableHead>
+            <TableHead className="min-w-[160px] text-center">Phương thức</TableHead>
+            <TableHead className="min-w-[180px] text-center">Tạo lúc</TableHead>
+            <TableHead className="w-[130px] text-center">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -55,42 +59,64 @@ export default function TableManagerPayment({
               </TableCell>
             </TableRow>
           ) : (
-            rows.map((r, idx) => {
-              // Chuẩn hoá giá trị có thể undefined
-              const pid = Number(r.paymentId ?? 0);
-              const oid = Number(r.orderId ?? 0);
-              const amountSafe = Number.isFinite(Number(r.amount)) ? Number(r.amount) : 0;
+            <>
+              {rows.map((r, idx) => {
+                const pid = Number(r.paymentId ?? 0);
+                const oid = Number(r.orderId ?? 0);
+                const amountSafe = Number.isFinite(Number(r.amount))
+                  ? Number(r.amount)
+                  : 0;
 
-              const key = pid > 0 ? `p-${pid}` : `row-${idx}`;
-              const paymentMethod = (r.paymentMethod ?? "").replaceAll("_", " ").trim();
-              const dateText = r.paymentDate ? formatDate(r.paymentDate) : "";
+                const key = pid > 0 ? `p-${pid}` : `row-${idx}`;
+                const paymentMethod = (r.paymentMethod ?? "")
+                  .replaceAll("_", " ")
+                  .trim();
+                const dateText = r.paymentDate ? formatDate(r.paymentDate) : "";
 
-              return (
-                <TableRow key={key}>
-                  <TableCell className="text-center">{pid > 0 ? pid : ""}</TableCell>
-                  <TableCell className="text-center">{oid > 0 ? oid : ""}</TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatCurrency(amountSafe)}
-                  </TableCell>
-                  <TableCell className="capitalize">{paymentMethod}</TableCell>
-                  <TableCell>{dateText}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" className="gap-1" onClick={() => onEdit(r)}>
-                        <Pencil className="h-4 w-4" /> Sửa
-                      </Button>
-                      <Button variant="destructive" size="sm" className="gap-1" onClick={() => onDelete(r)}>
-                        <Trash2 className="h-4 w-4" /> Xoá
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })
+                return (
+                  <TableRow key={key}>
+                    <TableCell className="text-center">{pid > 0 ? pid : ""}</TableCell>
+                    <TableCell className="text-center">{oid > 0 ? oid : ""}</TableCell>
+                    <TableCell className="capitalize text-center">
+                      {formatCurrency(amountSafe)}
+                    </TableCell>
+                    <TableCell className="capitalize text-center">
+                      {paymentMethod}
+                    </TableCell>
+                    <TableCell className="text-center">{dateText}</TableCell>
+                    <TableCell className="text-center">
+                      <ActionTablePayment
+                        onEdit={() => onEdit(r)}
+                        onDelete={() => onDelete(r)}
+                        display={{
+                          id: pid,
+                          orderId: oid,
+                          amount: formatCurrency(amountSafe),
+                          method: paymentMethod,
+                          date: dateText,
+                        }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+
+              {/* ✅ Dòng tổng tiền */}
+              <TableRow className="bg-muted/100 font-semibold">
+                <TableCell colSpan={1} className="capitalize text-right">
+                  Tổng Doanh Thu:
+                </TableCell>
+                <TableCell colSpan={1}> </TableCell>
+                <TableCell className="capitalize text-center font-semibold">
+                  {formatCurrency(totalAmount)}
+                </TableCell>
+                <TableCell colSpan={3}></TableCell>
+              </TableRow>
+
+            </>
           )}
         </TableBody>
       </Table>
     </div>
   );
 }
-
