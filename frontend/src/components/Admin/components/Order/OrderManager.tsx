@@ -6,31 +6,57 @@ import { toast } from "sonner";
 import ActionOrder from "./components/TableManagerOrder/OrderActions";
 import PaginationManagerOrder from "./components/PaginationManagerOrder";
 import type { Order, OrderItem } from "@/apis/orderApi";
+import type { UiStatus } from "./components/TableManagerOrder/TableManagerOrder";
 
-// 👉 Dùng đúng type + hàm từ orderApi.ts
-import {
-  getOrders,
-  getOrderById,
-  updateOrderStatus,
-  getOrderItems,
-  getOrderPayments,
-} from "@/apis/orderApi";
+// 👉 Chỉ import API đang dùng
+import { getOrders, updateOrderStatus } from "@/apis/orderApi";
+
+/* ===========================
+   Helpers tính tiền & trạng thái
+   =========================== */
+
+// Chuẩn hoá status từ BE về khóa UI để lọc/hiển thị
+const toUiStatus = (s: string): UiStatus => {
+  const k = (s || "").toLowerCase();
+  if (k === "pending" || k === "choduyet") return "ChoDuyet";
+  if (k === "paid" || k === "approved" || k === "daduyet") return "DaDuyet";
+  if (k === "canceled" || k === "cancelled" || k === "dahuy") return "DaHuy";
+  return "ChoDuyet";
+};
+
+// Tính tạm tính (gross)
+const calculateGross = (items: OrderItem[]) =>
+  items?.reduce((s, i) => s + i.quantity * i.price, 0) || 0;
+
+// Tính thành tiền (net = gross - discount nếu có promo)
+const calculateNet = (order: Order) => {
+  const gross = calculateGross(order.orderItems);
+  const discount = order.promoId ? (order.discountAmount || 0) : 0;
+  return Math.max(gross - discount, 0);
+};
 
 export default function OrderManager() {
+  // dữ liệu
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // filter & search
+  const [statusFilter, setStatusFilter] = useState<UiStatus>("ALL");
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  // phân trang
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // chi tiết đơn
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(false);
 
   // ====== Gọi API: danh sách đơn hàng ======
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await getOrders(); // GET /api/Order
-      setOrders(res);               // res đã là Order[]
+      const res = await getOrders(); // GET /Order
+      setOrders(res || []);
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast.error("Không thể tải danh sách đơn hàng");
@@ -43,35 +69,37 @@ export default function OrderManager() {
     fetchOrders();
   }, []);
 
-  // Tổng tiền cho 1 đơn (nếu cần dùng ở bảng)
-  const calculateTotalAmount = (orderItems: OrderItem[]) =>
-    orderItems.reduce((total, item) => total + item.quantity * item.price, 0);
-
-  // Lọc theo từ khóa & trạng thái, dựa trên field đúng của Order (orderApi.ts)
+  // ====== Lọc theo từ khóa & trạng thái ======
   const filteredOrders = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
+
     return orders.filter((o) => {
+      const matchesStatus =
+        statusFilter === "ALL" || toUiStatus(o.status) === statusFilter;
+
       const matchesSearch =
-        o.orderId.toString().includes(q) ||
-        o.userName.toLowerCase().includes(q) ||
-        o.customerName.toLowerCase().includes(q);
+        !q ||
+        String(o.orderId).includes(q) ||
+        (o.customerName || "").toLowerCase().includes(q) ||
+        (o.userName || "").toLowerCase().includes(q) ||
+        (o.promoCode || "").toLowerCase().includes(q);
 
-      const matchesStatus = statusFilter === "ALL" || o.status === statusFilter;
-      return matchesSearch && matchesStatus;
+      return matchesStatus && matchesSearch;
     });
-  }, [orders, searchTerm, statusFilter]);
+  }, [orders, statusFilter, searchTerm]);
 
-  const totalPages = Math.ceil(filteredOrders.length / rowsPerPage);
-  const paginatedOrders = filteredOrders.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  // ====== Phân trang từ danh sách đã lọc ======
+  const totalItems = filteredOrders.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / rowsPerPage));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIdx = (safePage - 1) * rowsPerPage;
+  const endIdx = startIdx + rowsPerPage;
+  const paginatedOrders = filteredOrders.slice(startIdx, endIdx);
 
   // ====== Handlers ======
-  // Hủy đơn hàng — PATCH /api/Order/{id}/cancel
   const handleDelete = async (id: number) => {
     try {
-      // await cancelOrder(id);
+      await updateOrderStatus(id, "DaHuy"); // đổi trạng thái sang Đã Hủy
       await fetchOrders();
       toast.success("Đã hủy đơn hàng");
     } catch (error) {
@@ -86,7 +114,7 @@ export default function OrderManager() {
 
   const handleStatusChange = async (orderId: number, newStatus: string) => {
     try {
-      await updateOrderStatus(orderId, newStatus); // PUT /Order/{id} + DTO đúng
+      await updateOrderStatus(orderId, newStatus); // PUT /Order/{id} + DTO chuẩn
       await fetchOrders();
       toast.success("Cập nhật trạng thái thành công");
     } catch (error: any) {
@@ -101,7 +129,6 @@ export default function OrderManager() {
     }
   };
 
-
   const handlePageChange = (page: number) => setCurrentPage(page);
   const handleRowsPerPageChange = (rows: number) => {
     setRowsPerPage(rows);
@@ -111,6 +138,7 @@ export default function OrderManager() {
   return (
     <div className="bg-gradient-to-br from-green-50/30 via-gray-50 to-green-100/30 dark:from-green-900/10 dark:via-gray-900 dark:to-green-800/10 min-h-screen">
       <div className="p-6 space-y-8">
+        {/* Thanh hành động: tìm kiếm, lọc trạng thái, export */}
         <ActionOrder
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -119,17 +147,22 @@ export default function OrderManager() {
           exportBill={() => {}}
         />
 
+        {/* Bảng đơn hàng */}
         <OrderTable
           paginatedpayments={paginatedOrders}
-          calculateTotalAmount={calculateTotalAmount}
+          calculateTotalAmount={calculateGross} // gross (nếu bảng còn dùng)
+          getNetAmount={calculateNet}           // net hiển thị ở cột Giá
           handleViewDetails={handleViewDetails}
           handleDelete={handleDelete}
           onStatusChange={handleStatusChange}
-          loading={loading} // nếu OrderTableProps chưa có, thêm `loading?: boolean`
+          loading={loading}
+          statusFilter={statusFilter}           // để Table hiển thị badge/menu đúng
+          searchKeyword={searchTerm}            // nếu Table tự lọc thêm
         />
 
+        {/* Phân trang */}
         <PaginationManagerOrder
-          currentPage={currentPage}
+          currentPage={safePage}
           totalPages={totalPages}
           rowsPerPage={rowsPerPage}
           onPageChange={handlePageChange}
@@ -137,6 +170,7 @@ export default function OrderManager() {
           totalItems={filteredOrders.length}
         />
 
+        {/* Dialog chi tiết */}
         {selectedOrder && (
           <DialogViewDetails
             selectedOrder={selectedOrder}
