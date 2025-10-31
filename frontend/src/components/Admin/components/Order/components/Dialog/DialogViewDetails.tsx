@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import type { Order, OrderItem } from '@/apis/orderApi';
-import { Image as ImageIcon, User, Calendar, Package } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import type { Order, OrderItem } from "@/apis/orderApi";
+import { Image as ImageIcon, User, Calendar, Package } from "lucide-react";
 
 interface DialogViewDetailsProps {
   selectedOrder: Order | null;
@@ -14,38 +14,59 @@ export default function DialogViewDetails({
 }: DialogViewDetailsProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedOrder) setIsOpen(true);
   }, [selectedOrder]);
 
+  // Hỗ trợ cả VN lẫn EN
   const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'ChoDuyet':
-        return 'Chờ Duyệt';
-      case 'DaDuyet':
-        return 'Đã Duyệt';
-      case 'DaHuy':
-        return 'Đã Hủy';
+    switch ((status || "").toLowerCase()) {
+      case "choduyet":
+      case "pending":
+        return "Chờ duyệt";
+      case "daduyet":
+      case "paid":
+      case "approved":
+        return "Đã duyệt";
+      case "dahuy":
+      case "canceled":
+      case "cancelled":
+        return "Đã hủy";
       default:
         return status;
     }
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ChoDuyet':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
-      case 'DaDuyet':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-      case 'DaHuy':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+    switch ((status || "").toLowerCase()) {
+      case "choduyet":
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
+      case "daduyet":
+      case "paid":
+      case "approved":
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+      case "dahuy":
+      case "canceled":
+      case "cancelled":
+        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300";
     }
   };
 
+  // Gross = sum(quantity * price)
   const calculateTotalAmount = (items: OrderItem[]) =>
     items.reduce((s, i) => s + i.quantity * i.price, 0);
+
+  // Tính các giá trị hiển thị
+  const gross =
+    selectedOrder ? calculateTotalAmount(selectedOrder.orderItems) : 0;
+  const discount =
+    selectedOrder && selectedOrder.promoId
+      ? selectedOrder.discountAmount || 0
+      : 0;
+  const net = Math.max(gross - discount, 0);
 
   return (
     <Dialog
@@ -78,11 +99,15 @@ export default function DialogViewDetails({
                   <div className="space-y-2">
                     <div>
                       <span className="text-sm text-gray-500">Khách hàng:</span>
-                      <p className="font-medium">{selectedOrder.customerName || 'N/A'}</p>
+                      <p className="font-medium">
+                        {selectedOrder.customerName || "N/A"}
+                      </p>
                     </div>
                     <div>
                       <span className="text-sm text-gray-500">Người tạo:</span>
-                      <p className="font-medium">{selectedOrder.userName || 'N/A'}</p>
+                      <p className="font-medium">
+                        {selectedOrder.userName || "N/A"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -102,21 +127,46 @@ export default function DialogViewDetails({
                     <div>
                       <span className="text-sm text-gray-500">Ngày đặt:</span>
                       <p className="font-medium">
-                        {new Date(selectedOrder.orderDate).toLocaleString('vi-VN')}
+                        {new Date(selectedOrder.orderDate).toLocaleString(
+                          "vi-VN"
+                        )}
                       </p>
                     </div>
                     <div>
                       <span className="text-sm text-gray-500">Trạng thái:</span>
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                          selectedOrder.status
+                        )}`}
+                      >
                         {getStatusLabel(selectedOrder.status)}
                       </span>
                     </div>
-                    <div>
-                      <span className="text-sm text-gray-500">Tổng tiền:</span>
-                      <p className="font-bold text-lg text-green-600">
-                        {calculateTotalAmount(selectedOrder.orderItems).toLocaleString('vi-VN')} đ
-                      </p>
+
+                    {/* ✅ Hiển thị Tạm tính / Giảm giá / Thành tiền */}
+                    <div className="pt-2 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">Tạm tính:</span>
+                        <p className="font-medium">
+                          {gross.toLocaleString("vi-VN")} đ
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">Giảm giá:</span>
+                        <p className="font-medium text-red-600">
+                          - {discount.toLocaleString("vi-VN")} đ
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">
+                          Thành tiền:
+                        </span>
+                        <p className="font-bold text-lg text-green-600">
+                          {net.toLocaleString("vi-VN")} đ
+                        </p>
+                      </div>
                     </div>
+                    {/* End Tổng tiền */}
                   </div>
                 </div>
               </div>
@@ -130,20 +180,26 @@ export default function DialogViewDetails({
               </h3>
               <div className="space-y-3">
                 {selectedOrder.orderItems.map((it) => (
-                  <div key={it.orderItemId} className="flex items-center gap-4 p-4 border rounded-lg">
+                  <div
+                    key={it.orderItemId}
+                    className="flex items-center gap-4 p-4 border rounded-lg"
+                  >
                     {/* API không có ảnh: hiển thị icon + tên */}
                     <div className="w-20 h-20 flex items-center justify-center bg-green-100 rounded-md">
                       <ImageIcon className="w-6 h-6 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <div className="text-sm text-green-700">SP: #{it.productId}</div>
+                      <div className="text-sm text-green-700">
+                        SP: #{it.productId}
+                      </div>
                       <div className="text-lg font-semibold">{it.productName}</div>
                       <div className="text-sm text-gray-600">
-                        SL: {it.quantity} • Giá: {it.price.toLocaleString('vi-VN')} đ
+                        SL: {it.quantity} • Giá:{" "}
+                        {it.price.toLocaleString("vi-VN")} đ
                       </div>
                     </div>
                     <div className="text-lg font-semibold text-green-700">
-                      {it.subtotal.toLocaleString('vi-VN')} đ
+                      {(it.quantity * it.price).toLocaleString("vi-VN")} đ
                     </div>
                   </div>
                 ))}
