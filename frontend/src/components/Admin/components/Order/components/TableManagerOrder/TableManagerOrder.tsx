@@ -25,7 +25,6 @@ import {
   Check,
 } from "lucide-react";
 import type { Order } from "@/apis/orderApi";
-import DialogViewDetails from "../Dialog/DialogViewDetails";
 import DialogConfirm from "../Dialog/DialogConfirm";
 import { toast } from "sonner";
 
@@ -43,6 +42,9 @@ export interface OrderTableProps {
   /** ⬇️ Thêm 2 props tùy chọn để table tự lọc */
   statusFilter?: UiStatus;            // "ALL" | "ChoDuyet" | "DaDuyet" | "DaHuy"
   searchKeyword?: string;             // từ khóa tìm kiếm (mã, tên KH, người tạo, promoCode)
+  // Optional: parent can control which row is selected (for export) and receive selection changes
+  selectedRowId?: number | null;
+  onRowSelect?: (order: Order | null) => void;
 }
 
 /* ===========================
@@ -90,8 +92,10 @@ export default function OrderTable({
   loading,
   statusFilter = "ALL",
   searchKeyword = "",
+  selectedRowId = null,
+  onRowSelect,
 }: OrderTableProps) {
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  // selection is lifted to parent via onRowSelect (if provided)
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
@@ -177,7 +181,17 @@ export default function OrderTable({
             return (
               <TableRow key={order.orderId} className="hover:bg-green-50/50">
                 <TableCell>
-                  <Checkbox />
+                  <Checkbox
+                    checked={selectedRowId === order.orderId}
+                    onCheckedChange={(val: boolean) => {
+                      // notify parent selection change
+                      if (val) {
+                        onRowSelect?.(order);
+                      } else {
+                        onRowSelect?.(null);
+                      }
+                    }}
+                  />
                 </TableCell>
 
                 <TableCell>
@@ -200,7 +214,11 @@ export default function OrderTable({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setSelectedOrder(order)}
+                      onClick={() => {
+                        // Open parent details dialog and mark row selected
+                        onRowSelect?.(order);
+                        handleViewDetails(order);
+                      }}
                     >
                       <Eye className="h-4 w-4 text-green-600" />
                     </Button>
@@ -260,7 +278,12 @@ export default function OrderTable({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem onClick={() => setSelectedOrder(order)}>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          onRowSelect?.(order);
+                          handleViewDetails(order);
+                        }}
+                      >
                         <Eye className="h-4 w-4 text-green-600" />
                         <span className="ml-2">Xem chi tiết</span>
                       </DropdownMenuItem>
@@ -280,10 +303,7 @@ export default function OrderTable({
         </TableBody>
       </Table>
 
-      <DialogViewDetails
-        selectedOrder={selectedOrder}
-        setSelectedOrder={setSelectedOrder}
-      />
+      {/* Details dialog is rendered by parent (OrderManager) from its selectedOrder state */}
 
       <DialogConfirm
         isOpen={!!orderToDelete}
