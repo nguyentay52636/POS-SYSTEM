@@ -4,6 +4,8 @@ import OrderTable from "./components/TableManagerOrder/TableManagerOrder";
 import DialogViewDetails from "./components/Dialog/DialogViewDetails";
 import { toast } from "sonner";
 import ActionOrder from "./components/TableManagerOrder/OrderActions";
+import { getOrderById } from "@/apis/orderApi";
+import { buildInvoiceHtml } from "@/lib/invoice";
 import PaginationManagerOrder from "./components/PaginationManagerOrder";
 import type { Order, OrderItem } from "@/apis/orderApi";
 import type { UiStatus } from "./components/TableManagerOrder/TableManagerOrder";
@@ -50,6 +52,8 @@ export default function OrderManager() {
 
   // chi tiết đơn
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  // selection used for export (checkbox) should NOT open the details dialog
+  const [selectedForExport, setSelectedForExport] = useState<Order | null>(null);
 
   // ====== Gọi API: danh sách đơn hàng ======
   const fetchOrders = async () => {
@@ -144,8 +148,34 @@ export default function OrderManager() {
           setSearchTerm={setSearchTerm}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
-          exportBill={() => {}}
+          exportBill={async () => {
+            const orderToUse = selectedForExport ?? selectedOrder;
+            if (!orderToUse) {
+              toast.error("Vui lòng chọn một đơn hàng (bấm 'Xem chi tiết' hoặc đánh dấu hàng) trước khi xuất hoá đơn");
+              return;
+            }
+
+            try {
+              const id = orderToUse.orderId;
+              const order = await getOrderById(id);
+              const html = buildInvoiceHtml(order);
+              const w = window.open("", "_blank", "width=900,height=700");
+              if (!w) {
+                toast.error("Popup bị chặn. Vui lòng cho phép popup để in hoá đơn.");
+                return;
+              }
+              w.document.write(html);
+              w.document.close();
+              w.focus();
+              // delay to ensure resources/styles load
+              setTimeout(() => w.print(), 600);
+            } catch (err) {
+              console.error("Export invoice error:", err);
+              toast.error("Không thể xuất hoá đơn");
+            }
+          }}
         />
+        {/* Pass selection handlers so checking a row sets selectedOrder for export */}
 
         {/* Bảng đơn hàng */}
         <OrderTable
@@ -158,6 +188,8 @@ export default function OrderManager() {
           loading={loading}
           statusFilter={statusFilter}           // để Table hiển thị badge/menu đúng
           searchKeyword={searchTerm}            // nếu Table tự lọc thêm
+          selectedRowId={selectedForExport?.orderId ?? selectedOrder?.orderId ?? null}
+          onRowSelect={(order) => setSelectedForExport(order)}
         />
 
         {/* Phân trang */}
