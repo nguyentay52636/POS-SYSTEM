@@ -10,7 +10,9 @@ public class ImportReceiptMappings : Profile
     {
         CreateMap<ImportReceipt, ImportReceiptResponseDto>()
             .ForMember(dest => dest.SupplierName, opt => opt.Ignore())
+            .ForMember(dest => dest.Supplier, opt => opt.MapFrom(src => src.Supplier))
             .ForMember(dest => dest.UserName, opt => opt.Ignore())
+            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
             .ForMember(dest => dest.ImportItems, opt => opt.Ignore());
 
         CreateMap<ImportReceipt, ImportReceiptDetailResponseDto>()

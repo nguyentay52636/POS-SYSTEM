@@ -65,8 +65,10 @@ public class ImportReceiptResponseDto
     public int ImportId { get; set; }
     public int SupplierId { get; set; }
     public string? SupplierName { get; set; }
+    public SupplierResponseDto? Supplier { get; set; }
     public int UserId { get; set; }
     public string? UserName { get; set; }
+    public UserResponseDto? User { get; set; }
     public DateTime? ImportDate { get; set; }
     public decimal? TotalAmount { get; set; }
     public string? Status { get; set; }

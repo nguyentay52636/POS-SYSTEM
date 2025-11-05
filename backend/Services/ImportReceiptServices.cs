@@ -63,7 +63,31 @@ public class ImportReceiptService : IImportReceiptService
 
         var importReceipt = _mapper.Map<ImportReceipt>(dto);
         var created = await _importRepo.CreateAsync(importReceipt);
-        return _mapper.Map<ImportReceiptResponseDto>(created);
+
+        // Reload with full details (Supplier and User)
+        var fullDetails = await _importRepo.GetByIdAsync(created.ImportId);
+        if (fullDetails == null)
+        {
+            throw new InvalidOperationException("Failed to retrieve created import receipt");
+        }
+
+        var responseDto = _mapper.Map<ImportReceiptResponseDto>(fullDetails);
+
+        // Map supplier details
+        if (fullDetails.Supplier != null)
+        {
+            responseDto.SupplierName = fullDetails.Supplier.Name;
+            responseDto.Supplier = _mapper.Map<SupplierResponseDto>(fullDetails.Supplier);
+        }
+
+        // Map user details
+        if (fullDetails.User != null)
+        {
+            responseDto.UserName = fullDetails.User.FullName ?? fullDetails.User.Username;
+            responseDto.User = _mapper.Map<UserResponseDto>(fullDetails.User);
+        }
+
+        return responseDto;
     }
 
     public async Task<ImportReceiptDetailResponseDto?> GetByIdAsync(int id)

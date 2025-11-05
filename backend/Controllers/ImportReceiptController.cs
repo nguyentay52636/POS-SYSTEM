@@ -24,38 +24,16 @@ public class ImportReceiptController : ControllerBase
     /// <summary>
     /// Get all import receipts with optional filtering
     /// </summary>
-    /// <param name="status">Filter by status (pending, completed, canceled)</param>
-    /// <param name="supplierId">Filter by supplier ID</param>
-    /// <param name="userId">Filter by user ID</param>
-    /// <param name="fromDate">Filter from date</param>
-    /// <param name="toDate">Filter to date</param>
-    /// <param name="page">Page number</param>
-    /// <param name="pageSize">Page size</param>
-    [HttpGet]
-    [ProducesResponseType(typeof(PagedResponse<ImportReceiptResponseDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PagedResponse<ImportReceiptResponseDto>>> List(
-        [FromQuery] string? status = null,
-        [FromQuery] int? supplierId = null,
-        [FromQuery] int? userId = null,
-        [FromQuery] DateTime? fromDate = null,
-        [FromQuery] DateTime? toDate = null,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
-    {
-        var query = new ImportReceiptQueryParams
-        {
-            Status = status,
-            SupplierId = supplierId,
-            UserId = userId,
-            FromDate = fromDate,
-            ToDate = toDate,
-            Page = page,
-            PageSize = pageSize
-        };
 
-        var result = await _service.SearchAsync(query);
+    [HttpGet]
+    [ProducesResponseType(typeof(ImportReceiptResponseDto[]), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ImportReceiptResponseDto[]>> List(
+    )
+    {
+        var result = await _service.ListAllAsync();
         return Ok(result);
     }
+
 
     /// <summary>
     /// Get import receipt details by ID (including items)
