@@ -41,9 +41,10 @@ export default function ReceiptsContent() {
     }
 
     const filteredReceipts = receipts.filter((receipt) => {
+        const receiptId = (receipt.importId || receipt.import_id || 0).toString()
         const matchesSearch =
-            receipt.import_id.toString().includes(searchTerm.toLowerCase()) ||
-            receipt.supplier?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            receiptId.includes(searchTerm.toLowerCase()) ||
+            (receipt.supplierName || receipt.supplier?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
             receipt.note?.toLowerCase().includes(searchTerm.toLowerCase())
 
         const matchesStatus = statusFilter === "all" || receipt.status === statusFilter
@@ -72,10 +73,14 @@ export default function ReceiptsContent() {
     const handleEditReceipt = async (data: UpdateImportReceiptDTO) => {
         if (!selectedReceipt) return
 
+        const receiptId = selectedReceipt.importId || selectedReceipt.import_id
+        if (!receiptId) return
+
         try {
-            const updatedReceipt = await updateImportReceipt(selectedReceipt.import_id, data)
+            const updatedReceipt = await updateImportReceipt(receiptId, data)
+            const currentReceiptId = (r: IImportReceipt) => r.importId || r.import_id
             setReceipts(receipts.map((r) =>
-                r.import_id === selectedReceipt.import_id ? updatedReceipt : r
+                currentReceiptId(r) === receiptId ? updatedReceipt : r
             ))
             setIsEditDialogOpen(false)
             setSelectedReceipt(null)
@@ -92,7 +97,7 @@ export default function ReceiptsContent() {
 
         try {
             await deleteImportReceipt(receiptId)
-            setReceipts(receipts.filter((r) => r.import_id !== receiptId))
+            setReceipts(receipts.filter((r) => (r.importId || r.import_id) !== receiptId))
             toast.success("Xóa phiếu nhập thành công!")
             fetchReceipts()
         } catch (error) {

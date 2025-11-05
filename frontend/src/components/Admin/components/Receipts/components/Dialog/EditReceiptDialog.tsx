@@ -20,7 +20,7 @@ import { Building2, Calendar } from "lucide-react"
 
 // Zod validation schema
 const editReceiptSchema = z.object({
-    supplier_id: z.number().optional(),
+    supplierId: z.number().optional(),
     status: z.string().optional(),
     note: z.string().optional(),
 })
@@ -57,7 +57,7 @@ export default function EditReceiptDialog({ isOpen, onOpenChange, selectedReceip
     } = useForm<EditReceiptFormData>({
         resolver: zodResolver(editReceiptSchema),
         defaultValues: {
-            supplier_id: selectedReceipt?.supplier_id,
+            supplierId: selectedReceipt?.supplierId || selectedReceipt?.supplier_id,
             status: selectedReceipt?.status,
             note: selectedReceipt?.note || '',
         }
@@ -65,7 +65,7 @@ export default function EditReceiptDialog({ isOpen, onOpenChange, selectedReceip
 
     useEffect(() => {
         if (selectedReceipt) {
-            setValue('supplier_id', selectedReceipt.supplier_id)
+            setValue('supplierId', selectedReceipt.supplierId || selectedReceipt.supplier_id)
             setValue('status', selectedReceipt.status)
             setValue('note', selectedReceipt.note || '')
         }
@@ -78,30 +78,33 @@ export default function EditReceiptDialog({ isOpen, onOpenChange, selectedReceip
 
     if (!selectedReceipt) return null
 
+    const receiptId = selectedReceipt.importId || selectedReceipt.import_id
+    const currentSupplierId = selectedReceipt.supplierId || selectedReceipt.supplier_id
+
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>Cập nhật phiếu nhập #{selectedReceipt.import_id}</DialogTitle>
+                    <DialogTitle>Cập nhật phiếu nhập #{receiptId}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-6 pt-4">
                     <Card className="border-l-4 border-l-blue-500">
                         <CardContent className="space-y-4 pt-6">
                             <div className="space-y-2">
-                                <Label htmlFor="supplier_id" className="flex items-center gap-2">
+                                <Label htmlFor="supplierId" className="flex items-center gap-2">
                                     <Building2 className="h-4 w-4" />
                                     Nhà cung cấp
                                 </Label>
                                 <Select
-                                    defaultValue={selectedReceipt.supplier_id?.toString()}
-                                    onValueChange={(value) => setValue('supplier_id', parseInt(value))}
+                                    defaultValue={currentSupplierId?.toString()}
+                                    onValueChange={(value) => setValue('supplierId', parseInt(value))}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Chọn nhà cung cấp" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {suppliers.map((supplier) => (
-                                            <SelectItem key={supplier.supplier_id} value={supplier.supplier_id.toString()}>
+                                            <SelectItem key={supplier.supplier_id || supplier.supplierId} value={(supplier.supplier_id || supplier.supplierId)?.toString() || ''}>
                                                 {supplier.name}
                                             </SelectItem>
                                         ))}

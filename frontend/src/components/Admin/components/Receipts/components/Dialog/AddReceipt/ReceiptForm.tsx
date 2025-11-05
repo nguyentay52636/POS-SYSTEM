@@ -20,10 +20,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 // Zod validation schema
 const receiptSchema = z.object({
-    supplier_id: z.number().min(1, "Vui lòng chọn nhà cung cấp"),
-    user_id: z.number().min(1),
-    import_date: z.string().min(1, "Vui lòng chọn ngày nhập"),
-    total_amount: z.number().min(0, "Tổng tiền không được âm"),
+    supplierId: z.number().min(1, "Vui lòng chọn nhà cung cấp"),
+    userId: z.number().min(1),
+    importDate: z.string().min(1, "Vui lòng chọn ngày nhập"),
+    totalAmount: z.number().min(0, "Tổng tiền không được âm"),
     status: z.string().min(1, "Vui lòng chọn trạng thái"),
     note: z.string().optional(),
 })
@@ -36,9 +36,9 @@ interface ReceiptFormProps {
 }
 
 interface ReceiptItem {
-    product_id: number
+    productId: number
     quantity: number
-    unit_price: number
+    unitPrice: number
     subtotal: number
 }
 
@@ -74,10 +74,10 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
     } = useForm<ReceiptFormData>({
         resolver: zodResolver(receiptSchema),
         defaultValues: {
-            user_id: 1, // TODO: Get from auth context
-            import_date: new Date().toISOString().split('T')[0],
+            userId: 1, // TODO: Get from auth context
+            importDate: new Date().toISOString().split('T')[0],
             status: 'pending',
-            total_amount: 0,
+            totalAmount: 0,
         }
     })
 
@@ -88,15 +88,15 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
         if (!product) return
 
         const newItem: ReceiptItem = {
-            product_id: selectedProductId,
+            productId: selectedProductId,
             quantity: newItemQuantity,
-            unit_price: newItemPrice,
+            unitPrice: newItemPrice,
             subtotal: newItemQuantity * newItemPrice
         }
 
         setItems([...items, newItem])
         const newTotal = items.reduce((sum, item) => sum + item.subtotal, 0) + newItem.subtotal
-        setValue('total_amount', newTotal)
+        setValue('totalAmount', newTotal)
 
         // Reset
         setSelectedProductId(null)
@@ -108,14 +108,19 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
         const newItems = items.filter((_, i) => i !== index)
         setItems(newItems)
         const newTotal = newItems.reduce((sum, item) => sum + item.subtotal, 0)
-        setValue('total_amount', newTotal)
+        setValue('totalAmount', newTotal)
     }
 
     const onSubmitForm = async (data: ReceiptFormData) => {
         const receiptData: CreateImportReceiptDTO = {
             ...data,
-            total_amount: items.reduce((sum, item) => sum + item.subtotal, 0),
-            import_items: items
+            totalAmount: items.reduce((sum, item) => sum + item.subtotal, 0),
+            importItems: items.map(item => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                subtotal: item.subtotal
+            }))
         }
         await onSubmit(receiptData)
     }
@@ -141,41 +146,41 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
                 <CardContent className="space-y-4 pt-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="supplier_id" className="flex items-center gap-2">
+                            <Label htmlFor="supplierId" className="flex items-center gap-2">
                                 <Building2 className="h-4 w-4" />
                                 Nhà cung cấp *
                             </Label>
                             <Select
-                                onValueChange={(value) => setValue('supplier_id', parseInt(value))}
+                                onValueChange={(value) => setValue('supplierId', parseInt(value))}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Chọn nhà cung cấp" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {suppliers.map((supplier) => (
-                                        <SelectItem key={supplier.supplier_id} value={supplier.supplier_id.toString()}>
+                                        <SelectItem key={supplier.supplier_id || supplier.supplierId} value={(supplier.supplier_id || supplier.supplierId)?.toString() || ''}>
                                             {supplier.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            {errors.supplier_id && (
-                                <p className="text-sm text-red-600">{errors.supplier_id.message}</p>
+                            {errors.supplierId && (
+                                <p className="text-sm text-red-600">{errors.supplierId.message}</p>
                             )}
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="import_date" className="flex items-center gap-2">
+                            <Label htmlFor="importDate" className="flex items-center gap-2">
                                 <Calendar className="h-4 w-4" />
                                 Ngày nhập *
                             </Label>
                             <Input
-                                id="import_date"
+                                id="importDate"
                                 type="date"
-                                {...register("import_date")}
+                                {...register("importDate")}
                             />
-                            {errors.import_date && (
-                                <p className="text-sm text-red-600">{errors.import_date.message}</p>
+                            {errors.importDate && (
+                                <p className="text-sm text-red-600">{errors.importDate.message}</p>
                             )}
                         </div>
 
@@ -290,12 +295,12 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
                                 </TableHeader>
                                 <TableBody>
                                     {items.map((item, index) => {
-                                        const product = products.find(p => p.product_id === item.product_id)
+                                        const product = products.find(p => p.product_id === item.productId)
                                         return (
                                             <TableRow key={index}>
                                                 <TableCell>{product?.product_name || 'N/A'}</TableCell>
                                                 <TableCell>{item.quantity}</TableCell>
-                                                <TableCell>{item.unit_price.toLocaleString('vi-VN')} VNĐ</TableCell>
+                                                <TableCell>{item.unitPrice.toLocaleString('vi-VN')} VNĐ</TableCell>
                                                 <TableCell className="font-semibold">{item.subtotal.toLocaleString('vi-VN')} VNĐ</TableCell>
                                                 <TableCell className="text-right">
                                                     <Button

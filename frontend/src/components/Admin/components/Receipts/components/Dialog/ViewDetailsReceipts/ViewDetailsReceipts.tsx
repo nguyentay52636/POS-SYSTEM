@@ -49,7 +49,7 @@ export default function ViewDetailsReceipts({
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-gray-900">
-                        Chi tiết phiếu nhập #{selectedReceipt.import_id}
+                        Chi tiết phiếu nhập #{selectedReceipt.importId || selectedReceipt.import_id}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -68,24 +68,24 @@ export default function ViewDetailsReceipts({
                                     <div className="flex items-center gap-2">
                                         <Building2 className="h-4 w-4 text-gray-500" />
                                         <span className="font-medium text-gray-700">Nhà cung cấp:</span>
-                                        <span className="text-gray-900">{selectedReceipt.supplier?.name || 'N/A'}</span>
+                                        <span className="text-gray-900">{selectedReceipt.supplierName || selectedReceipt.supplier?.name || 'N/A'}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <User className="h-4 w-4 text-gray-500" />
                                         <span className="font-medium text-gray-700">Người nhập:</span>
-                                        <span className="text-gray-900">{selectedReceipt.user?.full_name || selectedReceipt.user_id}</span>
+                                        <span className="text-gray-900">{selectedReceipt.userName || selectedReceipt.user?.full_name || selectedReceipt.userId || selectedReceipt.user_id}</span>
                                     </div>
                                 </div>
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2">
                                         <Calendar className="h-4 w-4 text-gray-500" />
                                         <span className="font-medium text-gray-700">Ngày nhập:</span>
-                                        <span className="text-gray-900">{new Date(selectedReceipt.import_date).toLocaleDateString('vi-VN')}</span>
+                                        <span className="text-gray-900">{new Date(selectedReceipt.importDate || selectedReceipt.import_date || '').toLocaleDateString('vi-VN')}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <DollarSign className="h-4 w-4 text-gray-500" />
                                         <span className="font-medium text-gray-700">Tổng tiền:</span>
-                                        <span className="text-blue-600 font-semibold">{formatPrice(selectedReceipt.total_amount)}</span>
+                                        <span className="text-blue-600 font-semibold">{formatPrice(selectedReceipt.totalAmount || selectedReceipt.total_amount || 0)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -99,7 +99,7 @@ export default function ViewDetailsReceipts({
                     </Card>
 
                     {/* Import Items */}
-                    {selectedReceipt.import_items && selectedReceipt.import_items.length > 0 && (
+                    {(selectedReceipt.importItems || selectedReceipt.import_items) && (selectedReceipt.importItems || selectedReceipt.import_items || []).length > 0 && (
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
@@ -118,11 +118,11 @@ export default function ViewDetailsReceipts({
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {selectedReceipt.import_items.map((item) => (
-                                            <TableRow key={item.import_item_id}>
+                                        {(selectedReceipt.importItems || selectedReceipt.import_items || []).map((item) => (
+                                            <TableRow key={item.importItemId || item.import_item_id}>
                                                 <TableCell>{item.product?.product_name || 'N/A'}</TableCell>
                                                 <TableCell>{item.quantity}</TableCell>
-                                                <TableCell>{item.unit_price.toLocaleString('vi-VN')} VNĐ</TableCell>
+                                                <TableCell>{(item.unitPrice || item.unit_price || 0).toLocaleString('vi-VN')} VNĐ</TableCell>
                                                 <TableCell className="font-semibold">{item.subtotal.toLocaleString('vi-VN')} VNĐ</TableCell>
                                             </TableRow>
                                         ))}

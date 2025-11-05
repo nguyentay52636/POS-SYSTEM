@@ -3,34 +3,34 @@ import { IImportReceipt, IImportItem } from "@/types/types"
 
 // DTOs
 export interface CreateImportReceiptDTO {
-    supplier_id: number
-    user_id: number
-    import_date: string
-    total_amount: number
+    supplierId: number
+    userId: number
+    importDate: string
+    totalAmount: number
     status: string
     note?: string
-    import_items: CreateImportItemDTO[]
+    importItems: CreateImportItemDTO[]
 }
 
 export interface CreateImportItemDTO {
-    product_id: number
+    productId: number
     quantity: number
-    unit_price: number
+    unitPrice: number
     subtotal: number
 }
 
 export interface UpdateImportReceiptDTO {
-    supplier_id?: number
-    user_id?: number
-    import_date?: string
-    total_amount?: number
+    supplierId?: number
+    userId?: number
+    importDate?: string
+    totalAmount?: number
     status?: string
     note?: string
 }
 
 const getAllImportReceipts = async (): Promise<IImportReceipt[]> => {
     try {
-        const { data } = await baseApi.get('/ImportReceipt')
+        const { data } = await baseApi.get('/imports')
         return data
     } catch (error) {
         console.error('Error fetching import receipts:', error)
@@ -40,7 +40,7 @@ const getAllImportReceipts = async (): Promise<IImportReceipt[]> => {
 
 const addImportReceipt = async (receiptData: CreateImportReceiptDTO): Promise<IImportReceipt> => {
     try {
-        const { data } = await baseApi.post('/ImportReceipt', receiptData)
+        const { data } = await baseApi.post('/imports', receiptData)
         return data
     } catch (error) {
         console.error('Error adding import receipt:', error)
@@ -50,7 +50,7 @@ const addImportReceipt = async (receiptData: CreateImportReceiptDTO): Promise<II
 
 const updateImportReceipt = async (receiptId: number, receiptData: UpdateImportReceiptDTO): Promise<IImportReceipt> => {
     try {
-        const { data } = await baseApi.put(`/ImportReceipt/${receiptId}`, receiptData)
+        const { data } = await baseApi.put(`/imports/${receiptId}`, receiptData)
         return data
     } catch (error) {
         console.error('Error updating import receipt:', error)
@@ -60,7 +60,7 @@ const updateImportReceipt = async (receiptId: number, receiptData: UpdateImportR
 
 const deleteImportReceipt = async (receiptId: number): Promise<void> => {
     try {
-        await baseApi.delete(`/ImportReceipt/${receiptId}`)
+        await baseApi.delete(`/imports/${receiptId}`)
     } catch (error) {
         console.error('Error deleting import receipt:', error)
         throw error
@@ -69,7 +69,7 @@ const deleteImportReceipt = async (receiptId: number): Promise<void> => {
 
 const getImportReceiptById = async (receiptId: number): Promise<IImportReceipt> => {
     try {
-        const { data } = await baseApi.get(`/ImportReceipt/${receiptId}`)
+        const { data } = await baseApi.get(`/imports/${receiptId}`)
         return data
     } catch (error) {
         console.error('Error fetching import receipt:', error)

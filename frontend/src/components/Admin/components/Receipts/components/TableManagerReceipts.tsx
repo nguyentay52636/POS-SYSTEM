@@ -66,25 +66,25 @@ export default function TableManagerReceipts({
                             </TableHeader>
                             <TableBody>
                                 {filteredReceipts.map((receipt) => (
-                                    <TableRow key={receipt.import_id} className="hover:bg-gray-50">
+                                    <TableRow key={receipt.importId || receipt.import_id} className="hover:bg-gray-50">
                                         <TableCell className="font-medium">
                                             <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
-                                                #{receipt.import_id}
+                                                #{receipt.importId || receipt.import_id}
                                             </span>
                                         </TableCell>
                                         <TableCell>
                                             <div className="font-medium text-gray-900">
-                                                {receipt.supplier?.name || 'N/A'}
+                                                {receipt.supplierName || receipt.supplier?.name || 'N/A'}
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-gray-600">
-                                            {receipt.user?.full_name || receipt.user_id}
+                                            {receipt.userName || receipt.user?.full_name || receipt.userId || receipt.user_id}
                                         </TableCell>
                                         <TableCell className="text-gray-600">
-                                            {new Date(receipt.import_date).toLocaleDateString('vi-VN')}
+                                            {new Date(receipt.importDate || receipt.import_date || '').toLocaleDateString('vi-VN')}
                                         </TableCell>
                                         <TableCell>
-                                            <p className="font-semibold text-blue-600">{formatPrice(receipt.total_amount)}</p>
+                                            <p className="font-semibold text-blue-600">{formatPrice(receipt.totalAmount || receipt.total_amount || 0)}</p>
                                         </TableCell>
                                         <TableCell>
                                             {getStatusBadge(receipt.status)}
@@ -114,7 +114,7 @@ export default function TableManagerReceipts({
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    onClick={() => handleDeleteReceipt(receipt.import_id)}
+                                                    onClick={() => handleDeleteReceipt(receipt.importId || receipt.import_id || 0)}
                                                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
