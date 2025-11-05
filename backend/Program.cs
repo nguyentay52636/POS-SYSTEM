@@ -56,7 +56,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings), typeof(OrderMappings), typeof(InventoryMappings), typeof(PaymentMappings));
+builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings), typeof(OrderMappings), typeof(InventoryMappings), typeof(PaymentMappings), typeof(ImportReceiptMappings));
 
 // DI
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -96,6 +96,10 @@ builder.Services.AddScoped<IInventoryService, InventoryService>();
 // Payment
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+// Import Receipt
+builder.Services.AddScoped<IImportReceiptRepository, ImportReceiptRepository>();
+builder.Services.AddScoped<IImportReceiptService, ImportReceiptService>();
 
 var app = builder.Build();
 

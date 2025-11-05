@@ -19,6 +19,10 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Customer> Customers { get; set; }
 
+    public virtual DbSet<ImportItem> ImportItems { get; set; }
+
+    public virtual DbSet<ImportReceipt> ImportReceipts { get; set; }
+
     public virtual DbSet<Inventory> Inventories { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
@@ -85,6 +89,72 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnName("phone");
         });
 
+        modelBuilder.Entity<ImportItem>(entity =>
+        {
+            entity.HasKey(e => e.ImportItemId).HasName("PK__import_i__68BACFC3BC462D28");
+
+            entity.ToTable("import_items");
+
+            entity.Property(e => e.ImportItemId).HasColumnName("import_item_id");
+            entity.Property(e => e.ImportId).HasColumnName("import_id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.Subtotal)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("subtotal");
+            entity.Property(e => e.UnitPrice)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("unit_price");
+
+            entity.HasOne(d => d.Import).WithMany(p => p.ImportItems)
+                .HasForeignKey(d => d.ImportId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_import_items_import");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.ImportItems)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_import_items_product");
+        });
+
+        modelBuilder.Entity<ImportReceipt>(entity =>
+        {
+            entity.HasKey(e => e.ImportId).HasName("PK__import_r__F3E6B05FC1EBD501");
+
+            entity.ToTable("import_receipts");
+
+            entity.Property(e => e.ImportId).HasColumnName("import_id");
+            entity.Property(e => e.ImportDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("import_date");
+            entity.Property(e => e.Note)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("note");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasDefaultValue("pending")
+                .HasColumnName("status");
+            entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
+            entity.Property(e => e.TotalAmount)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("total_amount");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.Supplier).WithMany(p => p.ImportReceipts)
+                .HasForeignKey(d => d.SupplierId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_import_receipts_supplier");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ImportReceipts)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_import_receipts_user");
+        });
+
         modelBuilder.Entity<Inventory>(entity =>
         {
             entity.HasKey(e => e.InventoryId).HasName("PK__inventor__B59ACC49366891C1");
@@ -100,6 +170,12 @@ public partial class ApplicationDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
+
+            entity.HasOne(d => d.Product)
+                .WithMany()
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_inventory_product");
         });
 
         modelBuilder.Entity<Order>(entity =>
