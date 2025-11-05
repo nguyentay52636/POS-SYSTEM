@@ -9,7 +9,7 @@ import { Settings } from "lucide-react"
  export const navigation = (pathname: string) => [
     {
         name: "Tổng quan",
-        href: "/admin",
+        href: "/admin/sells",
         icon: BarChart3,
         current: pathname === "/admin/sells",
         badge: null,

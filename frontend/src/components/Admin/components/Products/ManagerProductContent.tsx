@@ -119,15 +119,15 @@ export default function ManagerProductContent() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 mx-2 my-4">
+        <div className="min-h-screen  mx-2 my-4">
             {/* Header */}
             <ManagerProductHeader />
 
             <div className="p-6 space-y-6 my-4">
                 <CardsStatProduct totalProducts={totalProducts} activeProducts={activeProducts} outOfStockProducts={outOfStockProducts} inactiveProducts={inactiveProducts} />
 
-                <Card className="bg-white shadow-sm border-0">
-                    <CardHeader className="border-b bg-gray-50/50">
+                <Card className="shadow-sm border-0">
+                    <CardHeader className="border-b dark:bg-gray-900/50">
                         <ActionHeaderTitle handleOpenAddDialog={handleOpenAddDialog} />
                     </CardHeader>
                     <CardContent className="p-6">

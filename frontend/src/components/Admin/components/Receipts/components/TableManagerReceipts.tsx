@@ -46,7 +46,7 @@ export default function TableManagerReceipts({
 
     return (
         <>
-            <Card className="bg-white shadow-sm">
+            <Card className="shadow-sm">
                 <CardHeader>
                     <CardTitle>Danh sách phiếu nhập</CardTitle>
                 </CardHeader>
@@ -54,37 +54,37 @@ export default function TableManagerReceipts({
                     <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
-                                <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100">
-                                    <TableHead className="font-semibold text-gray-900">Mã phiếu</TableHead>
-                                    <TableHead className="font-semibold text-gray-900">Nhà cung cấp</TableHead>
-                                    <TableHead className="font-semibold text-gray-900">Người nhập</TableHead>
-                                    <TableHead className="font-semibold text-gray-900">Ngày nhập</TableHead>
-                                    <TableHead className="font-semibold text-gray-900">Tổng tiền</TableHead>
-                                    <TableHead className="font-semibold text-gray-900">Trạng thái</TableHead>
-                                    <TableHead className="text-right font-semibold text-gray-900">Thao tác</TableHead>
+                                <TableRow className=" dark:bg-gray-900/50">
+                                    <TableHead className="font-semibold text-gray-900 dark:text-white">Mã phiếu</TableHead>
+                                    <TableHead className="font-semibold text-gray-900 dark:text-white">Nhà cung cấp</TableHead>
+                                    <TableHead className="font-semibold text-gray-900 dark:text-white">Người nhập</TableHead>
+                                    <TableHead className="font-semibold text-gray-900 dark:text-white">Ngày nhập</TableHead>
+                                    <TableHead className="font-semibold text-gray-900 dark:text-white">Tổng tiền</TableHead>
+                                    <TableHead className="font-semibold text-gray-900 dark:text-white">Trạng thái</TableHead>
+                                    <TableHead className="text-right font-semibold text-gray-900 dark:text-white">Thao tác</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {filteredReceipts.map((receipt) => (
                                     <TableRow key={receipt.importId || receipt.import_id} className="hover:bg-gray-50">
                                         <TableCell className="font-medium">
-                                            <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
+                                            <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm dark:bg-gray-900/50 dark:text-white">
                                                 #{receipt.importId || receipt.import_id}
                                             </span>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="font-medium text-gray-900">
+                                            <div className="font-medium text-gray-900 dark:text-white">
                                                 {receipt.supplierName || receipt.supplier?.name || 'N/A'}
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-gray-600">
+                                        <TableCell className="text-gray-600 dark:text-white">
                                             {receipt.userName || receipt.user?.full_name || receipt.userId || receipt.user_id}
                                         </TableCell>
-                                        <TableCell className="text-gray-600">
+                                        <TableCell className="text-gray-600 dark:text-white">
                                             {new Date(receipt.importDate || receipt.import_date || '').toLocaleDateString('vi-VN')}
                                         </TableCell>
                                         <TableCell>
-                                            <p className="font-semibold text-blue-600">{formatPrice(receipt.totalAmount || receipt.total_amount || 0)}</p>
+                                            <p className="font-semibold text-blue-600 dark:text-white           ">{formatPrice(receipt.totalAmount || receipt.total_amount || 0)}</p>
                                         </TableCell>
                                         <TableCell>
                                             {getStatusBadge(receipt.status)}

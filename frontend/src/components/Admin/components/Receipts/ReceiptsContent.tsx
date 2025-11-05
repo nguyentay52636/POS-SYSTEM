@@ -108,7 +108,7 @@ export default function ReceiptsContent() {
 
     if (loading) {
         return (
-            <div className="bg-gradient-to-br from-green-50 via-blue-50 to-white p-6 min-h-screen flex items-center justify-center">
+            <div className=" p-6 min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mx-auto"></div>
                     <p className="mt-4 text-gray-600">Đang tải dữ liệu...</p>
@@ -118,7 +118,7 @@ export default function ReceiptsContent() {
     }
 
     return (
-        <div className="bg-gradient-to-br from-green-50 via-blue-50 to-white p-6">
+        <div className=" p-6">
             <div className="mx-auto space-y-6">
                 <HeaderManagerReceipts
                     isAddDialogOpen={isAddDialogOpen}

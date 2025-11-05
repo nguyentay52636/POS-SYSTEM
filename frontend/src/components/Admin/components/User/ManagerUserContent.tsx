@@ -16,7 +16,7 @@ export default function ManagerUserContent() {
     const [error, setError] = useState<string | null>(null)
     const [users, setUsers] = useState<IUser[]>([])
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-    
+
     // Dialog states
     const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -51,23 +51,23 @@ export default function ManagerUserContent() {
     }, [users, searchQuery])
 
     const handleAddAccount = () => { }
-    
+
     // Handlers for table actions
     const handleView = (user: IUser) => {
         setSelectedUser(user)
         setIsViewDialogOpen(true)
     }
-    
+
     const handleEdit = (user: IUser) => {
         setSelectedUser(user)
         setIsEditDialogOpen(true)
     }
-    
+
     const handleDelete = (user: IUser) => {
         setSelectedUser(user)
         setIsDeleteDialogOpen(true)
     }
-    
+
     const handleUpdateUser = async () => {
         // Refresh the user list
         try {
@@ -77,7 +77,7 @@ export default function ManagerUserContent() {
             console.error("Failed to refresh users:", e)
         }
     }
-    
+
     const handleConfirmDelete = async () => {
         // Refresh the user list
         try {
@@ -90,7 +90,7 @@ export default function ManagerUserContent() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+            <div className="min-h-screen">
                 <div className="p-6 space-y-8">
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
@@ -104,7 +104,7 @@ export default function ManagerUserContent() {
     }
 
     return (
-        <div className=" bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <div className=" ">
             <div className="p-6 space-y-8">
                 <HeaderManagerUser isAddDialogOpen={isAddDialogOpen} setIsAddDialogOpen={setIsAddDialogOpen} />
                 {error ? (
@@ -122,13 +122,13 @@ export default function ManagerUserContent() {
                         <PaginationManagerUser totalItems={filteredUsers.length} />
                     </>
                 )}
-                
+
                 {/* Dialogs */}
-                <DialogAddUser 
+                <DialogAddUser
                     isAddDialogOpen={isAddDialogOpen}
                     setIsAddDialogOpen={setIsAddDialogOpen}
                 />
-                
+
                 {selectedUser && (
                     <>
                         <DialogEditUser
@@ -137,13 +137,13 @@ export default function ManagerUserContent() {
                             setIsEditDialogOpen={setIsEditDialogOpen}
                             onUpdateUser={handleUpdateUser}
                         />
-                        
+
                         <DialogViewDetails
                             user={selectedUser}
                             isViewDialogOpen={isViewDialogOpen}
                             setIsViewDialogOpen={setIsViewDialogOpen}
                         />
-                        
+
                         <DialogConfirmDelete
                             user={selectedUser}
                             isDeleteDialogOpen={isDeleteDialogOpen}

@@ -7,11 +7,11 @@ export default function ActionHeaderTitle({ handleOpenAddDialog }: { handleOpenA
     return (
         <div className="flex items-center justify-between">
             <div>
-                <CardTitle className="text-xl text-gray-900 flex items-center">
-                    <Package className="h-5 w-5 mr-2 text-green-700" />
+                <CardTitle className="text-xl text-gray-900 dark:text-white flex items-center">
+                    <Package className="h-5 w-5 mr-2 text-green-700 dark:text-white" />
                     Danh sách sản phẩm
                 </CardTitle>
-                <CardDescription className="mt-1">Quản lý tất cả sản phẩm trong cửa hàng</CardDescription>
+                <CardDescription className="mt-1 text-gray-500 dark:text-white">Quản lý tất cả sản phẩm trong cửa hàng</CardDescription>
             </div>
             <div className="flex items-center space-x-3">
                 <Button variant="outline" size="sm" className="hover:bg-gray-50 bg-transparent">

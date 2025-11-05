@@ -22,14 +22,14 @@ export default function DialogAddReceipt({ isAddDialogOpen, setIsAddDialogOpen, 
         <>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                    <Button className="bg-green-700 hover:bg-green-800">
+                    <Button className="bg-green-700 hover:bg-green-800  dark:text-white!">
                         <Plus className="h-4 w-4 mr-2" />
                         Thêm phiếu nhập
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Thêm phiếu nhập mới</DialogTitle>
+                        <DialogTitle className="text-gray-900 dark:text-white!">Thêm phiếu nhập mới</DialogTitle>
                     </DialogHeader>
                     <ReceiptForm
                         onSubmit={handleSubmit}

@@ -408,7 +408,7 @@ export default function SellsContent() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+        <div className="min-h-screen ">
             <HeaderSells cart={cart} total={total} />
 
             <div className="flex h-[calc(100vh-100px)] overflow-hidden">
@@ -426,7 +426,7 @@ export default function SellsContent() {
                 </div>
 
                 {/* Right Panel - Cart */}
-                <div className="w-[480px] bg-white border-l border-green-200 shadow-xl flex flex-col">
+                <div className="w-[480px]  border-l border-green-200 shadow-xl flex flex-col">
                     {/* Cart Header */}
                     <HeaderCartSells cart={cart} total={total} stats={stats} clearCart={clearCart} />
 

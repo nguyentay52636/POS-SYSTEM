@@ -14,18 +14,18 @@ interface SearchCategoryProductProps {
 }
 export default function SearchCategoryProduct({ searchTerm, setSearchTerm, selectedCategory, setSelectedCategory, categories, statuses, selectedStatus, setSelectedStatus }: SearchCategoryProductProps) {
     return (
-        <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border">
+        <div className="flex flex-wrap items-center gap-4 mb-6 p-4 dark:bg-gray-900/50 rounded-xl border">
             <div className="relative flex-1 min-w-64">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                     placeholder="Tìm kiếm theo tên hoặc mã sản phẩm..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-white border-gray-200 focus:border-green-500 focus:ring-green-500"
+                    className="pl-10 bg-white border-gray-200 focus:border-green-500 focus:ring-green-500 dark:bg-gray-900/50 dark:border-gray-700 dark:text-white"
                 />
             </div>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-48 bg-white border-gray-200">
+                <SelectTrigger className="w-48 bg-white border-gray-200 dark:bg-gray-900/50 dark:border-gray-700 dark:text-white">
                     <SelectValue placeholder="Danh mục" />
                 </SelectTrigger>
                 <SelectContent>
@@ -37,7 +37,7 @@ export default function SearchCategoryProduct({ searchTerm, setSearchTerm, selec
                 </SelectContent>
             </Select>
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-48 bg-white border-gray-200">
+                <SelectTrigger className="w-48 bg-white border-gray-200 dark:bg-gray-900/50 dark:border-gray-700 dark:text-white">
                     <SelectValue placeholder="Trạng thái" />
                 </SelectTrigger>
                 <SelectContent>

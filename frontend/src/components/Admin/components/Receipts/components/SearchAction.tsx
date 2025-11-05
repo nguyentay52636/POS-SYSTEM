@@ -14,7 +14,7 @@ interface SearchActionProps {
 
 export default function SearchAction({ searchTerm, setSearchTerm, statusFilter, setStatusFilter }: SearchActionProps) {
     return (
-        <Card className="bg-white shadow-sm">
+        <Card className="shadow-sm">
             <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1">
@@ -24,13 +24,13 @@ export default function SearchAction({ searchTerm, setSearchTerm, statusFilter, 
                                 placeholder="Tìm kiếm theo mã phiếu, nhà cung cấp, ghi chú..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10"
+                                className="pl-10 dark:bg-gray-900/50 dark:border-gray-700 dark:text-white"
                             />
                         </div>
                     </div>
                     <div className="flex gap-2">
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-[180px]">
+                            <SelectTrigger className="w-[180px] dark:bg-gray-900/50 dark:border-gray-700 dark:text-white    dark:hover:bg-gray-900/50">
                                 <Filter className="h-4 w-4 mr-2" />
                                 <SelectValue placeholder="Lọc trạng thái" />
                             </SelectTrigger>
