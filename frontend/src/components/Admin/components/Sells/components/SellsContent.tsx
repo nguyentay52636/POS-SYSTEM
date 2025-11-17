@@ -433,7 +433,7 @@ export default function SellsContent() {
                     {/* Cart Items */}
                     <CartItem cart={cart} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />
 
-                    <div className="p-6 border-t border-green-200 bg-gradient-to-br from-green-50 to-white">
+                    <div className="p-6 border-t border-green-200">
                         {/* Promotion Code */}
                         <PromotionCodeSells
                             promoCode={promoCode}
@@ -463,7 +463,7 @@ export default function SellsContent() {
                                 </div>
                             )}
                             <Separator className="my-3" />
-                            <div className="flex justify-between text-lg font-bold bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+                            <div className="flex justify-between text-lg font-bold p-4 rounded-lg border border-green-200">
                                 <span className="text-gray-900">Tổng cộng:</span>
                                 <span className="text-green-700">{total.toLocaleString("vi-VN")}đ</span>
                             </div>
@@ -472,7 +472,7 @@ export default function SellsContent() {
                         <Button
                             onClick={handlePayment}
                             disabled={cart.length === 0}
-                            className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full text-white h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200  disabled:cursor-not-allowed"
                         >
                             <CreditCard className="mr-2 h-5 w-5" />
                             Thanh toán ngay

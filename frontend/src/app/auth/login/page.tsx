@@ -97,39 +97,39 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen flex">
             {/* Left Side - Hero Section */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-100 to-green-200 relative overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 bg-green-800 relative overflow-hidden">
                 <div className="flex flex-col justify-center px-12 z-10 max-w-lg">
-                    <h1 className="text-4xl font-bold text-gray-800 mb-6 leading-tight">
+                    <h1 className="text-4xl font-bold text-white mb-6 leading-tight">
                         Mua sắm dễ dàng tại{" "}
-                        <span className="text-green-700 bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent">
+                        <span className="text-white bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent">
                             GroceryMart
                         </span>
                     </h1>
-                    <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                    <p className="text-lg text-white mb-8 leading-relaxed">
                         Khám phá hàng ngàn sản phẩm chất lượng với giá tốt nhất!
                     </p>
                     <div className="flex space-x-8">
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-green-700">500+</div>
-                            <div className="text-sm text-gray-600">Sản phẩm</div>
+                            <div className="text-2xl font-bold text-white">500+</div>
+                            <div className="text-sm text-white">Sản phẩm</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-green-700">1K+</div>
-                            <div className="text-sm text-gray-600">Khách hàng</div>
+                            <div className="text-2xl font-bold text-white">1K+</div>
+                            <div className="text-sm text-white">Khách hàng</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-green-700">10+</div>
-                            <div className="text-sm text-gray-600">Năm kinh nghiệm</div>
+                            <div className="text-2xl font-bold text-white">10+</div>
+                            <div className="text-sm text-white">Năm kinh nghiệm</div>
                         </div>
                     </div>
                 </div>
                 <div className="absolute bottom-0 right-0 w-3/5 h-3/5 rounded-tl-[4rem] overflow-hidden shadow-2xl">
                     <Image
-                        src="/images/retail-login.jpg"
+                        src="/images/bg-y.jpg"
                         alt="Grocery Store"
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover"
+                        className="object-cover brightness-50"
                         priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -147,7 +147,7 @@ export default function LoginPage() {
                     {/* Mobile Logo */}
                     <div className="lg:hidden flex flex-col items-center mb-4">
                         <Image
-                            src="/logo-grocery.png"
+                            src="/images/bg-y.jpg"
                             alt="GroceryMart Logo"
                             width={60}
                             height={60}

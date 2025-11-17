@@ -211,11 +211,11 @@ export default function SuppliersContent() {
             console.log("Updating supplier with ID:", supplierId, "Data:", data)
             const updatedSupplier = await updateSupplier(supplierId, data)
             console.log("Updated supplier from API:", updatedSupplier)
-            
+
             // Normalize supplier data trước khi cập nhật vào state
             const normalizedSupplier = normalizeSupplier(updatedSupplier)
             console.log("Normalized supplier:", normalizedSupplier)
-            
+
             // Cập nhật danh sách suppliers - xử lý cả supplier_id và supplierId
             setSuppliers(suppliers.map((s) => {
                 const currentId = s.supplier_id || s.supplierId
@@ -223,7 +223,7 @@ export default function SuppliersContent() {
                 console.log(`Comparing supplier ${s.name}: currentId=${currentId}, supplierId=${supplierId}, match=${isMatch}`)
                 return isMatch ? normalizedSupplier : s
             }))
-            
+
             setIsEditDialogOpen(false)
             setSelectedSupplier(null)
             toast.success("Cập nhật nhà cung cấp thành công!")
@@ -263,7 +263,7 @@ export default function SuppliersContent() {
 
     if (loading) {
         return (
-            <div className="bg-gradient-to-br from-green-50 via-blue-50 to-white p-6 min-h-screen flex items-center justify-center">
+            <div className=" to-white p-6 min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mx-auto"></div>
                     <p className="mt-4 text-gray-600">Đang tải dữ liệu...</p>
@@ -273,7 +273,7 @@ export default function SuppliersContent() {
     }
 
     return (
-        <div className="bg-gradient-to-br from-green-50 via-blue-50 to-white p-6">
+        <div className=" p-6">
             <div className="mx-auto space-y-6">
                 <HeaderManagerSupplier
                     isAddDialogOpen={isAddDialogOpen}

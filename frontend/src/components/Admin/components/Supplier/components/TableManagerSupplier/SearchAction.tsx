@@ -12,7 +12,7 @@ interface SearchActionProps {
 }
 export default function SearchAction({ searchTerm, setSearchTerm, statusFilter, setStatusFilter }: SearchActionProps) {
     return (
-        <Card className="bg-white shadow-sm">
+        <Card className="shadow-sm">
             <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1">

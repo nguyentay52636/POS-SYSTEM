@@ -40,7 +40,7 @@ export default function DialogPayment({
                 </DialogHeader>
 
                 <div className="space-y-6">
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 shadow-sm">
+                    <div className=" p-6 rounded-xl border border-green-200 shadow-sm">
                         <p className="text-sm font-medium text-gray-600 mb-2">Tổng thanh toán</p>
                         <p className="text-3xl font-bold text-green-700">{total.toLocaleString("vi-VN")}đ</p>
                     </div>

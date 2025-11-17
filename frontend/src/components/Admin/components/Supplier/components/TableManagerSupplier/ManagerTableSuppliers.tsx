@@ -19,7 +19,7 @@ interface ManagerTableSuppliersProps {
 export default function ManagerTableSuppliers({ suppliers, filteredSuppliers, setSelectedSupplier, setIsImportDialogOpen, setIsDetailDialogOpen, setIsEditDialogOpen, handleDeleteSupplier }: ManagerTableSuppliersProps) {
     return (
         <>
-            <Card className="bg-white shadow-sm">
+            <Card className="shadow-sm">
                 <CardHeader>
                     <CardTitle>Danh sách nhà cung cấp</CardTitle>
                 </CardHeader>
@@ -27,7 +27,7 @@ export default function ManagerTableSuppliers({ suppliers, filteredSuppliers, se
                     <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
-                                <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100">
+                                <TableRow className="">
                                     <TableHead className="font-semibold text-gray-900">Mã NCC</TableHead>
                                     <TableHead className="font-semibold text-gray-900">Tên nhà cung cấp</TableHead>
                                     <TableHead className="font-semibold text-gray-900">Liên hệ</TableHead>
@@ -41,27 +41,27 @@ export default function ManagerTableSuppliers({ suppliers, filteredSuppliers, se
                                 {filteredSuppliers.map((supplier) => (
                                     <TableRow key={supplier.supplier_id} className="hover:bg-gray-50">
                                         <TableCell className="font-medium">
-                                            <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
+                                            <span className="px-2 py-1 dark:text-white text-gray-800 rounded text-sm">
                                                 {supplier.supplier_id}
                                             </span>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="font-medium text-gray-900">{supplier.name}</div>
+                                            <div className="font-medium dark:text-white text-gray-900">{supplier.name}</div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="space-y-1">
-                                                <div className="flex items-center gap-1 text-sm text-gray-600">
+                                                <div className="flex items-center gap-1 text-sm dark:text-white text-gray-600">
                                                     <Phone className="h-3 w-3" />
                                                     {supplier.phone}
                                                 </div>
-                                                <div className="flex items-center gap-1 text-sm text-gray-600">
+                                                <div className="flex items-center gap-1 text-sm dark:text-white text-gray-600">
                                                     <Mail className="h-3 w-3" />
                                                     {supplier.email}
                                                 </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex items-center gap-1 text-sm text-gray-600">
+                                            <div className="flex items-center gap-1 text-sm dark:text-white text-gray-600">
                                                 <MapPin className="h-3 w-3" />
                                                 <span className="truncate max-w-[200px]">{supplier.address}</span>
                                             </div>
@@ -69,12 +69,12 @@ export default function ManagerTableSuppliers({ suppliers, filteredSuppliers, se
                                         <TableCell>
                                             <Badge
                                                 variant="default"
-                                                className="bg-green-100 text-green-800 hover:bg-green-200"
+                                                className="dark:bg-green-100 dark:text-green-800 bg-green-100 text-green-800 hover:bg-green-200"
                                             >
                                                 Hoạt động
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-gray-600">{new Date(supplier?.createdAt || "").toLocaleDateString()}</TableCell>
+                                        <TableCell className="dark:text-white text-gray-600">{new Date(supplier?.createdAt || "").toLocaleDateString()}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                                 <Button
@@ -84,7 +84,7 @@ export default function ManagerTableSuppliers({ suppliers, filteredSuppliers, se
                                                         setSelectedSupplier(supplier)
                                                         setIsImportDialogOpen(true)
                                                     }}
-                                                    className="bg-green-50 text-green-700 hover:bg-green-100 border-green-200"
+                                                    className="dark:bg-green-50 dark:text-green-700 bg-green-50 text-green-700 hover:bg-green-100 border-green-200"
                                                     disabled={false}
                                                 >
                                                     <ShoppingCart className="h-4 w-4" />
@@ -113,7 +113,7 @@ export default function ManagerTableSuppliers({ suppliers, filteredSuppliers, se
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => handleDeleteSupplier(supplier.supplier_id)}
-                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    className="dark:text-red-600 dark:hover:text-red-700 dark:hover:bg-red-50 text-red-600 hover:text-red-700 hover:bg-red-50"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>

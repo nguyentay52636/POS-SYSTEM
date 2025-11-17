@@ -9,9 +9,9 @@ import { Settings } from "lucide-react"
  export const navigation = (pathname: string) => [
     {
         name: "Tổng quan",
-        href: "/admin/sells",
+        href: "/admin/dashboard",
         icon: BarChart3,
-        current: pathname === "/admin/sells",
+        current: pathname === "/admin/dashboard",
         badge: null,
     },
     {

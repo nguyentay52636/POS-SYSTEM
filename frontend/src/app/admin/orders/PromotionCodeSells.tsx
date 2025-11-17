@@ -62,7 +62,7 @@ export default function PromotionCodeSells({
                         </Button>
                     </div>
                 ) : (
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 shadow-sm">
+                    <div className="border border-green-200 rounded-lg p-4 shadow-sm">
                         <div className="flex items-start justify-between">
                             <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
