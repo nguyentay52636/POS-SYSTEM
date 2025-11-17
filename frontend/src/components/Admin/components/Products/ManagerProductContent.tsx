@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import ManagerProductHeader from "./components/ManagerProductHeader"
@@ -12,6 +12,7 @@ import SearchCategoryProduct from "./components/Handler/SearchCategoryProduct"
 import { FormProduct } from "./components/Dialog/FormProduct"
 import PaginationManagerProduct from "./components/PaginationManagerProduct"
 import ManagerTableProducts from "./components/ManagerTableProducts"
+import { usePagination } from "@/context/PaginationContext"
 
 
 
@@ -32,14 +33,24 @@ export default function ManagerProductContent() {
     const outOfStockProducts = products.filter((p) => p.status === "out-of-stock").length
     const inactiveProducts = products.filter((p) => p.status === "inactive").length
 
-    const filteredProducts = products.filter((product) => {
-        const matchesSearch =
-            product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            product.product_id.toString().includes(searchTerm.toLowerCase())
-        const matchesCategory = selectedCategory === "all" || product.category_id.category_name === selectedCategory
-        const matchesStatus = selectedStatus === "all" || product.status === selectedStatus
-        return matchesSearch && matchesCategory && matchesStatus
-    })
+    const { paginationState } = usePagination()
+
+    const filteredProducts = useMemo(() => {
+        return products.filter((product) => {
+            const matchesSearch =
+                product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.product_id.toString().includes(searchTerm.toLowerCase())
+            const matchesCategory = selectedCategory === "all" || product.category_id.category_name === selectedCategory
+            const matchesStatus = selectedStatus === "all" || product.status === selectedStatus
+            return matchesSearch && matchesCategory && matchesStatus
+        })
+    }, [products, searchTerm, selectedCategory, selectedStatus])
+
+    const paginatedProducts = useMemo(() => {
+        const startIndex = (paginationState.currentPage - 1) * paginationState.rowsPerPage
+        const endIndex = startIndex + paginationState.rowsPerPage
+        return filteredProducts.slice(startIndex, endIndex)
+    }, [filteredProducts, paginationState.currentPage, paginationState.rowsPerPage])
 
 
 
@@ -134,7 +145,7 @@ export default function ManagerProductContent() {
                         <SearchCategoryProduct searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} categories={categories} statuses={statuses} selectedStatus={selectedStatus} setSelectedStatus={setSelectedStatus} />
 
                         <ManagerTableProducts
-                            products={filteredProducts}
+                            products={paginatedProducts}
                             formatPrice={formatPrice}
                             getStatusBadge={getStatusBadge}
                             handleViewDetails={handleViewDetails}

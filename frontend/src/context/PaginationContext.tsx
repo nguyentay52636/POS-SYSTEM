@@ -36,29 +36,39 @@ export function PaginationProvider({
     children,
     initialRowsPerPage = 8
 }: PaginationProviderProps) {
+    const calculateTotalPages = useCallback(
+        (total: number, rows: number) => Math.max(1, Math.ceil(total / rows)),
+        []
+    )
+
     const [paginationState, setPaginationState] = useState<PaginationState>({
         ...defaultPaginationState,
         rowsPerPage: initialRowsPerPage,
+        totalPages: calculateTotalPages(defaultPaginationState.totalItems, initialRowsPerPage),
     });
 
     const setCurrentPage = useCallback((page: number) => {
         setPaginationState(prev => ({
             ...prev,
-            currentPage: page,
+            currentPage: Math.min(Math.max(page, 1), prev.totalPages),
         }));
     }, []);
 
     const setRowsPerPage = useCallback((rows: number) => {
-        setPaginationState(prev => ({
-            ...prev,
-            rowsPerPage: rows,
-            currentPage: 1,
-        }));
-    }, []);
+        setPaginationState(prev => {
+            const nextTotalPages = calculateTotalPages(prev.totalItems, rows)
+            return {
+                ...prev,
+                rowsPerPage: rows,
+                totalPages: nextTotalPages,
+                currentPage: Math.min(prev.currentPage, nextTotalPages),
+            }
+        });
+    }, [calculateTotalPages]);
 
     const setTotalItems = useCallback((total: number) => {
         setPaginationState(prev => {
-            const nextTotalPages = Math.max(1, Math.ceil(total / prev.rowsPerPage));
+            const nextTotalPages = calculateTotalPages(total, prev.rowsPerPage);
             if (prev.totalItems === total && prev.totalPages === nextTotalPages) {
                 return prev;
             }
@@ -66,14 +76,16 @@ export function PaginationProvider({
                 ...prev,
                 totalItems: total,
                 totalPages: nextTotalPages,
+                currentPage: Math.min(prev.currentPage, nextTotalPages),
             };
         });
-    }, []);
+    }, [calculateTotalPages]);
 
     const setTotalPages = useCallback((pages: number) => {
         setPaginationState(prev => ({
             ...prev,
             totalPages: pages,
+            currentPage: Math.min(prev.currentPage, Math.max(1, pages)),
         }));
     }, []);
 
@@ -81,8 +93,9 @@ export function PaginationProvider({
         setPaginationState({
             ...defaultPaginationState,
             rowsPerPage: initialRowsPerPage,
+            totalPages: calculateTotalPages(defaultPaginationState.totalItems, initialRowsPerPage),
         });
-    }, [initialRowsPerPage]);
+    }, [calculateTotalPages, initialRowsPerPage]);
 
     const value: PaginationContextType = useMemo(() => ({
         paginationState,

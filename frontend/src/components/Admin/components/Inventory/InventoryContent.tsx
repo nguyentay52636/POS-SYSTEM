@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { IInventory } from "@/types/types"
 import StatsCard from "./components/StatsCard"
 import SearchAction from "./components/SearchAction"
@@ -11,6 +11,7 @@ import { toast } from "sonner"
 import HeaderManagerInventory from "./components/HeaderManagerInventory"
 import EditInventoryDialog from "./components/Dialog/EditInventory/EditInventoryDialog"
 import ViewDetailsInventory from "./components/Dialog/ViewDetailsInventory/ViewDetailsInventory"
+import { usePagination } from "@/context/PaginationContext"
 
 export default function InventoryContent() {
     const [inventories, setInventories] = useState<IInventory[]>([])
@@ -39,14 +40,24 @@ export default function InventoryContent() {
         }
     }
 
-    const filteredInventories = inventories.filter((inventory) => {
-        const matchesSearch =
-            inventory.product?.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            inventory.inventory_id.toString().includes(searchTerm.toLowerCase()) ||
-            inventory.product_id.toString().includes(searchTerm.toLowerCase())
+    const { paginationState } = usePagination()
 
-        return matchesSearch
-    })
+    const filteredInventories = useMemo(() => {
+        return inventories.filter((inventory) => {
+            const matchesSearch =
+                inventory.product?.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                inventory.inventory_id.toString().includes(searchTerm.toLowerCase()) ||
+                inventory.product_id.toString().includes(searchTerm.toLowerCase())
+
+            return matchesSearch
+        })
+    }, [inventories, searchTerm])
+
+    const paginatedInventories = useMemo(() => {
+        const startIndex = (paginationState.currentPage - 1) * paginationState.rowsPerPage
+        const endIndex = startIndex + paginationState.rowsPerPage
+        return filteredInventories.slice(startIndex, endIndex)
+    }, [filteredInventories, paginationState.currentPage, paginationState.rowsPerPage])
 
     const totalInventories = inventories.length
     const lowStockInventories = inventories.filter(i => i.quantity < 10).length
@@ -128,7 +139,7 @@ export default function InventoryContent() {
                 />
                 <TableManagerInventory
                     inventories={inventories}
-                    filteredInventories={filteredInventories}
+                    filteredInventories={paginatedInventories}
                     setSelectedInventory={setSelectedInventory}
                     setIsDetailDialogOpen={setIsDetailDialogOpen}
                     setIsEditDialogOpen={setIsEditDialogOpen}

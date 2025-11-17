@@ -98,6 +98,15 @@ export default function LoginPage() {
         <div className="min-h-screen flex">
             {/* Left Side - Hero Section */}
             <div className="hidden lg:flex lg:w-1/2 bg-green-800 relative overflow-hidden">
+                <Image
+                    src="/images/bg-y.jpg"
+                    alt="Grocery Store"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
+                    priority
+                />
+                <div className="absolute inset-0 bg-green-900/50" />
                 <div className="flex flex-col justify-center px-12 z-10 max-w-lg">
                     <h1 className="text-4xl font-bold text-white mb-6 leading-tight">
                         Mua sắm dễ dàng tại{" "}
@@ -122,17 +131,6 @@ export default function LoginPage() {
                             <div className="text-sm text-white">Năm kinh nghiệm</div>
                         </div>
                     </div>
-                </div>
-                <div className="absolute bottom-0 right-0 w-3/5 h-3/5 rounded-tl-[4rem] overflow-hidden shadow-2xl">
-                    <Image
-                        src="/images/bg-y.jpg"
-                        alt="Grocery Store"
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover brightness-50"
-                        priority
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                 </div>
             </div>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { ISupplier, SanPham } from "@/types/types"
 import StatsCard from "./components/StatsCard"
 import SearchAction from "./components/TableManagerSupplier/SearchAction"
@@ -12,6 +12,7 @@ import ViewDetailsSuppliers from "./components/Dialog/ViewDetailsSuppliers/ViewD
 import DialogEditSupplier from "./components/Dialog/EditSupplier/DialogEditSupplier"
 import { getAllSuppliers, addSupplier, updateSupplier, deleteSupplier, CreateSupplierDTO, UpdateSupplierDTO } from "@/apis/supplierApi"
 import { toast } from "sonner"
+import { usePagination } from "@/context/PaginationContext"
 
 export default function SuppliersContent() {
     const [suppliers, setSuppliers] = useState<ISupplier[]>([])
@@ -172,16 +173,26 @@ export default function SuppliersContent() {
         }
     }
 
-    const filteredSuppliers = suppliers.filter((supplier) => {
-        const matchesSearch =
-            supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            supplier.supplier_id.toString().includes(searchTerm.toLowerCase()) ||
-            supplier.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const { paginationState } = usePagination()
 
-        const matchesStatus = statusFilter === "all" || supplier.trangThai === statusFilter
+    const filteredSuppliers = useMemo(() => {
+        return suppliers.filter((supplier) => {
+            const matchesSearch =
+                supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                supplier.supplier_id.toString().includes(searchTerm.toLowerCase()) ||
+                supplier.email.toLowerCase().includes(searchTerm.toLowerCase())
 
-        return matchesSearch && matchesStatus
-    })
+            const matchesStatus = statusFilter === "all" || supplier.trangThai === statusFilter
+
+            return matchesSearch && matchesStatus
+        })
+    }, [suppliers, searchTerm, statusFilter])
+
+    const paginatedSuppliers = useMemo(() => {
+        const startIndex = (paginationState.currentPage - 1) * paginationState.rowsPerPage
+        const endIndex = startIndex + paginationState.rowsPerPage
+        return filteredSuppliers.slice(startIndex, endIndex)
+    }, [filteredSuppliers, paginationState.currentPage, paginationState.rowsPerPage])
 
     const totalSuppliers = suppliers.length
     const activeSuppliers = suppliers.filter(s => s.trangThai === "active").length
@@ -293,7 +304,7 @@ export default function SuppliersContent() {
                 />
                 <ManagerTableSuppliers
                     suppliers={suppliers}
-                    filteredSuppliers={filteredSuppliers}
+                    filteredSuppliers={paginatedSuppliers}
                     setSelectedSupplier={setSelectedSupplier}
                     setIsImportDialogOpen={setIsImportDialogOpen}
                     setIsDetailDialogOpen={setIsDetailDialogOpen}

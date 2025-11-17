@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Plus } from "lucide-react"
@@ -11,10 +11,10 @@ import CardStats from "@/components/Admin/components/Promotion/components/CardSt
 import { Promotion, getAllPromotions, addPromotions, deletePromotions, updatePromotions } from "@/apis/promotionsApi"
 import { toast } from "sonner"
 // removed unused DialogAddPromotions
+import { usePagination } from "@/context/PaginationContext"
 
 export default function ManagerPromotionsContent() {
     const [promotions, setPromotions] = useState<Promotion[]>([])
-    const [filteredPromotions, setFilteredPromotions] = useState<Promotion[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [isFormOpen, setIsFormOpen] = useState(false)
@@ -41,7 +41,9 @@ export default function ManagerPromotionsContent() {
         fetchPromotions()
     }, [])
 
-    useEffect(() => {
+    const { paginationState } = usePagination()
+
+    const filteredPromotions = useMemo(() => {
         let filtered = promotions
         if (searchTerm) {
             filtered = filtered.filter(
@@ -54,8 +56,14 @@ export default function ManagerPromotionsContent() {
             filtered = filtered.filter((p) => p.status === statusFilter)
         }
 
-        setFilteredPromotions(filtered)
+        return filtered
     }, [promotions, searchTerm, statusFilter])
+
+    const paginatedPromotions = useMemo(() => {
+        const startIndex = (paginationState.currentPage - 1) * paginationState.rowsPerPage
+        const endIndex = startIndex + paginationState.rowsPerPage
+        return filteredPromotions.slice(startIndex, endIndex)
+    }, [filteredPromotions, paginationState.currentPage, paginationState.rowsPerPage])
 
     const stats = {
         total: promotions.length,
@@ -207,7 +215,7 @@ export default function ManagerPromotionsContent() {
 
                 {/* Promotions Table */}
                 <TableManagerPromotions
-                    filteredPromotions={filteredPromotions}
+                    filteredPromotions={paginatedPromotions}
                     handleViewDetail={handleViewDetail}
                     handleEdit={handleEdit}
                     handleDelete={handleDelete}

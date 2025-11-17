@@ -9,6 +9,7 @@ import DialogViewDetails from './components/DIalog/DIalogVIewDetails'
 import DialogConfirmDelete from './components/DIalog/DIalogConfirmDelete'
 import { getAllUsers } from '../../../../apis/userApi'
 import { IUser } from '@/types/types'
+import { usePagination } from '@/context/PaginationContext'
 
 export default function ManagerUserContent() {
     const [searchQuery, setSearchQuery] = useState("")
@@ -40,6 +41,8 @@ export default function ManagerUserContent() {
         fetchUsers()
     }, [])
 
+    const { paginationState } = usePagination()
+
     const filteredUsers = useMemo(() => {
         if (!searchQuery) return users
         const q = searchQuery.toLowerCase().trim()
@@ -49,6 +52,12 @@ export default function ManagerUserContent() {
             u.role.toLowerCase().includes(q)
         )
     }, [users, searchQuery])
+
+    const paginatedUsers = useMemo(() => {
+        const startIndex = (paginationState.currentPage - 1) * paginationState.rowsPerPage
+        const endIndex = startIndex + paginationState.rowsPerPage
+        return filteredUsers.slice(startIndex, endIndex)
+    }, [filteredUsers, paginationState.currentPage, paginationState.rowsPerPage])
 
     const handleAddAccount = () => { }
 
@@ -112,7 +121,7 @@ export default function ManagerUserContent() {
                 ) : (
                     <>
                         <TableManagerUser
-                            users={filteredUsers}
+                            users={paginatedUsers}
                             searchQuery={searchQuery}
                             setSearchQuery={setSearchQuery}
                             onView={handleView}
