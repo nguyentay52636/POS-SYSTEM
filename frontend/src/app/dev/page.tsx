@@ -40,7 +40,7 @@ export default function Page() {
                         className="bg-white shadow rounded-lg p-4 border"
                     >
                         <img
-                            src={p.image}
+                            src={p.image_url}
                             alt={p.product_name}
                             className="w-full h-40 object-cover rounded"
                         />

@@ -110,19 +110,17 @@ export interface IInventory {
   product?: IProduct; // Full product information
 }
 export interface IProduct {
-  product_id: number;
-  category_id: ICategory;
-  supplier_id: ISupplier;
+  product_id?: number;
+  category_id?: ICategory;
+  supplier_id?: ISupplier;
   product_name: string;
   barcode: string;
   price: number;
-  image: string;
+  image_url: string;
   unit: number;
-  xuatXu: string;
   status: string;
-  createdAt: string;
-  updatedAt: string;
-  hsd: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 export interface ICustomer {
   customer_id: number;
