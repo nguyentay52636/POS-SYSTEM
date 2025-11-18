@@ -17,7 +17,7 @@ interface DialogConfirmDeleteProps {
     user: IUser
     isDeleteDialogOpen: boolean
     setIsDeleteDialogOpen: (open: boolean) => void
-    onConfirmDelete: (userId: string) => void
+    onConfirmDelete: (userId: number) => void
 }
 
 export default function DialogConfirmDelete({
@@ -36,7 +36,7 @@ export default function DialogConfirmDelete({
             toast.success("Xóa người dùng thành công!")
             
             // Call the callback to refresh the list
-            onConfirmDelete(user.user_id.toString())
+            onConfirmDelete(user.user_id)
             setIsDeleteDialogOpen(false)
         } catch (error) {
             console.error("Failed to delete user:", error)

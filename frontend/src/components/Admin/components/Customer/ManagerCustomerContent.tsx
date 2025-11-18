@@ -18,6 +18,7 @@ import {
 import CustomerFormDialog from "./components/CustomerFormDialog"; // NEW
 import { Button } from "@/components/ui/button"; // NEW
 import { Plus } from "lucide-react"; // NEW
+import { usePagination } from "@/context/PaginationContext";
 
 export default function ManagerCustomerContent() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,6 +48,8 @@ export default function ManagerCustomerContent() {
     loadData();
   }, [loadData]);
 
+  const { paginationState } = usePagination();
+
   const filteredCustomers = useMemo(() => {
     if (!searchQuery) return customers;
     const q = searchQuery.toLowerCase().trim();
@@ -57,6 +60,12 @@ export default function ManagerCustomerContent() {
       (c.address || "").toLowerCase().includes(q)
     );
   }, [customers, searchQuery]);
+
+  const paginatedCustomers = useMemo(() => {
+    const startIndex = (paginationState.currentPage - 1) * paginationState.rowsPerPage;
+    const endIndex = startIndex + paginationState.rowsPerPage;
+    return filteredCustomers.slice(startIndex, endIndex);
+  }, [filteredCustomers, paginationState.currentPage, paginationState.rowsPerPage]);
 
   const handleDelete = async (id: number) => {
     setRefreshing(true);
@@ -141,7 +150,7 @@ export default function ManagerCustomerContent() {
         ) : (
           <>
             <TableManagerCustomer
-              customers={filteredCustomers}
+              customers={paginatedCustomers}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               onEdit={handleEdit}

@@ -19,6 +19,10 @@ public class CreateProductDto
     [StringLength(50, ErrorMessage = "Unit cannot exceed 50 characters")]
     public string? Unit { get; set; }
 
+    [StringLength(255, ErrorMessage = "Image URL cannot exceed 255 characters")]
+    public string? ImageUrl { get; set; }
+    
+
     [Required(ErrorMessage = "Category ID is required")]
     public int CategoryId { get; set; }
 
@@ -39,6 +43,9 @@ public class UpdateProductDto
     [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
     public decimal Price { get; set; }
 
+    [StringLength(255, ErrorMessage = "Image URL cannot exceed 255 characters")]
+    public string? ImageUrl { get; set; }
+
     [StringLength(50, ErrorMessage = "Unit cannot exceed 50 characters")]
     public string? Unit { get; set; }
 
@@ -53,11 +60,14 @@ public class ProductResponseDto
 {
     public int ProductId { get; set; }
     public string? ProductName { get; set; }
+    public string? ImageUrl { get; set; }
     public string? Barcode { get; set; }
     public decimal? Price { get; set; }
     public string? Unit { get; set; }
     public int? CategoryId { get; set; }
     public int? SupplierId { get; set; }
+    public CategoryResponseDto? Category { get; set; }
+    public SupplierResponseDto? Supplier { get; set; }
     public DateTime? CreatedAt { get; set; }
 }
 

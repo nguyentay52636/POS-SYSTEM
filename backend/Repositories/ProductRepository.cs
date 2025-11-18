@@ -27,6 +27,14 @@ public class ProductRepository : IProductRepository
 {
     private readonly ApplicationDbContext _db;
 
+    private IQueryable<Product> QueryWithDetails()
+    {
+        return _db.Products
+            .AsNoTracking()
+            .Include(p => p.Category)
+            .Include(p => p.Supplier);
+    }
+
     public ProductRepository(ApplicationDbContext db)
     {
         _db = db;
@@ -37,17 +45,18 @@ public class ProductRepository : IProductRepository
         product.CreatedAt = DateTime.UtcNow;
         _db.Products.Add(product);
         await _db.SaveChangesAsync();
-        return product;
+        var created = await GetByIdAsync(product.ProductId);
+        return created ?? product;
     }
 
     public Task<Product?> GetByIdAsync(int id)
     {
-        return _db.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == id);
+        return QueryWithDetails().FirstOrDefaultAsync(p => p.ProductId == id);
     }
 
     public Task<Product?> GetByBarcodeAsync(string barcode)
     {
-        return _db.Products.AsNoTracking()
+        return QueryWithDetails()
             .FirstOrDefaultAsync(p => p.Barcode == barcode);
     }
 
@@ -55,7 +64,8 @@ public class ProductRepository : IProductRepository
     {
         _db.Products.Update(product);
         await _db.SaveChangesAsync();
-        return product;
+        var updated = await GetByIdAsync(product.ProductId);
+        return updated ?? product;
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -69,7 +79,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<(IReadOnlyList<Product> Items, int Total)> SearchAsync(ProductQueryParams query)
     {
-        IQueryable<Product> q = _db.Products.AsNoTracking();
+        IQueryable<Product> q = QueryWithDetails();
 
         // Apply filters
         q = q.WhereIf(!query.ProductName.IsNullOrWhiteSpace(),
@@ -106,8 +116,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<IReadOnlyList<Product>> ListAllAsync()
     {
-        return await _db.Products
-            .AsNoTracking()
+        return await QueryWithDetails()
             .OrderBy(p => p.ProductName)
             .ToListAsync();
     }

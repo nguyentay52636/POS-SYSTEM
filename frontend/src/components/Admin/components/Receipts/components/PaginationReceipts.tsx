@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import Pagination from '@/components/ui/pagination'
 import { usePagination } from '@/context/PaginationContext'
 
@@ -13,8 +14,13 @@ export default function PaginationReceipts({
     const {
         paginationState,
         setCurrentPage,
-        setRowsPerPage
+        setRowsPerPage,
+        setTotalItems
     } = usePagination()
+
+    useEffect(() => {
+        setTotalItems(totalItems)
+    }, [setTotalItems, totalItems])
 
     return (
         <Pagination

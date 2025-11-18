@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { IImportReceipt } from "@/types/types"
 import StatsCard from "./components/StatsCard"
 import SearchAction from "./components/SearchAction"
@@ -11,6 +11,7 @@ import { getAllImportReceipts, addImportReceipt, updateImportReceipt, deleteImpo
 import { toast } from "sonner"
 import ViewDetailsReceipts from "./components/Dialog/ViewDetailsReceipts/ViewDetailsReceipts"
 import EditReceiptDialog from "./components/Dialog/EditReceiptDialog"
+import { usePagination } from "@/context/PaginationContext"
 
 export default function ReceiptsContent() {
     const [receipts, setReceipts] = useState<IImportReceipt[]>([])
@@ -40,17 +41,27 @@ export default function ReceiptsContent() {
         }
     }
 
-    const filteredReceipts = receipts.filter((receipt) => {
-        const receiptId = (receipt.importId || receipt.import_id || 0).toString()
-        const matchesSearch =
-            receiptId.includes(searchTerm.toLowerCase()) ||
-            (receipt.supplierName || receipt.supplier?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-            receipt.note?.toLowerCase().includes(searchTerm.toLowerCase())
+    const { paginationState } = usePagination()
 
-        const matchesStatus = statusFilter === "all" || receipt.status === statusFilter
+    const filteredReceipts = useMemo(() => {
+        return receipts.filter((receipt) => {
+            const receiptId = (receipt.importId || receipt.import_id || 0).toString()
+            const matchesSearch =
+                receiptId.includes(searchTerm.toLowerCase()) ||
+                (receipt.supplierName || receipt.supplier?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                receipt.note?.toLowerCase().includes(searchTerm.toLowerCase())
 
-        return matchesSearch && matchesStatus
-    })
+            const matchesStatus = statusFilter === "all" || receipt.status === statusFilter
+
+            return matchesSearch && matchesStatus
+        })
+    }, [receipts, searchTerm, statusFilter])
+
+    const paginatedReceipts = useMemo(() => {
+        const startIndex = (paginationState.currentPage - 1) * paginationState.rowsPerPage
+        const endIndex = startIndex + paginationState.rowsPerPage
+        return filteredReceipts.slice(startIndex, endIndex)
+    }, [filteredReceipts, paginationState.currentPage, paginationState.rowsPerPage])
 
     const totalReceipts = receipts.length
     const pendingReceipts = receipts.filter(r => r.status === "pending").length
@@ -138,7 +149,7 @@ export default function ReceiptsContent() {
                 />
                 <TableManagerReceipts
                     receipts={receipts}
-                    filteredReceipts={filteredReceipts}
+                    filteredReceipts={paginatedReceipts}
                     setSelectedReceipt={setSelectedReceipt}
                     setIsDetailDialogOpen={setIsDetailDialogOpen}
                     setIsEditDialogOpen={setIsEditDialogOpen}

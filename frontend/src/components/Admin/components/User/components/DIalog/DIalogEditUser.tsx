@@ -63,11 +63,11 @@ export default function DialogEditUser({
             
             console.log("Updating user with data:", userData)
             
-            await updateUser(editedUser.user_id, userData)
+            const updatedUser = await updateUser(editedUser.user_id, userData)
             toast.success("Cập nhật người dùng thành công!")
             
             // Call the callback to refresh the list
-            onUpdateUser(editedUser)
+            onUpdateUser(updatedUser)
             setIsEditDialogOpen(false)
             
         } catch (error) {
