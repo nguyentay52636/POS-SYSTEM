@@ -39,9 +39,12 @@ export default function ManagerProductContent() {
 
     const filteredProducts = useMemo(() => {
         return products.filter((product) => {
+            const idMatches = product.product_id
+                ? product.product_id.toString().includes(searchTerm.toLowerCase())
+                : false
             const matchesSearch =
                 product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.product_id.toString().includes(searchTerm.toLowerCase())
+                idMatches
             const categoryName = typeof product.category_id === 'object' ? product.category_id.category_name : ""
             const matchesCategory = selectedCategory === "all" || categoryName === selectedCategory
             const matchesStatus = selectedStatus === "all" || product.status === selectedStatus
@@ -82,10 +85,6 @@ export default function ManagerProductContent() {
         console.log("View details for product:", product.product_id)
     }
 
-    const handleViewEdit = (product: IProduct) => {
-        console.log("View edit for product:", product.product_id)
-    }
-
     const handleDeleteProduct = async (productId: string) => {
         if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
             try {
@@ -108,7 +107,7 @@ export default function ManagerProductContent() {
 
     const handleFormSubmit = async (product: IProduct) => {
         try {
-            if (editingProduct) {
+            if (editingProduct && typeof editingProduct.product_id === "number") {
                 // Update existing product
                 await editProduct(editingProduct.product_id, product);
             } else {
@@ -148,7 +147,6 @@ export default function ManagerProductContent() {
                                     formatPrice={formatPrice}
                                     getStatusBadge={getStatusBadge}
                                     handleViewDetails={handleViewDetails}
-                                    handleViewEdit={handleViewEdit}
                                     handleEditProduct={handleEditProduct}
                                     handleDeleteProduct={handleDeleteProduct}
                                 />

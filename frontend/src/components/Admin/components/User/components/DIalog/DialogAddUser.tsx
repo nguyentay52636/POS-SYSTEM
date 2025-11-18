@@ -25,7 +25,7 @@ export default function DialogAddUser({
     setIsAddDialogOpen,
     onUserAdded
 }: DialogAddUserProps) {
-    const [user, setUser] = useState({
+const [user, setUser] = useState({
         username: "",
         password: "",
         full_name: "",
