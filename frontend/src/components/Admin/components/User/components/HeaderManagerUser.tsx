@@ -1,10 +1,13 @@
 
-import React, { useState } from 'react'
+import React from 'react'
 import { Users, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import DialogAddUser from './DIalog/DialogAddUser'
 
-export default function HeaderManagerUser({ isAddDialogOpen, setIsAddDialogOpen }: { isAddDialogOpen: boolean, setIsAddDialogOpen: (open: boolean) => void }) {
+interface HeaderManagerUserProps {
+    onAddClick: () => void
+}
+
+export default function HeaderManagerUser({ onAddClick }: HeaderManagerUserProps) {
     return (
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 sm:p-6 lg:p-8">
             <div className="space-y-2 w-full sm:w-auto">
@@ -22,10 +25,14 @@ export default function HeaderManagerUser({ isAddDialogOpen, setIsAddDialogOpen 
                 </div>
             </div>
             <div className="w-full sm:w-auto">
-
-
+                <Button
+                    className="w-full sm:w-auto bg-green-700 text-white hover:bg-green-800 shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base px-4 py-2 sm:px-6 sm:py-2"
+                    onClick={onAddClick}
+                >
+                    <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="whitespace-nowrap">Thêm tài khoản</span>
+                </Button>
             </div>
-            <DialogAddUser isAddDialogOpen={isAddDialogOpen} setIsAddDialogOpen={setIsAddDialogOpen} />
         </div>
     )
 }

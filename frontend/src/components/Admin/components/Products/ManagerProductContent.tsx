@@ -6,19 +6,21 @@ import { Badge } from "@/components/ui/badge"
 import ManagerProductHeader from "./components/ManagerProductHeader"
 import CardsStatProduct from "./components/CardsStatProduct"
 import { IProduct } from "@/types/types"
-import { mockProducts, mockCategories, mockSuppliers } from "@/components/Admin/components/Products/mock/data"
+import { mockCategories } from "@/components/Admin/components/Products/mock/data"
 import ActionHeaderTitle from "./components/Handler/ActionHeaderTitle"
 import SearchCategoryProduct from "./components/Handler/SearchCategoryProduct"
 import { FormProduct } from "./components/Dialog/FormProduct"
 import PaginationManagerProduct from "./components/PaginationManagerProduct"
 import ManagerTableProducts from "./components/ManagerTableProducts"
 import { usePagination } from "@/context/PaginationContext"
+import { useProducts } from "./hook/useProducts"
 
 
 
 
 export default function ManagerProductContent() {
-    const [products, setProducts] = useState<IProduct[]>(mockProducts)
+
+    const { products, loading, fetchProducts, addProduct, editProduct, removeProduct } = useProducts()
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedCategory, setSelectedCategory] = useState("all")
     const [selectedStatus, setSelectedStatus] = useState("all")
@@ -40,7 +42,8 @@ export default function ManagerProductContent() {
             const matchesSearch =
                 product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 product.product_id.toString().includes(searchTerm.toLowerCase())
-            const matchesCategory = selectedCategory === "all" || product.category_id.category_name === selectedCategory
+            const categoryName = typeof product.category_id === 'object' ? product.category_id.category_name : ""
+            const matchesCategory = selectedCategory === "all" || categoryName === selectedCategory
             const matchesStatus = selectedStatus === "all" || product.status === selectedStatus
             return matchesSearch && matchesCategory && matchesStatus
         })
@@ -76,18 +79,20 @@ export default function ManagerProductContent() {
     }
 
     const handleViewDetails = (product: IProduct) => {
-        // TODO: Implement view details functionality
         console.log("View details for product:", product.product_id)
     }
 
     const handleViewEdit = (product: IProduct) => {
-        // TODO: Implement view edit functionality
         console.log("View edit for product:", product.product_id)
     }
 
-    const handleDeleteProduct = (productId: string) => {
+    const handleDeleteProduct = async (productId: string) => {
         if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-            setProducts(products.filter((p) => p.product_id.toString() !== productId))
+            try {
+                await removeProduct(parseInt(productId));
+            } catch (error) {
+                console.error("Lỗi xóa sản phẩm:", error);
+            }
         }
     }
 
@@ -101,32 +106,20 @@ export default function ManagerProductContent() {
         setIsAddDialogOpen(true)
     }
 
-    const handleFormSubmit = (product: IProduct) => {
-        if (editingProduct) {
-            // Update existing product
-            setProducts(
-                products.map((p) =>
-                    p.product_id === editingProduct.product_id
-                        ? { ...product, category_id: mockCategories[0], supplier_id: mockSuppliers[0] }
-                        : p,
-                ),
-            )
-        } else {
-            // Add new product
-            setProducts([
-                ...products,
-                {
-                    ...product,
-                    product_id: Math.max(...products.map(p => p.product_id)) + 1,
-                    category_id: mockCategories[0],
-                    supplier_id: mockSuppliers[0],
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                },
-            ])
+    const handleFormSubmit = async (product: IProduct) => {
+        try {
+            if (editingProduct) {
+                // Update existing product
+                await editProduct(editingProduct.product_id, product);
+            } else {
+                // Add new product
+                await addProduct(product);
+            }
+            setIsAddDialogOpen(false)
+            setEditingProduct(null)
+        } catch (error) {
+            console.error("Lỗi lưu sản phẩm:", error);
         }
-        setIsAddDialogOpen(false)
-        setEditingProduct(null)
     }
 
     return (
@@ -144,16 +137,24 @@ export default function ManagerProductContent() {
                     <CardContent className="p-6">
                         <SearchCategoryProduct searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} categories={categories} statuses={statuses} selectedStatus={selectedStatus} setSelectedStatus={setSelectedStatus} />
 
-                        <ManagerTableProducts
-                            products={paginatedProducts}
-                            formatPrice={formatPrice}
-                            getStatusBadge={getStatusBadge}
-                            handleViewDetails={handleViewDetails}
-                            handleViewEdit={handleViewEdit}
-                            handleEditProduct={handleEditProduct}
-                            handleDeleteProduct={handleDeleteProduct}
-                        />
-                        <PaginationManagerProduct totalItems={filteredProducts.length} />
+                        {loading ? (
+                            <div className="flex items-center justify-center py-12">
+                                <div className="text-gray-500">Đang tải dữ liệu...</div>
+                            </div>
+                        ) : (
+                            <>
+                                <ManagerTableProducts
+                                    products={paginatedProducts}
+                                    formatPrice={formatPrice}
+                                    getStatusBadge={getStatusBadge}
+                                    handleViewDetails={handleViewDetails}
+                                    handleViewEdit={handleViewEdit}
+                                    handleEditProduct={handleEditProduct}
+                                    handleDeleteProduct={handleDeleteProduct}
+                                />
+                                <PaginationManagerProduct totalItems={filteredProducts.length} />
+                            </>
+                        )}
 
 
                     </CardContent>
@@ -164,11 +165,7 @@ export default function ManagerProductContent() {
                 editingProduct={editingProduct}
                 isOpen={isAddDialogOpen}
                 onOpenChange={setIsAddDialogOpen}
-                onSubmit={() => {
-                    console.log("Form submitted")
-                }
-
-                }
+                onSubmit={handleFormSubmit}
             />
         </div>
     )

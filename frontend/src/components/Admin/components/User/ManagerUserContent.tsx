@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import HeaderManagerUser from './components/HeaderManagerUser'
 import TableManagerUser from './components/TableManagerUser/TableManagerUser'
 import PaginationManagerUser from './components/PaginationManagerUser'
@@ -24,22 +24,22 @@ export default function ManagerUserContent() {
     const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                setLoading(true)
-                const usersData = await getAllUsers()
-                console.log(usersData)
-                setUsers(usersData)
-                setError(null)
-            } catch (e: any) {
-                setError("Không thể tải dữ liệu")
-            } finally {
-                setLoading(false)
-            }
+    const fetchUsers = useCallback(async () => {
+        try {
+            setLoading(true)
+            const usersData = await getAllUsers()
+            setUsers(usersData)
+            setError(null)
+        } catch (e: any) {
+            setError("Không thể tải dữ liệu")
+        } finally {
+            setLoading(false)
         }
-        fetchUsers()
     }, [])
+
+    useEffect(() => {
+        fetchUsers()
+    }, [fetchUsers])
 
     const { paginationState } = usePagination()
 
@@ -59,7 +59,9 @@ export default function ManagerUserContent() {
         return filteredUsers.slice(startIndex, endIndex)
     }, [filteredUsers, paginationState.currentPage, paginationState.rowsPerPage])
 
-    const handleAddAccount = () => { }
+    const handleOpenAddDialog = () => {
+        setIsAddDialogOpen(true)
+    }
 
     // Handlers for table actions
     const handleView = (user: IUser) => {
@@ -77,24 +79,24 @@ export default function ManagerUserContent() {
         setIsDeleteDialogOpen(true)
     }
 
-    const handleUpdateUser = async () => {
-        // Refresh the user list
-        try {
-            const usersData = await getAllUsers()
-            setUsers(usersData)
-        } catch (e: any) {
-            console.error("Failed to refresh users:", e)
-        }
+    const handleUserAdded = (newUser: IUser) => {
+        setUsers((prev) => [newUser, ...prev])
     }
 
-    const handleConfirmDelete = async () => {
-        // Refresh the user list
-        try {
-            const usersData = await getAllUsers()
-            setUsers(usersData)
-        } catch (e: any) {
-            console.error("Failed to refresh users:", e)
-        }
+    const handleUpdateUser = (updatedUser: IUser) => {
+        setUsers((prev) =>
+            prev.map((user) => (user.user_id === updatedUser.user_id ? updatedUser : user))
+        )
+        setSelectedUser((prev) =>
+            prev && prev.user_id === updatedUser.user_id ? updatedUser : prev
+        )
+    }
+
+    const handleConfirmDelete = (deletedUserId: number) => {
+        setUsers((prev) => prev.filter((user) => user.user_id !== deletedUserId))
+        setSelectedUser((prev) =>
+            prev && prev.user_id === deletedUserId ? null : prev
+        )
     }
 
     if (loading) {
@@ -115,9 +117,11 @@ export default function ManagerUserContent() {
     return (
         <div className=" ">
             <div className="p-6 space-y-8">
-                <HeaderManagerUser isAddDialogOpen={isAddDialogOpen} setIsAddDialogOpen={setIsAddDialogOpen} />
+                <HeaderManagerUser onAddClick={handleOpenAddDialog} />
                 {error ? (
-                    <div>Error</div>
+                    <div className="rounded-md border border-red-200 bg-red-50 p-4 text-red-700">
+                        {error}
+                    </div>
                 ) : (
                     <>
                         <TableManagerUser
@@ -136,6 +140,7 @@ export default function ManagerUserContent() {
                 <DialogAddUser
                     isAddDialogOpen={isAddDialogOpen}
                     setIsAddDialogOpen={setIsAddDialogOpen}
+                    onUserAdded={handleUserAdded}
                 />
 
                 {selectedUser && (
