@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using backend.Services;
 using backend.DTOs;
 using System.Net.Mime;
+using Microsoft.AspNetCore.Http;
 
 namespace backend.Controllers;
 
@@ -15,10 +16,12 @@ namespace backend.Controllers;
 public class ProductController : ControllerBase
 {
     private readonly IProductService _service;
+    private readonly IFileUploadService _fileUploadService;
 
-    public ProductController(IProductService service)
+    public ProductController(IProductService service, IFileUploadService fileUploadService)
     {
         _service = service;
+        _fileUploadService = fileUploadService;
     }
 
     /// <summary>
@@ -84,25 +87,30 @@ public class ProductController : ControllerBase
     }
 
     /// <summary>
-    /// Create a new product.
+    /// Create a new product (with optional image upload).
     /// </summary>
     /// <remarks>
-    /// Sample request:
+    /// Supports two formats:
+    /// 1. JSON only: POST /api/product with JSON body
+    /// 2. Multipart form data: POST /api/product with form-data containing product data and image file
+    ///
+    /// Sample request (multipart/form-data):
     ///
     ///     POST /api/product
-    ///     {
-    ///         "productName": "Laptop Dell XPS 15",
-    ///         "barcode": "1234567890123",
-    ///         "price": 1299.99,
-    ///         "unit": "pcs",
-    ///         "categoryId": 1,
-    ///         "supplierId": 2
-    ///     }
+    ///     Content-Type: multipart/form-data
+    ///     - productName: "Laptop Dell XPS 15"
+    ///     - barcode: "1234567890123"
+    ///     - price: 1299.99
+    ///     - unit: "pcs"
+    ///     - categoryId: 1
+    ///     - supplierId: 2
+    ///     - imageFile: [binary file]
     /// </remarks>
     [HttpPost]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<ProductResponseDto>> Create([FromBody] CreateProductDto dto)
+    public async Task<ActionResult<ProductResponseDto>> Create([FromForm] CreateProductWithFileDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -111,7 +119,39 @@ public class ProductController : ControllerBase
 
         try
         {
-            var created = await _service.CreateAsync(dto);
+            // Handle image upload if file is provided
+            string? imageUrl = null;
+            if (dto.ImageFile != null)
+            {
+                // Log file info for debugging
+                Console.WriteLine($"ImageFile received: {dto.ImageFile.FileName}, Size: {dto.ImageFile.Length} bytes, ContentType: {dto.ImageFile.ContentType}");
+                imageUrl = await _fileUploadService.UploadProductImageAsync(dto.ImageFile);
+                Console.WriteLine($"Image uploaded, URL: {imageUrl}");
+            }
+            else if (!string.IsNullOrEmpty(dto.ImageUrl))
+            {
+                // Use provided ImageUrl if no file uploaded
+                imageUrl = dto.ImageUrl;
+                Console.WriteLine($"Using provided ImageUrl: {imageUrl}");
+            }
+            else
+            {
+                Console.WriteLine("No image file or URL provided");
+            }
+
+            // Create CreateProductDto from form data
+            var createDto = new CreateProductDto
+            {
+                ProductName = dto.ProductName,
+                Barcode = dto.Barcode,
+                Price = dto.Price,
+                Unit = dto.Unit,
+                ImageUrl = imageUrl,
+                CategoryId = dto.CategoryId,
+                SupplierId = dto.SupplierId
+            };
+
+            var created = await _service.CreateAsync(createDto);
             return CreatedAtAction(nameof(GetById), new { id = created.ProductId }, created);
         }
         catch (ArgumentException ex)

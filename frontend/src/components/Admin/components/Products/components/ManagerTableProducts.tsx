@@ -21,6 +21,7 @@ export default function ManagerTableProducts({
     handleDeleteProduct,
     handleViewDetails
 }: ManagerTableProductsProps) {
+    const API_BASE_URL = "http://localhost:5006";
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm dark:border-gray-800 dark:bg-gray-900/40">
             <Table>
@@ -65,9 +66,16 @@ export default function ManagerTableProducts({
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <img
-                                                src={product.image_url || "/placeholder.svg"}
+                                                src={
+                                                    product.image_url
+                                                        ? `${API_BASE_URL}${product.image_url}`
+                                                        : "/images/next.svg"
+                                                }
                                                 alt={product.product_name}
-                                                className="h-12 w-12 rounded-lg border object-cover shadow-sm"
+                                                className="h-12 w-12 rounded-lg border z-100!"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).src = "/images/next.svg";
+                                                }}
                                             />
                                             <div>
                                                 <p className="font-medium text-gray-900 dark:text-white">{product.product_name}</p>
