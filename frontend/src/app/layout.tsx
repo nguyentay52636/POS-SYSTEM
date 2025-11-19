@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/ThemeProvider"
 import ConditionalSidebar from "@/components/Admin/components/SiderBar/ConditionalSidebar"
 import { Toaster } from "sonner"
 import ReduxProvider from "@/components/ReduxProvider"
+import ToastProvider from "@/components/ui/Provider/ToastProvider"
+import { ToastContainer } from "react-toastify"
 
 
 
@@ -28,7 +30,8 @@ export default function AdminRootLayout({
                 </div>
               </div>
 
-              <Toaster position="top-right" richColors />
+              {/* <Toaster position="top-right" richColors /> */}
+              <ToastContainer position="top-right" autoClose={2000} />
             </ThemeProvider>
           </ReduxProvider>
         </Suspense>

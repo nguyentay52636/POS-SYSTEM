@@ -59,7 +59,7 @@ const mapApiProductToComponent = (apiProduct: any): IProduct => {
         product_name: apiProduct.productName || apiProduct.product_name,
         barcode: apiProduct.barcode || "",
         price: apiProduct.price || 0,
-        image_url: apiProduct.image_url || apiProduct.image || "",
+        image_url: apiProduct.imageUrl || apiProduct.image_url || apiProduct.image || "",
         unit: apiProduct.unit || 0,
         status: apiProduct.status || "active",
         createdAt: apiProduct.createdAt || apiProduct.created_at || new Date().toISOString(),
@@ -152,4 +152,136 @@ export const deleteProduct = async (productId: number): Promise<void> => {
         throw error
     }
 }
+
+const createProductFormData = (
+    product: IProduct,
+    imageFile?: File | null,
+    imageUrl?: string
+): FormData => {
+    const formData = new FormData();
+    
+    if (product.product_id) {
+        formData.append("productId", product.product_id.toString());
+    }
+    formData.append("productName", product.product_name.trim());
+    formData.append("barcode", (product.barcode || "").trim());
+    formData.append("price", String(product.price));
+    formData.append("unit", String(product.unit || 0));
+    formData.append("status", product.status || "active");
+    
+    const categoryId = typeof product.category_id === 'object' 
+        ? product.category_id.category_id 
+        : product.category_id;
+    const supplierId = typeof product.supplier_id === 'object' 
+        ? product.supplier_id.supplier_id 
+        : product.supplier_id;
+    
+    if (categoryId) {
+        formData.append("categoryId", String(categoryId));
+    }
+    if (supplierId) {
+        formData.append("supplierId", String(supplierId));
+    }
+    
+    if (imageFile) {
+        formData.append("imageFile", imageFile);
+    } else if (imageUrl) {
+        formData.append("imageUrl", imageUrl.trim());
+    }
+    
+    return formData;
+};
+
+// Create product with file upload support
+export const createProductWithFormData = async (
+    product: IProduct,
+    imageFile?: File | null,
+    imageUrl?: string
+): Promise<IProduct> => {
+    try {
+        const formData = createProductFormData(product, imageFile, imageUrl);
+        
+        // Use fetch directly for FormData to avoid axios issues with multipart/form-data
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const headers: HeadersInit = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch('/api/product', {
+            method: 'POST',
+            body: formData,
+            headers,
+        });
+        
+        if (!response.ok) {
+            let errorMessage = "Lỗi tạo sản phẩm";
+            try {
+                const errorData = await response.json();
+                if (errorData.errors) {
+                    const errors = Object.values(errorData.errors).flat() as string[];
+                    errorMessage = errors.join(", ");
+                } else {
+                    errorMessage = errorData.message || errorData.title || errorMessage;
+                }
+            } catch {
+                errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            }
+            throw new Error(errorMessage);
+        }
+        
+        const data = await response.json();
+        return mapApiProductToComponent(data);
+    } catch (error) {
+        console.error('Error creating product with file:', error);
+        throw error;
+    }
+};
+
+// Update product with file upload support
+export const updateProductWithFormData = async (
+    productId: number,
+    product: IProduct,
+    imageFile?: File | null,
+    imageUrl?: string
+): Promise<IProduct> => {
+    try {
+        const formData = createProductFormData(product, imageFile, imageUrl);
+        
+        // Use fetch directly for FormData
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const headers: HeadersInit = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`/api/product/${productId}`, {
+            method: 'PUT',
+            body: formData,
+            headers,
+        });
+        
+        if (!response.ok) {
+            let errorMessage = "Lỗi cập nhật sản phẩm";
+            try {
+                const errorData = await response.json();
+                if (errorData.errors) {
+                    const errors = Object.values(errorData.errors).flat() as string[];
+                    errorMessage = errors.join(", ");
+                } else {
+                    errorMessage = errorData.message || errorData.title || errorMessage;
+                }
+            } catch {
+                errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            }
+            throw new Error(errorMessage);
+        }
+        
+        const data = await response.json();
+        return mapApiProductToComponent(data);
+    } catch (error) {
+        console.error('Error updating product with file:', error);
+        throw error;
+    }
+};
 

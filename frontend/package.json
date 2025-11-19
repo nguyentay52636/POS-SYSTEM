@@ -33,6 +33,7 @@
     "react-qr-code": "^2.0.18",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.3",
+    "react-toastify": "^11.0.5",
     "recharts": "^3.4.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",

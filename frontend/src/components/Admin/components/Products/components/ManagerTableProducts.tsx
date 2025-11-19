@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState, useCallback, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Eye, Edit, Trash2 } from "lucide-react"
@@ -12,6 +12,60 @@ interface ManagerTableProductsProps {
     handleDeleteProduct: (productId: string) => void
     handleViewDetails: (product: IProduct) => void
 }
+
+const BACKEND_BASE_URL = "http://localhost:5006";
+const PLACEHOLDER_IMAGE = "/images/bg-y.jpg";
+
+// Helper function to get image URL
+const getImageUrl = (imageUrl: string | undefined): string => {
+    if (!imageUrl) return PLACEHOLDER_IMAGE;
+
+    // If already a full URL
+    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+        return imageUrl;
+    }
+
+    // If starts with /, it's a relative path from backend
+    if (imageUrl.startsWith("/")) {
+        return `${BACKEND_BASE_URL}${imageUrl}`;
+    }
+
+    // Otherwise, assume it's a filename
+    return `${BACKEND_BASE_URL}/image/uploads/products/${imageUrl}`;
+};
+
+const ProductImage = ({ imageUrl, alt }: { imageUrl: string | undefined; alt: string }) => {
+    const [imgSrc, setImgSrc] = useState<string>(getImageUrl(imageUrl));
+    const [hasError, setHasError] = useState(false);
+
+    useEffect(() => {
+        if (imageUrl) {
+            setImgSrc(getImageUrl(imageUrl));
+            setHasError(false);
+        } else {
+            setImgSrc(PLACEHOLDER_IMAGE);
+            setHasError(false);
+        }
+    }, [imageUrl]);
+
+    const handleError = useCallback(() => {
+        if (!hasError && imgSrc !== PLACEHOLDER_IMAGE) {
+            setHasError(true);
+            setImgSrc(PLACEHOLDER_IMAGE);
+        }
+    }, [hasError, imgSrc]);
+
+    return (
+        <img
+            src={imgSrc}
+            alt={alt}
+            className="h-12 w-12 rounded-lg border object-cover shadow-sm"
+            onError={handleError}
+            loading="lazy"
+            crossOrigin="anonymous"
+        />
+    );
+};
 
 export default function ManagerTableProducts({
     products,
@@ -64,10 +118,9 @@ export default function ManagerTableProducts({
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
-                                            <img
-                                                src={product.image_url || "/placeholder.svg"}
+                                            <ProductImage
+                                                imageUrl={product.image_url}
                                                 alt={product.product_name}
-                                                className="h-12 w-12 rounded-lg border object-cover shadow-sm"
                                             />
                                             <div>
                                                 <p className="font-medium text-gray-900 dark:text-white">{product.product_name}</p>

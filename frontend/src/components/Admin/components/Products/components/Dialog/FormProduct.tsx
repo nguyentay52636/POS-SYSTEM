@@ -17,7 +17,7 @@ interface ProductFormProps {
     editingProduct?: IProduct | null
     isOpen: boolean
     onOpenChange: (open: boolean) => void
-    onSubmit?: (product: IProduct) => void | Promise<void>
+    onSubmit?: (product: IProduct, imageFile?: File | null, imageUrl?: string) => void | Promise<void>
 }
 
 type ProductFormValues = {
@@ -58,15 +58,29 @@ const mapProductToFormValues = (product?: IProduct | null): ProductFormValues =>
 export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: ProductFormProps) {
     const [formValues, setFormValues] = useState<ProductFormValues>(createEmptyFormValues)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [imageFile, setImageFile] = useState<File | null>(null)
+    const [imagePreview, setImagePreview] = useState<string | null>(null)
+    const [imageError, setImageError] = useState<string>("")
 
     const { categories, loading: loadingCategories } = useCategories()
     const { suppliers, loading: loadingSuppliers } = useSuppliers()
     useEffect(() => {
         if (!isOpen) {
             setFormValues(createEmptyFormValues())
+            setImageFile(null)
+            setImagePreview(null)
+            setImageError("")
             return
         }
         setFormValues(mapProductToFormValues(editingProduct))
+        // Set preview from existing image_url if editing
+        if (editingProduct?.image_url) {
+            setImagePreview(editingProduct.image_url)
+        } else {
+            setImagePreview(null)
+        }
+        setImageFile(null)
+        setImageError("")
     }, [editingProduct, isOpen])
 
     const handleInputChange =
@@ -78,6 +92,64 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
     const handleSelectChange = (field: keyof ProductFormValues) => (value: string) => {
         setFormValues((prev) => ({ ...prev, [field]: value }))
     }
+
+    // Handle file upload
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setImageError("");
+
+        if (file) {
+            // Validate file size (5MB max)
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                setImageError(`File quá lớn! Tối đa ${maxSize / 1024 / 1024}MB`);
+                e.target.value = "";
+                setImageFile(null);
+                setImagePreview(null);
+                return;
+            }
+
+            // Validate file extension
+            const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+            const extension = file.name.toLowerCase().substring(file.name.lastIndexOf("."));
+            if (!allowedExtensions.includes(extension)) {
+                setImageError(`Định dạng file không hợp lệ! Chỉ chấp nhận: ${allowedExtensions.join(", ")}`);
+                e.target.value = "";
+                setImageFile(null);
+                setImagePreview(null);
+                return;
+            }
+
+            setImageFile(file);
+            setFormValues((prev) => ({ ...prev, image_url: "" })); // Clear URL if file is selected
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setImageFile(null);
+            if (!formValues.image_url) {
+                setImagePreview(null);
+            }
+        }
+    };
+
+    // Handle URL change
+    const handleUrlChange = (url: string) => {
+        setFormValues((prev) => ({ ...prev, image_url: url }));
+        setImageError("");
+        if (url) {
+            setImageFile(null);
+            setImagePreview(url);
+        } else {
+            if (!imageFile) {
+                setImagePreview(null);
+            }
+        }
+    };
 
     const selectedCategory = useMemo<ICategory | undefined>(() => {
         if (!formValues.categoryId) return undefined
@@ -112,15 +184,19 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
             !Number.isNaN(Number(formValues.price)) &&
             !Number.isNaN(Number(formValues.unit))
 
+        // Image is valid if either file is selected OR URL is provided
+        const imageValid = imageFile !== null || (formValues.image_url && formValues.image_url.trim().length > 0)
+
         return (
             numericFieldsValid &&
             formValues.product_name.trim().length > 0 &&
             formValues.barcode.trim().length > 0 &&
-            formValues.image_url.trim().length > 0 &&
+            imageValid &&
             formValues.categoryId !== "" &&
-            formValues.supplierId !== ""
+            formValues.supplierId !== "" &&
+            !imageError
         )
-    }, [formValues])
+    }, [formValues, imageFile, imageError])
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -133,7 +209,8 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
             price: Number(formValues.price),
             unit: Number(formValues.unit),
             status: formValues.status,
-            image_url: formValues.image_url.trim(),
+            // Use image_url from form if no file, otherwise empty (file will be sent separately)
+            image_url: imageFile ? "" : (formValues.image_url.trim() || ""),
             category_id: selectedCategory,
             supplier_id: selectedSupplier,
             createdAt: editingProduct?.createdAt ?? now,
@@ -146,7 +223,9 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
 
         try {
             setIsSubmitting(true)
-            await Promise.resolve(onSubmit(payload))
+            // Pass imageFile and imageUrl to onSubmit
+            const imageUrl = imageFile ? undefined : (formValues.image_url.trim() || undefined)
+            await Promise.resolve(onSubmit(payload, imageFile, imageUrl))
             onOpenChange(false)
         } catch (error) {
             console.error("Lỗi lưu sản phẩm:", error)
@@ -334,31 +413,58 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
                                 Ảnh sản phẩm
                             </span>
                         </div>
-                        <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-4">
+                            {/* File Upload */}
                             <div className="space-y-2">
-                                <Label htmlFor="image_url">URL ảnh *</Label>
+                                <Label htmlFor="image_file">Upload từ máy tính</Label>
+                                <Input
+                                    id="image_file"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="cursor-pointer"
+                                />
+                                {imageFile && (
+                                    <p className="text-xs text-gray-600">
+                                        📎 {imageFile.name} ({(imageFile.size / 1024).toFixed(2)} KB)
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* URL Input */}
+                            <div className="space-y-2">
+                                <Label htmlFor="image_url">Hoặc nhập URL ảnh</Label>
                                 <Input
                                     id="image_url"
                                     type="url"
-                                    placeholder="https://example.com/image.jpg"
+                                    placeholder="https://example.com/image.jpg hoặc /image/uploads/products/..."
                                     value={formValues.image_url}
-                                    onChange={handleInputChange("image_url")}
-                                    required
+                                    onChange={(e) => handleUrlChange(e.target.value)}
                                 />
                                 <p className="text-xs text-gray-500">
-                                    Hỗ trợ PNG, JPG, JPEG. Lưu ý ảnh nên có kích thước tối thiểu 600x600px.
+                                    Hỗ trợ PNG, JPG, JPEG, GIF, WEBP (tối đa 5MB nếu upload file).
                                 </p>
                             </div>
-                            <div className="rounded-lg border bg-gray-50 p-4 text-center">
+
+                            {/* Error Message */}
+                            {imageError && (
+                                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 border border-red-200">
+                                    ❌ {imageError}
+                                </div>
+                            )}
+
+                            {/* Preview */}
+                            <div className="rounded-lg border bg-gray-50 p-4">
                                 <p className="text-sm font-medium text-gray-700 mb-3">Xem trước</p>
-                                <div className="flex h-32 items-center justify-center rounded-md bg-white">
-                                    {formValues.image_url ? (
+                                <div className="flex h-48 items-center justify-center rounded-md bg-white border border-gray-200">
+                                    {imagePreview ? (
                                         <img
-                                            src={formValues.image_url}
+                                            src={imagePreview}
                                             alt="Product preview"
-                                            className="h-28 w-28 rounded-md object-cover"
+                                            className="max-h-full max-w-full rounded-md object-contain"
                                             onError={(event) => {
-                                                (event.currentTarget as HTMLImageElement).src = "/placeholder.svg"
+                                                setImageError("Không thể load ảnh từ URL này");
+                                                setImagePreview(null);
                                             }}
                                         />
                                     ) : (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getProducts, createProduct, deleteProduct, updateProduct } from "@/apis/productApi";
+import { getProducts, createProduct, deleteProduct, updateProduct, createProductWithFormData, updateProductWithFormData } from "@/apis/productApi";
 import { IProduct } from "@/types/types";
 
 export function useProducts() {
@@ -30,10 +30,36 @@ export function useProducts() {
     }
   };
 
+  // CREATE with file upload
+  const addProductWithFormData = async (product: IProduct, imageFile?: File | null, imageUrl?: string) => {
+    try {
+      const newProduct = await createProductWithFormData(product, imageFile, imageUrl);
+      setProducts((prev) => [...prev, newProduct]);
+      return newProduct;
+    } catch (error) {
+      console.error("Lỗi tạo sản phẩm:", error);
+      throw error;
+    }
+  };
+
   // UPDATE
   const editProduct = async (id: number, product: IProduct) => {
     try {
       const updated = await updateProduct(id, product);
+      setProducts((prev) =>
+        prev.map((p) => (p.product_id === id ? updated : p))
+      );
+      return updated;
+    } catch (error) {
+      console.error("Lỗi cập nhật sản phẩm:", error);
+      throw error;
+    }
+  };
+
+  // UPDATE with file upload
+  const editProductWithFormData = async (id: number, product: IProduct, imageFile?: File | null, imageUrl?: string) => {
+    try {
+      const updated = await updateProductWithFormData(id, product, imageFile, imageUrl);
       setProducts((prev) =>
         prev.map((p) => (p.product_id === id ? updated : p))
       );
@@ -65,7 +91,9 @@ export function useProducts() {
     loading,
     fetchProducts,
     addProduct,
+    addProductWithFormData,
     editProduct,
+    editProductWithFormData,
     removeProduct,
   };
 }
