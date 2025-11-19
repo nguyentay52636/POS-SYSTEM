@@ -14,13 +14,13 @@ import PaginationManagerProduct from "./components/PaginationManagerProduct"
 import ManagerTableProducts from "./components/ManagerTableProducts"
 import { usePagination } from "@/context/PaginationContext"
 import { useProducts } from "./hook/useProducts"
-
+import { toast } from "react-toastify"
 
 
 
 export default function ManagerProductContent() {
 
-    const { products, loading, fetchProducts, addProduct, editProduct, removeProduct } = useProducts()
+    const { products, loading, fetchProducts, addProductWithFormData, editProductWithFormData, removeProduct } = useProducts()
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedCategory, setSelectedCategory] = useState("all")
     const [selectedStatus, setSelectedStatus] = useState("all")
@@ -89,8 +89,10 @@ export default function ManagerProductContent() {
         if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
             try {
                 await removeProduct(parseInt(productId));
+                toast.success("Xóa sản phẩm thành công")
             } catch (error) {
                 console.error("Lỗi xóa sản phẩm:", error);
+                toast.error("Không thể xóa sản phẩm")
             }
         }
     }
@@ -105,14 +107,14 @@ export default function ManagerProductContent() {
         setIsAddDialogOpen(true)
     }
 
-    const handleFormSubmit = async (product: IProduct) => {
+    const handleFormSubmit = async (product: IProduct, imageFile?: File | null, imageUrl?: string) => {
         try {
             if (editingProduct && typeof editingProduct.product_id === "number") {
-                // Update existing product
-                await editProduct(editingProduct.product_id, product);
+                // Update existing product with FormData
+                await editProductWithFormData(editingProduct.product_id, product, imageFile, imageUrl);
             } else {
-                // Add new product
-                await addProduct(product);
+                // Add new product with FormData
+                await addProductWithFormData(product, imageFile, imageUrl);
             }
             setIsAddDialogOpen(false)
             setEditingProduct(null)

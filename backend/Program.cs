@@ -145,7 +145,24 @@ app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
         Path.Combine(builder.Environment.ContentRootPath, "image")),
-    RequestPath = "/image"
+    RequestPath = "/image",
+    OnPrepareResponse = ctx =>
+    {
+        // Add CORS headers to static files
+        var origin = ctx.Context.Request.Headers["Origin"].ToString();
+        if (!string.IsNullOrEmpty(origin) &&
+            (origin.StartsWith("http://localhost:3000") || origin.StartsWith("http://localhost:3001")))
+        {
+            ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", origin);
+        }
+        else
+        {
+            // Default to allow localhost:3000 if no origin header
+            ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "http://localhost:3000");
+        }
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, OPTIONS");
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "*");
+    }
 });
 
 app.UseAuthentication();
