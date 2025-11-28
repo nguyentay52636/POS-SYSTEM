@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useCallback } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import ManagerProductHeader from "./components/ManagerProductHeader"
@@ -27,28 +27,58 @@ export default function ManagerProductContent() {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
     const [editingProduct, setEditingProduct] = useState<IProduct | null>(null)
 
-    const categories = ["all", ...mockCategories.map(cat => cat.category_name)]
-    const statuses = ["all", "active", "inactive", "out-of-stock"]
+    // Memoize static arrays to prevent recreation on every render
+    const categories = useMemo(() => ["all", ...mockCategories.map(cat => cat.category_name)], [])
+    const statuses = useMemo(() => ["all", "active", "inactive", "out-of-stock"], [])
 
-    const totalProducts = products.length
-    const activeProducts = products.filter((p) => p.status === "active").length
-    const outOfStockProducts = products.filter((p) => p.status === "out-of-stock").length
-    const inactiveProducts = products.filter((p) => p.status === "inactive").length
+    // Memoize stats calculations to prevent recalculation on every render
+    const stats = useMemo(() => {
+        const total = products.length
+        let active = 0
+        let outOfStock = 0
+        let inactive = 0
+
+        // Single loop instead of multiple filters
+        for (const product of products) {
+            if (product.status === "active") active++
+            else if (product.status === "out-of-stock") outOfStock++
+            else if (product.status === "inactive") inactive++
+        }
+
+        return { total, active, outOfStock, inactive }
+    }, [products])
 
     const { paginationState } = usePagination()
 
     const filteredProducts = useMemo(() => {
+        if (!products.length) return []
+
+        const lowerSearchTerm = searchTerm.toLowerCase()
+        const hasSearchTerm = lowerSearchTerm.length > 0
+        const isAllCategory = selectedCategory === "all"
+        const isAllStatus = selectedStatus === "all"
+
         return products.filter((product) => {
-            const idMatches = product.product_id
-                ? product.product_id.toString().includes(searchTerm.toLowerCase())
-                : false
-            const matchesSearch =
-                product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                idMatches
-            const categoryName = typeof product.category_id === 'object' ? product.category_id.category_name : ""
-            const matchesCategory = selectedCategory === "all" || categoryName === selectedCategory
-            const matchesStatus = selectedStatus === "all" || product.status === selectedStatus
-            return matchesSearch && matchesCategory && matchesStatus
+            if (!isAllCategory) {
+                const categoryName = typeof product.category_id === 'object'
+                    ? product.category_id.category_name
+                    : ""
+                if (categoryName !== selectedCategory) return false
+            }
+
+            // Early return for status filter
+            if (!isAllStatus && product.status !== selectedStatus) return false
+
+            // Search filter (only if search term exists)
+            if (hasSearchTerm) {
+                const idMatches = product.product_id
+                    ? product.product_id.toString().includes(lowerSearchTerm)
+                    : false
+                const nameMatches = product.product_name.toLowerCase().includes(lowerSearchTerm)
+                if (!idMatches && !nameMatches) return false
+            }
+
+            return true
         })
     }, [products, searchTerm, selectedCategory, selectedStatus])
 
@@ -60,32 +90,35 @@ export default function ManagerProductContent() {
 
 
 
-    const formatPrice = (price: number) => {
+    // Memoize formatters to prevent recreation
+    const formatPrice = useCallback((price: number) => {
         return new Intl.NumberFormat("vi-VN", {
             style: "currency",
             currency: "VND",
         }).format(price)
-    }
+    }, [])
 
-    const getStatusBadge = (status: string) => {
-        const statusConfig = {
-            active: { label: "Đang bán", className: "bg-green-100 text-green-800 border-green-200" },
-            inactive: { label: "Tạm ngưng", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-            "out-of-stock": { label: "Hết hàng", className: "bg-red-100 text-red-800 border-red-200" },
-        }
+    // Memoize status config to prevent recreation
+    const statusConfig = useMemo(() => ({
+        active: { label: "Đang bán", className: "bg-green-100 text-green-800 border-green-200" },
+        inactive: { label: "Tạm ngưng", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+        "out-of-stock": { label: "Hết hàng", className: "bg-red-100 text-red-800 border-red-200" },
+    }), [])
+
+    const getStatusBadge = useCallback((status: string) => {
         const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.active
         return (
             <Badge className={`${config.className} border`}>
                 {config.label}
             </Badge>
         )
-    }
+    }, [statusConfig])
 
-    const handleViewDetails = (product: IProduct) => {
+    const handleViewDetails = useCallback((product: IProduct) => {
         console.log("View details for product:", product.product_id)
-    }
+    }, [])
 
-    const handleDeleteProduct = async (productId: string) => {
+    const handleDeleteProduct = useCallback(async (productId: string) => {
         if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
             try {
                 await removeProduct(parseInt(productId));
@@ -95,33 +128,41 @@ export default function ManagerProductContent() {
                 toast.error("Không thể xóa sản phẩm")
             }
         }
-    }
+    }, [removeProduct])
 
-    const handleEditProduct = (product: IProduct) => {
+    const handleEditProduct = useCallback((product: IProduct) => {
         setEditingProduct(product)
         setIsAddDialogOpen(true)
-    }
+    }, [])
 
-    const handleOpenAddDialog = () => {
+    const handleOpenAddDialog = useCallback(() => {
         setEditingProduct(null)
         setIsAddDialogOpen(true)
-    }
+    }, [])
 
-    const handleFormSubmit = async (product: IProduct, imageFile?: File | null, imageUrl?: string) => {
+    const handleFormSubmit = useCallback(async (product: IProduct, imageFile?: File | null, imageUrl?: string) => {
+        const isEditing = editingProduct && typeof editingProduct.product_id === "number"
+        const productId = editingProduct?.product_id
         try {
-            if (editingProduct && typeof editingProduct.product_id === "number") {
-                // Update existing product with FormData
-                await editProductWithFormData(editingProduct.product_id, product, imageFile, imageUrl);
+            if (isEditing && productId) {
+                await editProductWithFormData(productId, product, imageFile, imageUrl);
+                toast.success("Cập nhật sản phẩm thành công");
             } else {
-                // Add new product with FormData
                 await addProductWithFormData(product, imageFile, imageUrl);
+                toast.success("Thêm sản phẩm thành công");
             }
             setIsAddDialogOpen(false)
             setEditingProduct(null)
-        } catch (error) {
+        } catch (error: any) {
             console.error("Lỗi lưu sản phẩm:", error);
+            const errorMessage = error?.message || "Đã xảy ra lỗi";
+            if (isEditing) {
+                toast.error(`Cập nhật sản phẩm thất bại: ${errorMessage}`);
+            } else {
+                toast.error(`Thêm sản phẩm thất bại: ${errorMessage}`);
+            }
         }
-    }
+    }, [editingProduct, editProductWithFormData, addProductWithFormData])
 
     return (
         <div className="min-h-screen  mx-2 my-4">
@@ -129,7 +170,12 @@ export default function ManagerProductContent() {
             <ManagerProductHeader />
 
             <div className="p-6 space-y-6 my-4">
-                <CardsStatProduct totalProducts={totalProducts} activeProducts={activeProducts} outOfStockProducts={outOfStockProducts} inactiveProducts={inactiveProducts} />
+                <CardsStatProduct
+                    totalProducts={stats.total}
+                    activeProducts={stats.active}
+                    outOfStockProducts={stats.outOfStock}
+                    inactiveProducts={stats.inactive}
+                />
 
                 <Card className="shadow-sm border-0">
                     <CardHeader className="border-b dark:bg-gray-900/50">

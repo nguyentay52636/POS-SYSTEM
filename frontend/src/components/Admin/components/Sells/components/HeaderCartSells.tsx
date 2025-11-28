@@ -21,9 +21,11 @@ export default function HeaderCartSells({ cart, total, stats, clearCart }: Heade
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
                         <div className="p-2.5 bg-gradient-to-br from-green-600 to-green-700 rounded-xl shadow-lg ring-1 ring-green-200">
-                            <ShoppingCart className="h-5 w-5 text-white" />
+                            <ShoppingCart className="h-5 w-5 text-white dark:text-white!" />
                         </div>
-                        Giỏ hàng
+                        <span className="text-black dark:text-white!">
+                            Giỏ hàng
+                        </span>
                     </h2>
                     {cart.length > 0 && (
                         <Button

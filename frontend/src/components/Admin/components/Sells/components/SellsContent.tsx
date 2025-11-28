@@ -1,24 +1,9 @@
 "use client"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import {
-    Search,
-    ShoppingCart,
-    Plus,
-    Minus,
-    Trash2,
     CreditCard,
-    X,
-    Barcode,
-    Package,
-    Store,
-    TrendingUp,
 } from "lucide-react"
 import HeaderSells from "./HeaderSells"
 import LeftPanelSells from "./LeftPanelSells"
@@ -426,14 +411,14 @@ export default function SellsContent() {
                 </div>
 
                 {/* Right Panel - Cart */}
-                <div className="w-[480px]  border-l border-green-200 shadow-xl flex flex-col">
+                <div className="w-[480px] border-l border-green-200 dark:border-green-800 shadow-xl flex flex-col bg-white dark:bg-gray-800">
                     {/* Cart Header */}
                     <HeaderCartSells cart={cart} total={total} stats={stats} clearCart={clearCart} />
 
                     {/* Cart Items */}
                     <CartItem cart={cart} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />
 
-                    <div className="p-6 border-t border-green-200">
+                    <div className="p-6 border-t border-green-200 dark:border-green-800">
                         {/* Promotion Code */}
                         <PromotionCodeSells
                             promoCode={promoCode}
@@ -445,13 +430,13 @@ export default function SellsContent() {
                             removePromotion={removePromotion}
                         />
 
-                        <div className="space-y-3 mb-6 bg-white p-5 rounded-xl border border-green-200 shadow-sm">
+                        <div className="space-y-3 mb-6 bg-white dark:bg-gray-800 p-5 rounded-xl border border-green-200 dark:border-green-800 shadow-sm">
                             <div className="flex justify-between text-sm">
-                                <span className="text-gray-600 font-medium">Tạm tính:</span>
-                                <span className="font-semibold text-gray-900">{subtotal.toLocaleString("vi-VN")}đ</span>
+                                <span className="text-gray-600 dark:text-gray-300 font-medium">Tạm tính:</span>
+                                <span className="font-semibold text-gray-900 dark:text-gray-100">{subtotal.toLocaleString("vi-VN")}đ</span>
                             </div>
                             {appliedPromotion && discountAmount > 0 && (
-                                <div className="flex justify-between text-sm text-orange-600">
+                                <div className="flex justify-between text-sm text-orange-600 dark:text-orange-400">
                                     <span className="font-medium">
                                         Giảm giá (
                                         {appliedPromotion.discount_type === "percentage"
@@ -462,10 +447,10 @@ export default function SellsContent() {
                                     <span className="font-semibold">-{discountAmount.toLocaleString("vi-VN")}đ</span>
                                 </div>
                             )}
-                            <Separator className="my-3" />
-                            <div className="flex justify-between text-lg font-bold p-4 rounded-lg border border-green-200">
-                                <span className="text-gray-900">Tổng cộng:</span>
-                                <span className="text-green-700">{total.toLocaleString("vi-VN")}đ</span>
+                            <Separator className="my-3 bg-gray-200 dark:bg-gray-700" />
+                            <div className="flex justify-between text-lg font-bold p-4 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
+                                <span className="text-gray-900 dark:text-gray-100">Tổng cộng:</span>
+                                <span className="text-green-700 dark:text-green-400">{total.toLocaleString("vi-VN")}đ</span>
                             </div>
                         </div>
 
