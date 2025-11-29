@@ -1,2 +1,2 @@
 migration Azure -> Models 
-dotnet ef dbcontext scaffold "Server=localhost,1433;Database=system_pos ;User Id=sa;Password=Tay52636@;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -o Models -c ApplicationDbContext --force
+dotnet ef dbcontext scaffold "Server=localhost,1433;Database=bachhoaxanh ;User Id=sa;Password=Tay52636@;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -o Models -c ApplicationDbContext --force

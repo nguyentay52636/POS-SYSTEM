@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace backend.Models;
 
-public partial class ImportReceipt
+public partial class ExportReceipt
 {
-    public int ImportId { get; set; }
+    public int ExportId { get; set; }
 
-    public int SupplierId { get; set; }
+    public int CustomerId { get; set; }
 
     public int UserId { get; set; }
 
-    public DateTime? ImportDate { get; set; }
+    public DateTime? ExportDate { get; set; }
 
     public decimal? TotalAmount { get; set; }
 
@@ -19,9 +19,9 @@ public partial class ImportReceipt
 
     public string? Note { get; set; }
 
-    public virtual ICollection<ImportItem> ImportItems { get; set; } = new List<ImportItem>();
+    public virtual Customer Customer { get; set; } = null!;
 
-    public virtual Supplier Supplier { get; set; } = null!;
+    public virtual ICollection<ExportItem> ExportItems { get; set; } = new List<ExportItem>();
 
     public virtual User User { get; set; } = null!;
 }

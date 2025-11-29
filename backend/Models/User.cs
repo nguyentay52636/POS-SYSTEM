@@ -7,15 +7,21 @@ public partial class User
 {
     public int UserId { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public string Username { get; set; } = null!;
+
+    public string Password { get; set; } = null!;
 
     public string? FullName { get; set; }
 
-    public string? Password { get; set; }
+    public int RoleId { get; set; }
 
-    public int Role { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
-    public string? Username { get; set; }
+    public virtual ICollection<ExportReceipt> ExportReceipts { get; set; } = new List<ExportReceipt>();
 
     public virtual ICollection<ImportReceipt> ImportReceipts { get; set; } = new List<ImportReceipt>();
+
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+
+    public virtual Role Role { get; set; } = null!;
 }

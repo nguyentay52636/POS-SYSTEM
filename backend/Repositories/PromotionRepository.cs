@@ -83,9 +83,9 @@ public class PromotionRepository : IPromotionRepository
         q = (query.SortBy?.ToLowerInvariant()) switch
         {
             "promo_code" => q.OrderByIf(true, p => p.PromoCode!, desc),
-            "end_date" => q.OrderByIf(true, p => p.EndDate!.Value, desc),
-            "discount_value" => q.OrderByIf(true, p => p.DiscountValue!.Value, desc),
-            _ => q.OrderByIf(true, p => p.StartDate!.Value, desc)
+            "end_date" => q.OrderByIf(true, p => p.EndDate, desc),
+            "discount_value" => q.OrderByIf(true, p => p.DiscountValue, desc),
+            _ => q.OrderByIf(true, p => p.StartDate, desc)
         };
 
         int total = await q.CountAsync();
@@ -107,8 +107,8 @@ public class PromotionRepository : IPromotionRepository
         var now = DateTime.Now;
         IQueryable<Promotion> q = _db.Promotions.AsNoTracking()
             .Where(p => p.Status == "active" &&
-                       p.StartDate <= now &&
-                       p.EndDate >= now &&
+                       p.StartDate.ToDateTime(TimeOnly.MinValue) <= now &&
+                       p.EndDate.ToDateTime(TimeOnly.MaxValue) >= now &&
                        (p.UsageLimit == 0 || p.UsedCount < p.UsageLimit));
 
         q = q.OrderBy(p => p.StartDate);

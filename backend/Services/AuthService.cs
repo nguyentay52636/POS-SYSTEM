@@ -44,7 +44,10 @@ namespace backend.Services
             }
 
             // Get role string from role enum value
-            var roleString = UserRoleHelper.GetRoleName(user.Role);
+            // Assuming user.Role is now a navigation property to a Role object
+            // Role = user.RoleId,Id is the foreign key.
+            // The UserResponseDto mapping needs to be explicit or adjusted.
+            var roleString = UserRoleHelper.GetRoleName(user.RoleId);
 
             // Generate JWT token
             var (token, expiresAt) = _jwtService.GenerateToken(
@@ -82,7 +85,7 @@ namespace backend.Services
                 Username = registerDto.Username,
                 Password = hashedPassword,
                 FullName = registerDto.FullName ?? registerDto.Username,
-                Role = (int)UserRole.Customer, // Default role is Customer
+                RoleId = (int)UserRole.Customer, // Default role is Customer
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -90,7 +93,7 @@ namespace backend.Services
             var createdUser = await _userRepository.CreateAsync(newUser);
 
             // Get role string from role enum value
-            var roleString = UserRoleHelper.GetRoleName(createdUser.Role);
+            var roleString = UserRoleHelper.GetRoleName(createdUser.RoleId);
 
             // Generate JWT token
             var (token, expiresAt) = _jwtService.GenerateToken(

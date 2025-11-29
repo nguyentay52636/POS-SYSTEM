@@ -100,7 +100,7 @@ public class OrderService : IOrderService
             {
                 throw new ArgumentException("Promotion is not active");
             }
-            if (promotion.StartDate > now || promotion.EndDate < now)
+            if (promotion.StartDate.ToDateTime(TimeOnly.MinValue) > now || promotion.EndDate.ToDateTime(TimeOnly.MaxValue) < now)
             {
                 throw new ArgumentException("Promotion is not valid at this time");
             }
@@ -112,11 +112,11 @@ public class OrderService : IOrderService
             // Calculate discount
             if (promotion.DiscountType == "percent")
             {
-                discountAmount = subtotalBeforeDiscount * (promotion.DiscountValue ?? 0) / 100;
+                discountAmount = subtotalBeforeDiscount * promotion.DiscountValue / 100;
             }
             else if (promotion.DiscountType == "fixed")
             {
-                discountAmount = promotion.DiscountValue ?? 0;
+                discountAmount = promotion.DiscountValue;
             }
 
             // Check minimum order amount
@@ -139,11 +139,11 @@ public class OrderService : IOrderService
                 // Calculate discount
                 if (promotion.DiscountType == "percent")
                 {
-                    discountAmount = subtotalBeforeDiscount * (promotion.DiscountValue ?? 0) / 100;
+                    discountAmount = subtotalBeforeDiscount * promotion.DiscountValue / 100;
                 }
                 else if (promotion.DiscountType == "fixed")
                 {
-                    discountAmount = promotion.DiscountValue ?? 0;
+                    discountAmount = promotion.DiscountValue;
                 }
             }
         }

@@ -39,12 +39,18 @@ public class UserRepository : IUserRepository
 
     public Task<User?> GetByIdAsync(int id)
     {
-        return _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == id);
+        return _db.Users
+            .AsNoTracking()
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.UserId == id);
     }
 
     public Task<User?> GetByUsernameAsync(string username)
     {
-        return _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == username);
+        return _db.Users
+            .AsNoTracking()
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Username == username);
     }
 
     public async Task<User> UpdateAsync(User user)
@@ -65,13 +71,15 @@ public class UserRepository : IUserRepository
 
     public async Task<(IReadOnlyList<User> Items, int Total)> SearchAsync(UserQueryParams query)
     {
-        IQueryable<User> q = _db.Users.AsNoTracking();
+        IQueryable<User> q = _db.Users
+            .AsNoTracking()
+            .Include(u => u.Role);
 
         // Apply filters using extension methods
         q = q.WhereIf(!query.Username.IsNullOrWhiteSpace(),
                 u => u.Username != null && u.Username.Contains(query.Username!))
             .WhereIf(!query.Role.IsNullOrWhiteSpace(),
-                u => u.Role == UserRoleHelper.GetRoleValue(query.Role!))
+                u => u.RoleId == UserRoleHelper.GetRoleValue(query.Role!))
             .WhereIf(!query.Keyword.IsNullOrWhiteSpace(),
                 u => (u.Username != null && u.Username.Contains(query.Keyword!)) ||
                      (u.FullName != null && u.FullName.Contains(query.Keyword!)));
@@ -93,8 +101,10 @@ public class UserRepository : IUserRepository
 
     public async Task<IReadOnlyList<User>> ListAllAsync()
     {
-        IQueryable<User> q = _db.Users.AsNoTracking();
-        q = q.OrderByDescending(u => u.CreatedAt);
+        IQueryable<User> q = _db.Users
+            .AsNoTracking()
+            .Include(u => u.Role)
+            .OrderByDescending(u => u.CreatedAt);
         var items = await q.ToListAsync();
         return items;
     }

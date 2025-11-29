@@ -86,17 +86,19 @@ public class PromotionService : IPromotionService
             }
         }
         // Validate if only end date is being updated
-        else if (dto.EndDate.HasValue && existing.StartDate.HasValue)
+        else if (dto.EndDate.HasValue)
         {
-            if (dto.EndDate <= existing.StartDate)
+            var endDate = DateOnly.FromDateTime(dto.EndDate.Value);
+            if (endDate <= existing.StartDate)
             {
                 throw new ArgumentException("End date must be after start date");
             }
         }
         // Validate if only start date is being updated
-        else if (dto.StartDate.HasValue && existing.EndDate.HasValue)
+        else if (dto.StartDate.HasValue)
         {
-            if (existing.EndDate <= dto.StartDate)
+            var startDate = DateOnly.FromDateTime(dto.StartDate.Value);
+            if (existing.EndDate <= startDate)
             {
                 throw new ArgumentException("End date must be after start date");
             }
@@ -206,12 +208,12 @@ public class PromotionService : IPromotionService
         }
 
         // Check date range
-        if (promotion.StartDate > now)
+        if (promotion.StartDate.ToDateTime(TimeOnly.MinValue) > now)
         {
             throw new ArgumentException("Promotion has not started yet");
         }
 
-        if (promotion.EndDate < now)
+        if (promotion.EndDate.ToDateTime(TimeOnly.MaxValue) < now)
         {
             throw new ArgumentException("Promotion has expired");
         }

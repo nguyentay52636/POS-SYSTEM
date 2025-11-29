@@ -56,7 +56,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings), typeof(OrderMappings), typeof(InventoryMappings), typeof(PaymentMappings), typeof(ImportReceiptMappings));
+builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings), typeof(OrderMappings), typeof(InventoryMappings), typeof(PaymentMappings), typeof(ImportReceiptMappings), typeof(RbacMappings));
 
 // DI
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -101,6 +101,19 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IImportReceiptRepository, ImportReceiptRepository>();
 builder.Services.AddScoped<IImportReceiptService, ImportReceiptService>();
 
+// RBAC
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+
+builder.Services.AddScoped<IFeatureRepository, FeatureRepository>();
+builder.Services.AddScoped<IFeatureService, FeatureService>();
+
+builder.Services.AddScoped<IPermissionTypeRepository, PermissionTypeRepository>();
+builder.Services.AddScoped<IPermissionTypeService, PermissionTypeService>();
+
+builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
+builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
+
 var app = builder.Build();
 
 app.UseSwagger();
@@ -114,7 +127,7 @@ app.UseSwaggerUI(c =>
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    // db.Database.Migrate();
 }
 
 app.UseHttpsRedirection();

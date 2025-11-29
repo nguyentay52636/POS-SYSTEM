@@ -34,6 +34,17 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
+    /// Search users with pagination and filtering.
+    /// </summary>
+    [HttpGet("search")]
+    [ProducesResponseType(typeof(PagedResponse<UserResponseDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedResponse<UserResponseDto>>> Search([FromQuery] UserQueryParams query)
+    {
+        var result = await _service.SearchAsync(query);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Get a user by id.
     /// </summary>
     /// <param name="id">User id</param>

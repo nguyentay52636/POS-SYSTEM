@@ -45,7 +45,9 @@ public class UserService : IUserService
 
         var user = _mapper.Map<User>(dto);
         user = await _repo.CreateAsync(user);
-        return _mapper.Map<UserResponseDto>(user);
+        // Reload with Role navigation property
+        var created = await _repo.GetByIdAsync(user.UserId);
+        return _mapper.Map<UserResponseDto>(created ?? user);
     }
 
     public async Task<UserResponseDto?> GetByIdAsync(int id)
@@ -74,7 +76,9 @@ public class UserService : IUserService
 
         _mapper.Map(dto, existing);
         var updated = await _repo.UpdateAsync(existing);
-        return _mapper.Map<UserResponseDto>(updated);
+        // Reload with Role navigation property
+        var reloaded = await _repo.GetByIdAsync(id);
+        return _mapper.Map<UserResponseDto>(reloaded ?? updated);
     }
 
     public Task<bool> DeleteAsync(int id) => _repo.DeleteAsync(id);
