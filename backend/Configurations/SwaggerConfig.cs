@@ -41,6 +41,14 @@ namespace backend.Configurations
                         new string[] {}
                     }
                 });
+
+                // Enable XML comments if available
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                if (File.Exists(xmlPath))
+                {
+                    c.IncludeXmlComments(xmlPath);
+                }
             });
         }
     }

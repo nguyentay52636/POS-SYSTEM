@@ -56,7 +56,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings), typeof(OrderMappings), typeof(InventoryMappings), typeof(PaymentMappings), typeof(ImportReceiptMappings), typeof(RbacMappings));
+builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings), typeof(OrderMappings), typeof(InventoryMappings), typeof(PaymentMappings), typeof(ImportReceiptMappings), typeof(RbacMappings), typeof(ExportReceiptMappings));
 
 // DI
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -101,6 +101,10 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IImportReceiptRepository, ImportReceiptRepository>();
 builder.Services.AddScoped<IImportReceiptService, ImportReceiptService>();
 
+// Export Receipt
+builder.Services.AddScoped<IExportReceiptRepository, ExportReceiptRepository>();
+builder.Services.AddScoped<IExportReceiptService, ExportReceiptService>();
+
 // RBAC
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
@@ -121,6 +125,14 @@ app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "POS System API v1");
     c.RoutePrefix = "swagger";
+    c.DisplayRequestDuration();
+    c.EnableFilter();
+    c.EnableDeepLinking();
+    c.EnableTryItOutByDefault();
+    c.EnablePersistAuthorization();
+    c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
+    c.DefaultModelsExpandDepth(-1);
+    c.DefaultModelRendering(Swashbuckle.AspNetCore.SwaggerUI.ModelRendering.Model);
 });
 
 // Apply any pending EF Core migrations at startup to ensure DB schema is up-to-date
