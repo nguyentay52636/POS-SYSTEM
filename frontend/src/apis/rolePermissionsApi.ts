@@ -14,6 +14,26 @@ export interface IPermissionsRolesCreate {
     featureId: number;
     isAllowed: boolean;
 }
+export type PermissionType = "view" | "create" | "edit" | "delete" | "print" | "export"
+
+export interface FeaturePermission {
+  featureId: number
+  featureName: string
+  permissions: {
+    [key in PermissionType]: boolean
+  }
+}
+export const permissionTypes = [
+    { code: "view", name: "Xem" },
+    { code: "create", name: "Thêm" },
+    { code: "edit", name: "Sửa" },
+    { code: "delete", name: "Xóa" },
+    { code: "print", name: "In" },
+    { code: "export", name: "Xuất Excel" },
+] as const
+
+// export type PermissionType = typeof permissionTypes[number]["code"]
+
 export const getPermissionsRoles = async (roleId: number) => {
     try {
         const { data } = await baseApi.get(`/Roles/${roleId}/permissions`);

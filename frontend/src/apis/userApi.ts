@@ -19,10 +19,7 @@ export interface CreateUserRequest {
   role: string | number;
   avatar?: string;
 }
-export enum Role {
-  ADMIN = "admin",
-  USER = "user",
-}
+
 
 // Point to an existing asset in public/ to avoid 404
 const DEFAULT_AVATAR = "/next.svg";
