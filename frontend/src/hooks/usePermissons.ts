@@ -1,4 +1,5 @@
 import useSWR from "swr"
+import { useMemo } from "react"
 import { getAllRoles, type IRole } from "@/apis/roleApi"
 import { getFeatures, type IFeaturePermission } from "@/apis/featuresApi"
 import {
@@ -53,11 +54,16 @@ export const convertToFeaturePermissions = (
     })
 }
 
+// Stable empty arrays to prevent infinite loops
+const EMPTY_ROLES: IRole[] = []
+const EMPTY_FEATURES: IFeaturePermission[] = []
+const EMPTY_PERMISSIONS: IPermissionsRoles[] = []
+
 export const useRoles = () => {
     const { data, error, isLoading, mutate } = useSWR<IRole[]>("/roles", getAllRoles)
 
     return {
-        roles: data || [],
+        roles: data || EMPTY_ROLES,
         isLoading,
         isError: error,
         mutate,
@@ -68,7 +74,7 @@ export const useFeatures = () => {
     const { data, error, isLoading, mutate } = useSWR<IFeaturePermission[]>("/features", getFeatures)
 
     return {
-        features: data || [],
+        features: data || EMPTY_FEATURES,
         isLoading,
         isError: error,
         mutate,
@@ -82,7 +88,7 @@ export const useRolePermissions = (roleId: number | null) => {
     )
 
     return {
-        permissions: data || [],
+        permissions: data || EMPTY_PERMISSIONS,
         isLoading,
         isError: error,
         mutate,
@@ -93,7 +99,10 @@ export const usePermissionsData = (roleId: number | null) => {
     const { features, isLoading: featuresLoading } = useFeatures()
     const { permissions, isLoading: permissionsLoading, mutate } = useRolePermissions(roleId)
 
-    const featurePermissions = convertToFeaturePermissions(features, permissions)
+    const featurePermissions = useMemo(
+        () => convertToFeaturePermissions(features, permissions),
+        [features, permissions]
+    )
 
     return {
         featurePermissions,

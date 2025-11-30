@@ -55,19 +55,19 @@ export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCate
                                     placeholder="Tìm kiếm sản phẩm theo tên hoặc mã vạch..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-12 h-11 text-sm border border-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:text-white! text-white!     "
+                                    className="pl-12 h-11 text-sm border border-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:text-white text-black"
                                 />
                             </div>
                             <Select
                                 value={selectedCategory.toString()}
                                 onValueChange={(value) => setSelectedCategory(value === "all" ? "all" : Number(value))}
                             >
-                                <SelectTrigger className="w-[200px] h-11 border border-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:text-white! text-white!     ">
+                                <SelectTrigger className="w-[200px] h-11 border border-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:text-white text-black">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">
-                                        <span className="font-medium dark:text-white! text-white!     ">Tất cả danh mục</span>
+                                        <span className="font-medium dark:text-white text-black">Tất cả danh mục</span>
                                     </SelectItem>
                                     {mockCategories.map((cat) => (
                                         <SelectItem key={cat.category_id} value={cat.category_id.toString()}>
@@ -78,15 +78,15 @@ export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCate
                             </Select>
                         </div>
                         <div className="mt-4 flex items-center justify-between text-sm">
-                            <span className="text-gray-600 dark:text-white! text-white!     ">
-                                Hiển thị <span className="font-semibold text-green-700">{filteredProducts.length}</span> sản phẩm
+                            <span className="text-black dark:text-white">
+                                Hiển thị <span className="font-semibold text-black dark:text-white">{filteredProducts.length}</span> sản phẩm
                             </span>
                             {searchTerm && (
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => setSearchTerm("")}
-                                    className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-white! text-white!     "
+                                    className="text-black hover:text-gray-700 hover:bg-gray-100 dark:text-white"
                                 >
                                     <X className="h-4 w-4 mr-1" />
                                     Xóa tìm kiếm
@@ -105,7 +105,7 @@ export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCate
                                 onClick={() => addToCart(product)}
                             >
                                 <CardContent className="p-0">
-                                    <div className="relative aspect-[4/3] overflow-hidden dark:text-white! text-white!     ">
+                                    <div className="relative aspect-[4/3] overflow-hidden dark:text-white text-black">
                                         <img
                                             src={product.image || "/placeholder.svg"}
                                             alt={product.product_name}
@@ -113,8 +113,8 @@ export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCate
                                         />
 
                                         <div className="absolute top-2 right-2">
-                                            <div className=" px-2 py-1 rounded-lg shadow-sm border border-gray-200 dark:text-white! text-white!     ">
-                                                <span className="text-xs font-semibold text-green-700 flex items-center gap-1              ">
+                                            <div className=" px-2 py-1 rounded-lg shadow-sm border border-gray-200 dark:text-white text-black">
+                                                <span className="text-xs font-semibold text-black flex items-center gap-1">
                                                     <Package className="h-3 w-3" />
                                                     {product.stock}
                                                 </span>
@@ -123,12 +123,12 @@ export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCate
 
                                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                                             <div className=" rounded-full p-3 shadow-xl transform scale-0 group-hover:scale-100 transition-transform duration-300 delay-100">
-                                                <Plus className="h-6 w-6 text-green-700 dark:text-white! text-white!     " strokeWidth={2} />
+                                                <Plus className="h-6 w-6 text-black dark:text-white" strokeWidth={2} />
                                             </div>
                                         </div>
 
-                                        <div className="absolute bottom-2 left-2 px-2 py-1 rounded-md shadow-sm dark:text-white! text-white!     ">
-                                            <span className="text-[10px] font-mono text-white flex items-center gap-1">
+                                        <div className="absolute bottom-2 left-2 px-2 py-1 rounded-md shadow-sm dark:text-white text-black">
+                                            <span className="text-[10px] font-mono text-black dark:text-white flex items-center gap-1">
                                                 <Barcode className="h-3 w-3" />
                                                 {product.barcode}
                                             </span>
@@ -136,31 +136,31 @@ export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCate
                                     </div>
 
                                     <div className="p-3 space-y-2">
-                                        <h3 className="font-semibold text-sm leading-tight line-clamp-2 text-gray-800 group-hover:text-green-700 transition-colors duration-200 dark:text-white! text-white!     ">
+                                        <h3 className="font-semibold text-sm leading-tight line-clamp-2 text-black group-hover:text-black transition-colors duration-200 dark:text-white">
                                             {product.product_name}
                                         </h3>
 
                                         <div className="flex items-end justify-between gap-2 pt-1 border-t border-gray-100">
                                             <div className="flex-1">
-                                                <p className="text-[10px] uppercase tracking-wide text-gray-500 mb-1 font-medium dark:text-white! text-white!     ">
+                                                <p className="text-[10px] uppercase tracking-wide text-black mb-1 font-medium dark:text-white">
                                                     Giá bán
                                                 </p>
                                                 <div className="flex items-baseline gap-1">
-                                                    <p className="text-lg font-bold text-green-700 leading-none dark:text-white! text-white!     ">
+                                                    <p className="text-lg font-bold text-black leading-none dark:text-white">
                                                         {product.price.toLocaleString("vi-VN")}
                                                     </p>
-                                                    <span className="text-xs font-medium text-gray-600 dark:text-white! text-white!     ">đ</span>
+                                                    <span className="text-xs font-medium text-black dark:text-white">đ</span>
                                                 </div>
                                             </div>
-                                            <Badge className="text-xs font-medium px-2 py-1 bg-green-100 border border-green-200 text-green-800 dark:text-white! text-white!     ">
+                                            <Badge className="text-xs font-medium px-2 py-1 bg-green-100 border border-green-200 text-black dark:text-white">
                                                 /{product.unit}
                                             </Badge>
                                         </div>
 
                                         <div className="pt-2 border-t border-gray-100">
-                                            <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-gray-500 group-hover:text-green-700 transition-colors duration-200 dark:text-white! text-white!     ">
+                                            <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-black group-hover:text-black transition-colors duration-200 dark:text-white">
                                                 <ShoppingCart className="h-3.5 w-3.5" />
-                                                <span className="dark:text-white! text-white!     " >Nhấn để thêm</span>
+                                                <span className="dark:text-white text-black" >Nhấn để thêm</span>
                                             </div>
                                         </div>
                                     </div>

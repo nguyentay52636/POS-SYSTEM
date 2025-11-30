@@ -1,10 +1,5 @@
-"use client"
-import React from 'react'
-import AdminLayout from '@/components/Admin/AdminLayout'
+import { redirect } from 'next/navigation'
+
 export default function AdminPage() {
-    return (
-        <>
-            <AdminLayout />
-        </>
-    )
+    redirect('/admin/dashboard')
 }

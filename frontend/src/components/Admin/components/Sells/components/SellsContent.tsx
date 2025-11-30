@@ -1,24 +1,12 @@
 "use client"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import {
-    Search,
-    ShoppingCart,
-    Plus,
-    Minus,
-    Trash2,
+
     CreditCard,
     X,
-    Barcode,
-    Package,
-    Store,
-    TrendingUp,
+
 } from "lucide-react"
 import HeaderSells from "./HeaderSells"
 import LeftPanelSells from "./LeftPanelSells"
