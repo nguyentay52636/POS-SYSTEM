@@ -47,32 +47,28 @@ export default function ManagerTableProducts({
                         </TableRow>
                     ) : (
                         products.map((product) => {
-                            const categoryName = typeof product.category_id === "object"
-                                ? (product.category_id.category_name || (product.category_id as any).categoryName || "")
-                                : ""
-                            const supplierName = typeof product.supplier_id === "object"
-                                ? (product.supplier_id.name || "")
-                                : ""
+                            const categoryName = product.category ? product.category.categoryName : ""
+                            const supplierName = product.supplier ? product.supplier.name : ""
 
                             return (
-                                <TableRow key={product.product_id} className="hover:bg-gray-50/60 dark:hover:bg-gray-900/50">
+                                <TableRow key={product.productId} className="hover:bg-gray-50/60 dark:hover:bg-gray-900/50">
 
                                     <TableCell>
                                         <code className="rounded bg-gray-100 px-2 py-1 text-sm font-mono text-gray-700 dark:bg-gray-900/70 dark:text-gray-300">
-                                            {product.product_id}
+                                            {product.productId}
                                         </code>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <img
-                                                src={product.image_url || "/placeholder.svg"}
-                                                alt={product.product_name}
+                                                src={product.imageUrl || "/placeholder.svg"}
+                                                alt={product.productName}
                                                 className="h-12 w-12 rounded-lg border object-cover shadow-sm"
                                             />
                                             <div>
-                                                <p className="font-medium text-gray-900 dark:text-white">{product.product_name}</p>
-                                                {product.product_id && (
-                                                    <code className="text-xs text-gray-500 dark:text-gray-400">#{product.product_id}</code>
+                                                <p className="font-medium text-gray-900 dark:text-white">{product.productName}</p>
+                                                {product.productId && (
+                                                    <code className="text-xs text-gray-500 dark:text-gray-400">#{product.productId}</code>
                                                 )}
                                             </div>
                                         </div>
@@ -102,7 +98,7 @@ export default function ManagerTableProducts({
                                         </span>
                                     </TableCell>
 
-                                    <TableCell>{getStatusBadge(product.status)}</TableCell>
+                                    <TableCell>{getStatusBadge(product.status || "")}</TableCell>
 
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-1">
@@ -126,7 +122,7 @@ export default function ManagerTableProducts({
                                                 variant="ghost"
                                                 size="sm"
                                                 className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40"
-                                                onClick={() => handleDeleteProduct(product.product_id?.toString() ?? "")}
+                                                onClick={() => handleDeleteProduct(product.productId?.toString() ?? "")}
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>

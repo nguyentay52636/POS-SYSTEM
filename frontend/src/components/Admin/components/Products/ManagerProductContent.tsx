@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import ManagerProductHeader from "./components/ManagerProductHeader"
@@ -13,52 +13,42 @@ import { FormProduct } from "./components/Dialog/FormProduct"
 import PaginationManagerProduct from "./components/PaginationManagerProduct"
 import ManagerTableProducts from "./components/ManagerTableProducts"
 import { usePagination } from "@/context/PaginationContext"
-import { useProducts } from "./hook/useProducts"
-
-
-
+import { useProduct } from "@/hooks/useProduct"
 
 export default function ManagerProductContent() {
 
-    const { products, loading, fetchProducts, addProduct, editProduct, removeProduct } = useProducts()
-    const [searchTerm, setSearchTerm] = useState("")
-    const [selectedCategory, setSelectedCategory] = useState("all")
-    const [selectedStatus, setSelectedStatus] = useState("all")
-    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-    const [editingProduct, setEditingProduct] = useState<IProduct | null>(null)
+    const {
+        filteredProducts,
+        loading,
+        totalProducts,
+        activeProducts,
+        outOfStockProducts,
+        inactiveProducts,
+        searchTerm,
+        setSearchTerm,
+        selectedCategory,
+        setSelectedCategory,
+        selectedStatus,
+        setSelectedStatus,
+        isAddDialogOpen,
+        setIsAddDialogOpen,
+        editingProduct,
+        handleOpenAddDialog,
+        handleEditProduct,
+        handleDeleteProduct,
+        handleFormSubmit
+    } = useProduct()
 
-    const categories = ["all", ...mockCategories.map(cat => cat.category_name)]
+    const categories = ["all", ...mockCategories.map(cat => cat.categoryName)]
     const statuses = ["all", "active", "inactive", "out-of-stock"]
 
-    const totalProducts = products.length
-    const activeProducts = products.filter((p) => p.status === "active").length
-    const outOfStockProducts = products.filter((p) => p.status === "out-of-stock").length
-    const inactiveProducts = products.filter((p) => p.status === "inactive").length
-
     const { paginationState } = usePagination()
-
-    const filteredProducts = useMemo(() => {
-        return products.filter((product) => {
-            const idMatches = product.product_id
-                ? product.product_id.toString().includes(searchTerm.toLowerCase())
-                : false
-            const matchesSearch =
-                product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                idMatches
-            const categoryName = typeof product.category_id === 'object' ? product.category_id.category_name : ""
-            const matchesCategory = selectedCategory === "all" || categoryName === selectedCategory
-            const matchesStatus = selectedStatus === "all" || product.status === selectedStatus
-            return matchesSearch && matchesCategory && matchesStatus
-        })
-    }, [products, searchTerm, selectedCategory, selectedStatus])
 
     const paginatedProducts = useMemo(() => {
         const startIndex = (paginationState.currentPage - 1) * paginationState.rowsPerPage
         const endIndex = startIndex + paginationState.rowsPerPage
         return filteredProducts.slice(startIndex, endIndex)
     }, [filteredProducts, paginationState.currentPage, paginationState.rowsPerPage])
-
-
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat("vi-VN", {
@@ -82,42 +72,12 @@ export default function ManagerProductContent() {
     }
 
     const handleViewDetails = (product: IProduct) => {
-        console.log("View details for product:", product.product_id)
+        console.log("View details for product:", product.productId)
     }
 
-    const handleDeleteProduct = async (productId: string) => {
+    const confirmDelete = (productId: string) => {
         if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-            try {
-                await removeProduct(parseInt(productId));
-            } catch (error) {
-                console.error("Lỗi xóa sản phẩm:", error);
-            }
-        }
-    }
-
-    const handleEditProduct = (product: IProduct) => {
-        setEditingProduct(product)
-        setIsAddDialogOpen(true)
-    }
-
-    const handleOpenAddDialog = () => {
-        setEditingProduct(null)
-        setIsAddDialogOpen(true)
-    }
-
-    const handleFormSubmit = async (product: IProduct) => {
-        try {
-            if (editingProduct && typeof editingProduct.product_id === "number") {
-                // Update existing product
-                await editProduct(editingProduct.product_id, product);
-            } else {
-                // Add new product
-                await addProduct(product);
-            }
-            setIsAddDialogOpen(false)
-            setEditingProduct(null)
-        } catch (error) {
-            console.error("Lỗi lưu sản phẩm:", error);
+            handleDeleteProduct(productId)
         }
     }
 
@@ -148,7 +108,7 @@ export default function ManagerProductContent() {
                                     getStatusBadge={getStatusBadge}
                                     handleViewDetails={handleViewDetails}
                                     handleEditProduct={handleEditProduct}
-                                    handleDeleteProduct={handleDeleteProduct}
+                                    handleDeleteProduct={confirmDelete}
                                 />
                                 <PaginationManagerProduct totalItems={filteredProducts.length} />
                             </>
@@ -168,3 +128,4 @@ export default function ManagerProductContent() {
         </div>
     )
 }
+

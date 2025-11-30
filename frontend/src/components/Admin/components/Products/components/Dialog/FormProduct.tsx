@@ -21,38 +21,38 @@ interface ProductFormProps {
 }
 
 type ProductFormValues = {
-    product_id?: string
-    product_name: string
+    productId?: string
+    productName: string
     barcode: string
     price: string
     unit: string
     status: string
-    image_url: string
+    imageUrl: string
     categoryId: string
     supplierId: string
 }
 
 const createEmptyFormValues = (): ProductFormValues => ({
-    product_name: "",
+    productName: "",
     barcode: "",
     price: "",
     unit: "",
     status: "active",
-    image_url: "",
+    imageUrl: "",
     categoryId: "",
     supplierId: ""
 })
 
 const mapProductToFormValues = (product?: IProduct | null): ProductFormValues => ({
-    product_id: product?.product_id ? product.product_id.toString() : undefined,
-    product_name: product?.product_name ?? "",
+    productId: product?.productId ? product.productId.toString() : undefined,
+    productName: product?.productName ?? "",
     barcode: product?.barcode ?? "",
     price: product?.price != null ? product.price.toString() : "",
     unit: product?.unit != null ? product.unit.toString() : "",
     status: product?.status ?? "active",
-    image_url: product?.image_url ?? "",
-    categoryId: product?.category_id?.category_id ? product.category_id.category_id.toString() : "",
-    supplierId: product?.supplier_id?.supplier_id ? product.supplier_id.supplier_id.toString() : ""
+    imageUrl: product?.imageUrl ?? "",
+    categoryId: product?.category?.categoryId ? product.category.categoryId.toString() : (product?.categoryId?.toString() || ""),
+    supplierId: product?.supplier?.supplierId ? product.supplier.supplierId.toString() : (product?.supplierId?.toString() || "")
 })
 
 export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: ProductFormProps) {
@@ -81,26 +81,26 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
 
     const selectedCategory = useMemo<ICategory | undefined>(() => {
         if (!formValues.categoryId) return undefined
-        const fromApi = categories.find((cat) => cat.category_id === Number(formValues.categoryId))
+        const fromApi = categories.find((cat) => cat.categoryId === Number(formValues.categoryId))
         if (fromApi) return fromApi
         if (
-            editingProduct?.category_id &&
-            editingProduct.category_id.category_id.toString() === formValues.categoryId
+            editingProduct?.category &&
+            editingProduct.category.categoryId.toString() === formValues.categoryId
         ) {
-            return editingProduct.category_id
+            return editingProduct.category
         }
         return undefined
     }, [categories, editingProduct, formValues.categoryId])
 
     const selectedSupplier = useMemo<ISupplier | undefined>(() => {
         if (!formValues.supplierId) return undefined
-        const fromApi = suppliers.find((sup) => sup.supplier_id === Number(formValues.supplierId))
+        const fromApi = suppliers.find((sup) => sup.supplierId === Number(formValues.supplierId))
         if (fromApi) return fromApi
         if (
-            editingProduct?.supplier_id &&
-            editingProduct.supplier_id.supplier_id.toString() === formValues.supplierId
+            editingProduct?.supplier &&
+            editingProduct.supplier.supplierId?.toString() === formValues.supplierId
         ) {
-            return editingProduct.supplier_id
+            return editingProduct.supplier
         }
         return undefined
     }, [suppliers, editingProduct, formValues.supplierId])
@@ -114,9 +114,9 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
 
         return (
             numericFieldsValid &&
-            formValues.product_name.trim().length > 0 &&
+            formValues.productName.trim().length > 0 &&
             formValues.barcode.trim().length > 0 &&
-            formValues.image_url.trim().length > 0 &&
+            formValues.imageUrl.trim().length > 0 &&
             formValues.categoryId !== "" &&
             formValues.supplierId !== ""
         )
@@ -128,20 +128,22 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
 
         const now = new Date().toISOString()
         const payload: IProduct = {
-            product_name: formValues.product_name.trim(),
+            productName: formValues.productName.trim(),
             barcode: formValues.barcode.trim(),
             price: Number(formValues.price),
             unit: Number(formValues.unit),
             status: formValues.status,
-            image_url: formValues.image_url.trim(),
-            category_id: selectedCategory,
-            supplier_id: selectedSupplier,
+            imageUrl: formValues.imageUrl.trim(),
+            category: selectedCategory,
+            categoryId: Number(formValues.categoryId),
+            supplier: selectedSupplier,
+            supplierId: Number(formValues.supplierId),
             createdAt: editingProduct?.createdAt ?? now,
             updatedAt: now
         }
 
-        if (editingProduct?.product_id) {
-            payload.product_id = editingProduct.product_id
+        if (editingProduct?.productId) {
+            payload.productId = editingProduct.productId
         }
 
         try {
@@ -161,7 +163,7 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
                 <DialogHeader className="border-b pb-4">
                     <DialogTitle className="flex items-center gap-3 text-xl text-gray-900">
                         <Badge variant="outline" className="rounded-full px-3 py-1 text-xs font-medium">
-                            {formValues.product_id ? `#${formValues.product_id}` : "New product"}
+                            {formValues.productId ? `#${formValues.productId}` : "New product"}
                         </Badge>
                         {editingProduct ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm mới"}
                     </DialogTitle>
@@ -181,12 +183,12 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
 
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="space-y-2">
-                                <Label htmlFor="product_name">Tên sản phẩm *</Label>
+                                <Label htmlFor="productName">Tên sản phẩm *</Label>
                                 <Input
-                                    id="product_name"
+                                    id="productName"
                                     placeholder="Ví dụ: Táo đỏ New Zealand"
-                                    value={formValues.product_name}
-                                    onChange={handleInputChange("product_name")}
+                                    value={formValues.productName}
+                                    onChange={handleInputChange("productName")}
                                     required
                                 />
                             </div>
@@ -261,12 +263,12 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
                                         ) : (
                                             categories.map((category, index) => {
                                                 const normalizedId =
-                                                    category.category_id ?? Number(index + 1)
+                                                    category.categoryId ?? Number(index + 1)
                                                 const value = normalizedId.toString()
                                                 const key = `category-${value}`
                                                 return (
                                                     <SelectItem key={key} value={value}>
-                                                        {category.category_name || `Danh mục ${index + 1}`}
+                                                        {category.categoryName || `Danh mục ${index + 1}`}
                                                     </SelectItem>
                                                 )
                                             })
@@ -298,7 +300,7 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
                                         ) : (
                                             suppliers.map((supplier, index) => {
                                                 const normalizedId =
-                                                    supplier.supplier_id ?? Number(index + 1)
+                                                    supplier.supplierId ?? Number(index + 1)
                                                 const value = normalizedId.toString()
                                                 const key = `supplier-${value}`
                                                 return (
@@ -336,13 +338,13 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
                         </div>
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
-                                <Label htmlFor="image_url">URL ảnh *</Label>
+                                <Label htmlFor="imageUrl">URL ảnh *</Label>
                                 <Input
-                                    id="image_url"
+                                    id="imageUrl"
                                     type="url"
                                     placeholder="https://example.com/image.jpg"
-                                    value={formValues.image_url}
-                                    onChange={handleInputChange("image_url")}
+                                    value={formValues.imageUrl}
+                                    onChange={handleInputChange("imageUrl")}
                                     required
                                 />
                                 <p className="text-xs text-gray-500">
@@ -352,9 +354,9 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
                             <div className="rounded-lg border bg-gray-50 p-4 text-center">
                                 <p className="text-sm font-medium text-gray-700 mb-3">Xem trước</p>
                                 <div className="flex h-32 items-center justify-center rounded-md bg-white">
-                                    {formValues.image_url ? (
+                                    {formValues.imageUrl ? (
                                         <img
-                                            src={formValues.image_url}
+                                            src={formValues.imageUrl}
                                             alt="Product preview"
                                             className="h-28 w-28 rounded-md object-cover"
                                             onError={(event) => {

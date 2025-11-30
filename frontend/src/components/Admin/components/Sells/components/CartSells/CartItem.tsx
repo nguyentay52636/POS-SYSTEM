@@ -29,7 +29,7 @@ export default function CartItem({ cart, updateQuantity, removeFromCart }: CartI
                             {cart.map((item) => (
                                 <Card
                                     key={item.product.product_id}
-                                    className="border border-green-200 shadow-sm hover:shadow-md transition-all duration-200 bg-white"
+                                    className="border border-green-200 shadow-sm hover:shadow-md transition-all duration-200 bg-gray-500!"
                                 >
                                     <CardContent className="p-4">
                                         <div className="flex gap-4">

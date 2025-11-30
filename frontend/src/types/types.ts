@@ -110,15 +110,17 @@ export interface IInventory {
   product?: IProduct; // Full product information
 }
 export interface IProduct {
-  product_id?: number;
-  category_id?: ICategory;
-  supplier_id?: ISupplier;
-  product_name: string;
-  barcode: string;
+  productId?: number;
+  productName: string;
+  imageUrl: string;
   price: number;
-  image_url: string;
   unit: number;
-  status: string;
+  categoryId?: number;
+  category: ICategory
+  supplierId?: number;
+  supplier: ISupplier;
+  barcode?: string;
+  status?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -132,8 +134,8 @@ export interface ICustomer {
   updatedAt: string;
 }
 export interface ICategory {
-  category_id: number;
-  category_name: string;
+  categoryId: number;
+  categoryName: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -160,7 +162,7 @@ export enum role {
 }
 export interface ISupplier {
   supplier_id: number;
-  supplierId?: number; 
+  supplierId?: number;
   name: string;
   phone: string;
   email: string;

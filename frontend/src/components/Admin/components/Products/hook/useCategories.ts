@@ -13,10 +13,10 @@ export function useCategories() {
     )
 
     return {
-      category_id: categoryId,
-      category_name:
-        rawCategory?.category_name ??
+      categoryId: categoryId,
+      categoryName:
         rawCategory?.categoryName ??
+        rawCategory?.category_name ??
         rawCategory?.name ??
         `Danh mục ${fallbackId}`,
       createdAt: rawCategory?.createdAt ?? rawCategory?.created_at ?? new Date().toISOString(),
