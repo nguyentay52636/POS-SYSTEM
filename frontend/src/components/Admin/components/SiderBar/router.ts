@@ -4,9 +4,10 @@ import { DollarSign } from "lucide-react"
 import { Star } from "lucide-react"
 import { ShoppingCart } from "lucide-react"
 import { Gift } from "lucide-react"
+import { Lock } from "lucide-react"
 import { Users } from "lucide-react"
 import { Settings } from "lucide-react"
- export const navigation = (pathname: string) => [
+export const navigation = (pathname: string) => [
     {
         name: "Tổng quan",
         href: "/admin/dashboard",
@@ -66,14 +67,14 @@ import { Settings } from "lucide-react"
         badge: null,
     },
     {
-        name : "Quản lý phiếu nhập",
+        name: "Quản lý phiếu nhập",
         href: "/admin/receipts",
         icon: ShoppingCart,
         current: pathname === "/admin/receipts",
         badge: null,
     },
     {
-        name : "Quản lý phiếu xuất",
+        name: "Quản lý phiếu xuất",
         href: "/admin/inventory-outvoices",
         icon: ShoppingCart,
         current: pathname === "/admin/inventory-outvoices",
@@ -92,6 +93,13 @@ import { Settings } from "lucide-react"
         href: "/admin/users",
         icon: Users,
         current: pathname === "/admin/users",
+        badge: null,
+    },
+    {
+        name: "Quản lý quyền",
+        href: "/admin/permissions",
+        icon: Lock,
+        current: pathname === "/admin/permissions",
         badge: null,
     },
     {

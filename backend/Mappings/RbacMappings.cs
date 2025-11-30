@@ -20,9 +20,7 @@ public class RbacMappings : Profile
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.RoleName))
             .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
-        // Feature Mappings
-        CreateMap<Feature, FeatureResponseDto>();
-        CreateMap<CreateFeatureDto, Feature>();
+        // Feature Mappings - moved to FeatureMappings.cs
 
         // PermissionType Mappings
         CreateMap<PermissionType, PermissionTypeResponseDto>();

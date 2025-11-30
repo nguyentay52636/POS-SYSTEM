@@ -1,5 +1,7 @@
-using System.Collections.Generic;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using backend.Models;
 
@@ -10,7 +12,10 @@ public interface IFeatureRepository
     Task<Feature> CreateAsync(Feature feature);
     Task<Feature?> GetByIdAsync(int id);
     Task<Feature?> GetByNameAsync(string name);
+    Task<Feature> UpdateAsync(Feature feature);
+    Task<bool> DeleteAsync(int id);
     Task<IReadOnlyList<Feature>> ListAllAsync();
+    Task<bool> ExistsAsync(int id);
 }
 
 public class FeatureRepository : IFeatureRepository
@@ -36,11 +41,36 @@ public class FeatureRepository : IFeatureRepository
 
     public Task<Feature?> GetByNameAsync(string name)
     {
-        return _db.Features.AsNoTracking().FirstOrDefaultAsync(f => f.FeatureName == name);
+        return _db.Features.AsNoTracking()
+            .FirstOrDefaultAsync(f => f.FeatureName == name);
+    }
+
+    public async Task<Feature> UpdateAsync(Feature feature)
+    {
+        _db.Features.Update(feature);
+        await _db.SaveChangesAsync();
+        return feature;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var existing = await _db.Features.FindAsync(id);
+        if (existing == null) return false;
+        _db.Features.Remove(existing);
+        await _db.SaveChangesAsync();
+        return true;
     }
 
     public async Task<IReadOnlyList<Feature>> ListAllAsync()
     {
-        return await _db.Features.AsNoTracking().ToListAsync();
+        return await _db.Features
+            .AsNoTracking()
+            .OrderBy(f => f.FeatureName)
+            .ToListAsync();
+    }
+
+    public async Task<bool> ExistsAsync(int id)
+    {
+        return await _db.Features.AnyAsync(f => f.FeatureId == id);
     }
 }
