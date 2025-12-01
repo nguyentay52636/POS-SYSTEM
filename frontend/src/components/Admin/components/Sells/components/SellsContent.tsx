@@ -15,8 +15,10 @@ import CartItem from "./CartSells/CartItem"
 import PromotionCodeSells from "@/app/admin/orders/PromotionCodeSells"
 import { PaymentMethod as PaymentMethodType } from "@/types/paymentType"
 import { CustomerInfo } from "./CustomerForm"
+import { IInventory, IProduct } from "@/types/types"
 import DialogCustomer from "./DialogCustomer"
 import DialogPayment from "./DialogPayment"
+import { useInventory } from "@/hooks/useInventory"
 
 
 export interface ICategory {
@@ -26,19 +28,7 @@ export interface ICategory {
     updatedAt: string
 }
 
-export interface IProduct {
-    product_id: number
-    category_id: number
-    supplier_id: number
-    product_name: string
-    barcode: string
-    price: number
-    unit: string
-    createdAt: string
-    updatedAt: string
-    image?: string
-    stock?: number
-}
+
 
 export interface IPromotion {
     promo_id: number
@@ -77,87 +67,6 @@ const mockCategories: ICategory[] = [
     { category_id: 3, category_name: "Thịt", createdAt: "2024-01-01", updatedAt: "2024-01-01" },
     { category_id: 4, category_name: "Hải sản", createdAt: "2024-01-01", updatedAt: "2024-01-01" },
     { category_id: 5, category_name: "Sữa", createdAt: "2024-01-01", updatedAt: "2024-01-01" },
-]
-
-const mockProducts: IProduct[] = [
-    {
-        product_id: 1,
-        category_id: 1,
-        supplier_id: 1,
-        product_name: "Táo Gala mini",
-        barcode: "8934567890123",
-        price: 33600,
-        unit: "kg",
-        image: "/placeholder.svg",
-        stock: 150,
-        createdAt: "2024-01-01",
-        updatedAt: "2024-01-01",
-    },
-    {
-        product_id: 2,
-        category_id: 1,
-        supplier_id: 1,
-        product_name: "Nho mẫu đơn",
-        barcode: "8934567890124",
-        price: 49000,
-        unit: "kg",
-        image: "/placeholder.svg",
-        stock: 80,
-        createdAt: "2024-01-01",
-        updatedAt: "2024-01-01",
-    },
-    {
-        product_id: 3,
-        category_id: 1,
-        supplier_id: 1,
-        product_name: "Cà chua cherry",
-        barcode: "8934567890125",
-        price: 25000,
-        unit: "kg",
-        image: "/placeholder.svg",
-        stock: 100,
-        createdAt: "2024-01-01",
-        updatedAt: "2024-01-01",
-    },
-    {
-        product_id: 4,
-        category_id: 3,
-        supplier_id: 2,
-        product_name: "Thịt ba chỉ",
-        barcode: "8934567890126",
-        price: 180000,
-        unit: "kg",
-        image: "/placeholder.svg",
-        stock: 50,
-        createdAt: "2024-01-01",
-        updatedAt: "2024-01-01",
-    },
-    {
-        product_id: 5,
-        category_id: 5,
-        supplier_id: 3,
-        product_name: "Sữa tươi TH True Milk",
-        barcode: "8934567890127",
-        price: 32000,
-        unit: "hộp",
-        image: "/placeholder.svg",
-        stock: 200,
-        createdAt: "2024-01-01",
-        updatedAt: "2024-01-01",
-    },
-    {
-        product_id: 6,
-        category_id: 1,
-        supplier_id: 1,
-        product_name: "Bánh mì Việt Nam",
-        barcode: "8934567890128",
-        price: 15000,
-        unit: "ổ",
-        image: "/placeholder.svg",
-        stock: 120,
-        createdAt: "2024-01-01",
-        updatedAt: "2024-01-01",
-    },
 ]
 
 const mockPromotions: IPromotion[] = [
@@ -233,6 +142,7 @@ const mockPaymentMethods: PaymentMethodType[] = [
 ]
 
 export default function SellsContent() {
+    const { inventories, loading } = useInventory()
     const [cart, setCart] = useState<CartItem[]>([])
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<number | "all">("all")
@@ -250,11 +160,23 @@ export default function SellsContent() {
     })
     const [showCustomerForm, setShowCustomerForm] = useState(false)
 
-    // Filter products
-    const filteredProducts = mockProducts.filter((product) => {
+    // Filter products from inventory API
+    const filteredInventories: IInventory[] = inventories.filter((inventory) => {
+        const name =
+            inventory.product?.productName ??
+            inventory.productName ??
+            ""
+        const barcode = inventory.product?.barcode ?? ""
+        const categoryId = inventory.product?.categoryId
+
         const matchesSearch =
-            product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) || product.barcode.includes(searchTerm)
-        const matchesCategory = selectedCategory === "all" || product.category_id === selectedCategory
+            name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            barcode.toLowerCase().includes(searchTerm.toLowerCase())
+
+        const matchesCategory =
+            selectedCategory === "all" ||
+            (categoryId !== undefined && categoryId === selectedCategory)
+
         return matchesSearch && matchesCategory
     })
 
@@ -271,10 +193,13 @@ export default function SellsContent() {
     const total = subtotal - discountAmount
 
     // Add to cart
-    const addToCart = (product: IProduct) => {
-        const existingItem = cart.find((item) => item.product.product_id === product.product_id)
+    const addToCart = (inventory: IInventory) => {
+        const product = inventory.product
+        if (!product || !product.productId) return
+
+        const existingItem = cart.find((item) => item.product.productId === product.productId)
         if (existingItem) {
-            updateQuantity(product.product_id, existingItem.quantity + 1)
+            updateQuantity(product.productId, existingItem.quantity + 1)
         } else {
             setCart([
                 ...cart,
@@ -295,7 +220,7 @@ export default function SellsContent() {
         }
         setCart(
             cart.map((item) =>
-                item.product.product_id === productId
+                item.product.productId === productId
                     ? { ...item, quantity: newQuantity, subtotal: item.product.price * newQuantity }
                     : item,
             ),
@@ -304,7 +229,7 @@ export default function SellsContent() {
 
     // Remove from cart
     const removeFromCart = (productId: number) => {
-        setCart(cart.filter((item) => item.product.product_id !== productId))
+        setCart(cart.filter((item) => item.product.productId !== productId))
     }
 
     // Clear cart
@@ -407,7 +332,7 @@ export default function SellsContent() {
                         setSearchTerm={setSearchTerm}
                         selectedCategory={selectedCategory}
                         setSelectedCategory={setSelectedCategory}
-                        filteredProducts={filteredProducts}
+                        filteredInventories={filteredInventories}
                         mockCategories={mockCategories}
                         addToCart={addToCart}
                     />

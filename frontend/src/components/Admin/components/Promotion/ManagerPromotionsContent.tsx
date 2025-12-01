@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Plus } from "lucide-react"
@@ -8,38 +8,18 @@ import { DialogEditPromotions, DialogViewDetailPromotions } from "./components/D
 import PaginationPromotions from "./components/PaginationPromotions"
 import TableManagerPromotions from "./components/TableManagerPromotions"
 import CardStats from "@/components/Admin/components/Promotion/components/CardStas"
-import { Promotion, getAllPromotions, addPromotions, deletePromotions, updatePromotions } from "@/apis/promotionsApi"
+import { Promotion } from "@/apis/promotionsApi"
 import { toast } from "sonner"
-// removed unused DialogAddPromotions
 import { usePagination } from "@/context/PaginationContext"
+import { usePromotion } from "@/hooks/usePromotion"
 
 export default function ManagerPromotionsContent() {
-    const [promotions, setPromotions] = useState<Promotion[]>([])
-    const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const { promotions, loading: isLoading, error, addPromotion, updatePromotion, deletePromotion } = usePromotion()
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [isDetailOpen, setIsDetailOpen] = useState(false)
     const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null)
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState("all")
-    const fetchPromotions = async () => {
-        try {
-            setIsLoading(true)
-            setError(null) // Clear previous errors
-            const data = await getAllPromotions()
-            setPromotions(data)
-            setIsLoading(false)
-        } catch (error: any) {
-            console.error("Error fetching promotions:", error)
-            const errorMessage = error.response?.data?.message || error.message || "Không thể tải danh sách khuyến mãi"
-            setError(errorMessage)
-            setIsLoading(false)
-            toast.error(errorMessage)
-        }
-    }
-    useEffect(() => {
-        fetchPromotions()
-    }, [])
 
     const { paginationState } = usePagination()
 
@@ -77,17 +57,13 @@ export default function ManagerPromotionsContent() {
     const handleSubmit = async (promotionData: Omit<Promotion, "promoId"> | Promotion) => {
         try {
             if ("promoId" in promotionData && promotionData.promoId) {
-                await updatePromotions(promotionData.promoId, promotionData)
-                toast.success("Cập nhật khuyến mãi thành công")
+                await updatePromotion(promotionData.promoId, promotionData as Promotion)
             } else {
-                await addPromotions(promotionData as Promotion)
-                toast.success("Thêm khuyến mãi thành công")
+                await addPromotion(promotionData as Promotion)
             }
             setIsFormOpen(false)
-            fetchPromotions()
         } catch (error) {
-            toast.error("Có lỗi xảy ra khi lưu khuyến mãi")
-            console.error("Error saving promotion:", error)
+            // Error handled in hook
         }
     }
 
@@ -104,12 +80,9 @@ export default function ManagerPromotionsContent() {
     const handleDelete = async (promoId: number) => {
         if (confirm("Bạn có chắc chắn muốn xóa khuyến mãi này?")) {
             try {
-                await deletePromotions(promoId)
-                toast.success("Xóa khuyến mãi thành công")
-                fetchPromotions()
+                await deletePromotion(promoId)
             } catch (error) {
-                toast.error("Không thể xóa khuyến mãi")
-                console.error("Error deleting promotion:", error)
+                // Error handled in hook
             }
         }
     }
@@ -164,7 +137,7 @@ export default function ManagerPromotionsContent() {
                     <div className="flex items-center justify-center h-96">
                         <div className="text-center text-red-600">
                             <p className="text-xl font-semibold">{error}</p>
-                            <Button onClick={fetchPromotions} className="mt-4">
+                            <Button onClick={() => window.location.reload()} className="mt-4">
                                 Thử lại
                             </Button>
                         </div>

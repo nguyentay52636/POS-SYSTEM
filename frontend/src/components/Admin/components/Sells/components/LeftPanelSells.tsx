@@ -8,37 +8,24 @@ import { X } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { CardContent } from '@/components/ui/card'
 import CardItemProduct from './ListItem/CartItemProduct'
+import { IInventory } from '@/types/types'
 interface ICategory {
     category_id: number
     category_name: string
     createdAt: string
     updatedAt: string
 }
-interface IProduct {
-    product_id: number
-    category_id: number
-    supplier_id: number
-    product_name: string
-    barcode: string
-    price: number
-    unit: string
-    createdAt: string
-    updatedAt: string
-    image?: string
-    stock?: number
-}
-
 interface LeftPanelSellsProps {
     searchTerm: string
     setSearchTerm: (value: string) => void
     selectedCategory: number | "all"
     setSelectedCategory: (value: number | "all") => void
-    filteredProducts: IProduct[]
+    filteredInventories: IInventory[]
     mockCategories: ICategory[]
-    addToCart: (product: IProduct) => void
+    addToCart: (inventory: IInventory) => void
 }
 
-export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCategory, setSelectedCategory, filteredProducts, mockCategories, addToCart }: LeftPanelSellsProps) {
+export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCategory, setSelectedCategory, filteredInventories, mockCategories, addToCart }: LeftPanelSellsProps) {
     return (
         <>
             <div className="flex-1 p-6 overflow-hidden flex flex-col ">
@@ -75,7 +62,7 @@ export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCate
                         </div>
                         <div className="mt-4 flex items-center justify-between text-sm">
                             <span className="text-black dark:text-white">
-                                Hiển thị <span className="font-semibold text-black dark:text-white">{filteredProducts.length}</span> sản phẩm
+                                Hiển thị <span className="font-semibold text-black dark:text-white">{filteredInventories.length}</span> sản phẩm
                             </span>
                             {searchTerm && (
                                 <Button
@@ -94,8 +81,8 @@ export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCate
 
                 <ScrollArea className="flex-1">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pr-4 pb-4">
-                        {filteredProducts.map((product) => (
-                            <CardItemProduct key={product.product_id} product={product} addToCart={addToCart} />
+                        {filteredInventories.map((inventory) => (
+                            <CardItemProduct key={inventory.inventoryId} inventory={inventory} addToCart={addToCart} />
                         ))}
                     </div>
                 </ScrollArea>

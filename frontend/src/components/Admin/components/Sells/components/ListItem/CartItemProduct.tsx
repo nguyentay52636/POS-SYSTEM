@@ -5,25 +5,28 @@ import { Plus, Package } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { ShoppingCart } from "lucide-react"
 import { Barcode } from "lucide-react"
+import { IInventory } from "@/types/types"
 
 interface CartItemProductProps {
-    product: any
-    addToCart: (product: any) => void
+    inventory: IInventory
+    addToCart: (inventory: IInventory) => void
 }
 
-export default function CartItemProduct({ product, addToCart }: CartItemProductProps) {
+export default function CartItemProduct({ inventory, addToCart }: CartItemProductProps) {
+    const product = inventory.product
+
     return (
         <>
             <Card
-                key={product.product_id}
+                key={inventory.inventoryId}
                 className="group cursor-pointer transition-all duration-200 border border-gray-200 hover:border-green-400 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden "
-                onClick={() => addToCart(product)}
+                onClick={() => addToCart(inventory)}
             >
                 <CardContent className="p-0">
                     <div className="relative aspect-[4/3] overflow-hidden dark:text-white text-black">
                         <img
-                            src={product.image || "/placeholder.svg"}
-                            alt={product.product_name}
+                            src={product?.imageUrl || "/placeholder.svg"}
+                            alt={product?.productName || "Sản phẩm"}
                             className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
                         />
 
@@ -31,7 +34,7 @@ export default function CartItemProduct({ product, addToCart }: CartItemProductP
                             <div className=" px-2 py-1 rounded-lg shadow-sm border border-gray-200 dark:text-white text-black">
                                 <span className="text-xs font-semibold text-black flex items-center gap-1">
                                     <Package className="h-3 w-3" />
-                                    {product.stock}
+                                    {inventory.quantity}
                                 </span>
                             </div>
                         </div>
@@ -45,14 +48,14 @@ export default function CartItemProduct({ product, addToCart }: CartItemProductP
                         <div className="absolute bottom-2 left-2 px-2 py-1 rounded-md shadow-sm dark:text-white text-black">
                             <span className="text-[10px] font-mono text-black dark:text-white flex items-center gap-1">
                                 <Barcode className="h-3 w-3" />
-                                {product.barcode}
+                                {product?.barcode}
                             </span>
                         </div>
                     </div>
 
                     <div className="p-3 space-y-2">
                         <h3 className="font-semibold text-sm leading-tight line-clamp-2 text-black group-hover:text-black transition-colors duration-200 dark:text-white">
-                            {product.product_name}
+                            {product?.productName}
                         </h3>
 
                         <div className="flex items-end justify-between gap-2 pt-1 border-t border-gray-100">
@@ -62,13 +65,13 @@ export default function CartItemProduct({ product, addToCart }: CartItemProductP
                                 </p>
                                 <div className="flex items-baseline gap-1">
                                     <p className="text-lg font-bold text-black leading-none dark:text-white">
-                                        {product.price.toLocaleString("vi-VN")}
+                                        {product?.price?.toLocaleString("vi-VN")}
                                     </p>
                                     <span className="text-xs font-medium text-black dark:text-white">đ</span>
                                 </div>
                             </div>
                             <Badge className="text-xs font-medium px-2 py-1 bg-green-100 border border-green-200 text-black dark:text-white">
-                                /{product.unit}
+                                /{product?.unit}
                             </Badge>
                         </div>
 

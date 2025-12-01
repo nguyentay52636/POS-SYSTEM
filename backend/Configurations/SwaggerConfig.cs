@@ -49,6 +49,8 @@ namespace backend.Configurations
                 {
                     c.IncludeXmlComments(xmlPath);
                 }
+                
+                c.EnableAnnotations();
             });
         }
     }
