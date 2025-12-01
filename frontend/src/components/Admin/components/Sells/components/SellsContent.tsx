@@ -1,41 +1,55 @@
 "use client"
 import { useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import {
-
-    CreditCard,
-    X,
-
-} from "lucide-react"
+import { CreditCard } from "lucide-react"
 import HeaderSells from "./HeaderSells"
 import LeftPanelSells from "./LeftPanelSells"
 import HeaderCartSells from "./HeaderCartSells"
-import CartItem from "./CartSells/CartItem"
+import CartItemComponent from "./CartSells/CartItem"
 import PromotionCodeSells from "@/app/admin/orders/PromotionCodeSells"
 import { PaymentMethod as PaymentMethodType } from "@/types/paymentType"
-import { CustomerInfo } from "./CustomerForm"
-import { IInventory, IProduct } from "@/types/types"
+import { IInventory } from "@/types/types"
 import DialogCustomer from "./DialogCustomer"
 import DialogPayment from "./DialogPayment"
 import { useInventory } from "@/hooks/useInventory"
 import { useCategory } from "@/hooks/useCategory"
+import { CustomerInfo } from "./CustomerForm"
+import {
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    setPromoCode,
+    applyPromotion,
+    removePromotion,
+    setPromoError,
+    setSelectedEWallet,
+    setSelectedPaymentMethod,
+    setReceivedAmount,
+    updateCustomerInfo,
+    setShowCustomerForm,
+    setIsPaymentOpen,
+    resetPaymentState,
+    selectCartItems,
+    selectCartTotal,
+    selectCartStats,
+    selectAppliedPromotion,
+    selectPromoCode,
+    selectPromoError,
+    selectCustomerInfo,
+    selectShowCustomerForm,
+    selectIsPaymentOpen,
+    selectSelectedPaymentMethod,
+    selectReceivedAmount,
+    selectSelectedEWallet,
+    type IPromotion,
+    type CartItem,
+} from "@/redux/Slice/cartSlice"
+import type { AppDispatch } from "@/redux/store"
 
 
-
-export interface IPromotion {
-    promo_id: number
-    promo_code: string
-    description: string
-    discount_type: string // "percentage" or "fixed"
-    discount_value?: number
-}
-
-export interface CartItem {
-    product: IProduct
-    quantity: number
-    subtotal: number
-}
 
 export interface Transaction {
     transaction_id: string
@@ -128,24 +142,27 @@ const mockPaymentMethods: PaymentMethodType[] = [
 ]
 
 export default function SellsContent() {
+    const dispatch = useDispatch<AppDispatch>()
     const { inventories, loading } = useInventory()
     const { categories, loading: categoryLoading } = useCategory()
-    const [cart, setCart] = useState<CartItem[]>([])
+
+    // Redux state
+    const cart = useSelector(selectCartItems)
+    const { subtotal, discountAmount, total } = useSelector(selectCartTotal)
+    const stats = useSelector(selectCartStats)
+    const appliedPromotion = useSelector(selectAppliedPromotion)
+    const promoCode = useSelector(selectPromoCode)
+    const promoError = useSelector(selectPromoError)
+    const selectedEWallet = useSelector(selectSelectedEWallet)
+    const customerInfo = useSelector(selectCustomerInfo)
+    const showCustomerForm = useSelector(selectShowCustomerForm)
+    const isPaymentOpen = useSelector(selectIsPaymentOpen)
+    const selectedPaymentMethod = useSelector(selectSelectedPaymentMethod)
+    const receivedAmount = useSelector(selectReceivedAmount)
+
+    // Local state for UI
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<number | "all">("all")
-    const [isPaymentOpen, setIsPaymentOpen] = useState(false)
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("")
-    const [receivedAmount, setReceivedAmount] = useState<number>(0)
-    const [promoCode, setPromoCode] = useState("")
-    const [appliedPromotion, setAppliedPromotion] = useState<IPromotion | null>(null)
-    const [promoError, setPromoError] = useState("")
-    const [selectedEWallet, setSelectedEWallet] = useState<string>("")
-    const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-        fullName: "",
-        phone: "",
-        email: "",
-    })
-    const [showCustomerForm, setShowCustomerForm] = useState(false)
 
     const filteredInventories: IInventory[] = inventories.filter((inventory) => {
         const name =
@@ -166,85 +183,53 @@ export default function SellsContent() {
         return matchesSearch && matchesCategory
     })
 
-    // Calculate totals
-    const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0)
-    let discountAmount = 0
-    if (appliedPromotion) {
-        if (appliedPromotion.discount_type === "percentage") {
-            discountAmount = (subtotal * (appliedPromotion.discount_value || 0)) / 100
-        } else if (appliedPromotion.discount_type === "fixed") {
-            discountAmount = appliedPromotion.discount_value || 0
-        }
-    }
-    const total = subtotal - discountAmount
-
-    // Add to cart
-    const addToCart = (inventory: IInventory) => {
+    // Add to cart handler
+    const handleAddToCart = (inventory: IInventory) => {
         const product = inventory.product
         if (!product || !product.productId) return
 
         const existingItem = cart.find((item) => item.product.productId === product.productId)
         if (existingItem) {
-            updateQuantity(product.productId, existingItem.quantity + 1)
+            dispatch(updateQuantity({ productId: product.productId, quantity: existingItem.quantity + 1 }))
         } else {
-            setCart([
-                ...cart,
-                {
-                    product,
-                    quantity: 1,
-                    subtotal: product.price,
-                },
-            ])
+            dispatch(addToCart({ product }))
         }
     }
 
-    // Update quantity
-    const updateQuantity = (productId: number, newQuantity: number) => {
+    // Update quantity handler
+    const handleUpdateQuantity = (productId: number, newQuantity: number) => {
         if (newQuantity <= 0) {
-            removeFromCart(productId)
+            dispatch(removeFromCart(productId))
             return
         }
-        setCart(
-            cart.map((item) =>
-                item.product.productId === productId
-                    ? { ...item, quantity: newQuantity, subtotal: item.product.price * newQuantity }
-                    : item,
-            ),
-        )
+        dispatch(updateQuantity({ productId, quantity: newQuantity }))
     }
 
-    // Remove from cart
-    const removeFromCart = (productId: number) => {
-        setCart(cart.filter((item) => item.product.productId !== productId))
+    // Remove from cart handler
+    const handleRemoveFromCart = (productId: number) => {
+        dispatch(removeFromCart(productId))
     }
 
-    // Clear cart
-    const clearCart = () => {
-        setCart([])
-        setAppliedPromotion(null)
-        setPromoCode("")
-        setPromoError("")
-        setSelectedEWallet("")
-        setSelectedPaymentMethod("")
-        setCustomerInfo({ fullName: "", phone: "", email: "" })
-        setShowCustomerForm(false)
+    // Clear cart handler
+    const handleClearCart = () => {
+        dispatch(clearCart())
     }
 
     // Handle payment
     const handlePayment = () => {
         if (cart.length === 0) return
-        setShowCustomerForm(true)
+        dispatch(setShowCustomerForm(true))
     }
 
     // Handle customer form next
     const handleCustomerFormNext = () => {
-        setShowCustomerForm(false)
-        setIsPaymentOpen(true)
+        dispatch(setShowCustomerForm(false))
+        dispatch(setIsPaymentOpen(true))
     }
 
     // Handle customer info change
-    const handleCustomerInfoChange = (field: keyof CustomerInfo, value: string) => {
-        setCustomerInfo(prev => ({ ...prev, [field]: value }))
+    const handleCustomerInfoChange = (field: keyof typeof customerInfo, value: string) => {
+        dispatch(updateCustomerInfo({ field, value }))
     }
 
     // Complete transaction
@@ -269,39 +254,33 @@ export default function SellsContent() {
         // Here you would save the transaction to database
 
         // Clear cart and close dialog
-        clearCart()
-        setIsPaymentOpen(false)
-        setReceivedAmount(0)
-        setSelectedPaymentMethod("")
+        dispatch(clearCart())
+        dispatch(resetPaymentState())
 
         // Show success message or print receipt
         alert("Thanh toán thành công!")
     }
 
     // Apply promotion code
-    const applyPromoCode = () => {
-        setPromoError("")
+    const handleApplyPromoCode = () => {
+        dispatch(setPromoError(""))
         const promotion = mockPromotions.find((p) => p.promo_code.toUpperCase() === promoCode.toUpperCase())
         if (promotion) {
-            setAppliedPromotion(promotion)
-            setPromoError("")
+            dispatch(applyPromotion(promotion))
         } else {
-            setPromoError("Mã khuyến mãi không hợp lệ")
-            setAppliedPromotion(null)
+            dispatch(setPromoError("Mã khuyến mãi không hợp lệ"))
+            dispatch(removePromotion())
         }
     }
 
-    // Remove promotion
-    const removePromotion = () => {
-        setAppliedPromotion(null)
-        setPromoCode("")
-        setPromoError("")
+    // Remove promotion handler
+    const handleRemovePromotion = () => {
+        dispatch(removePromotion())
     }
 
-    // Stats
-    const stats = {
-        totalItems: cart.reduce((sum, item) => sum + item.quantity, 0),
-        totalProducts: cart.length,
+    // Stats (already computed from Redux selectors)
+    const cartStats = {
+        ...stats,
         subtotal,
         total,
     }
@@ -320,28 +299,28 @@ export default function SellsContent() {
                         setSelectedCategory={setSelectedCategory}
                         filteredInventories={filteredInventories}
                         mockCategories={categories}
-                        addToCart={addToCart}
+                        addToCart={handleAddToCart}
                     />
                 </div>
 
                 {/* Right Panel - Cart */}
                 <div className="w-[480px]  border-l border-green-200 shadow-xl flex flex-col">
                     {/* Cart Header */}
-                    <HeaderCartSells cart={cart} total={total} stats={stats} clearCart={clearCart} />
+                    <HeaderCartSells cart={cart} total={total} stats={cartStats} clearCart={handleClearCart} />
 
                     {/* Cart Items */}
-                    <CartItem cart={cart} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />
+                    <CartItemComponent cart={cart} updateQuantity={handleUpdateQuantity} removeFromCart={handleRemoveFromCart} />
 
                     <div className="p-6 border-t border-green-200">
                         {/* Promotion Code */}
                         <PromotionCodeSells
                             promoCode={promoCode}
-                            setPromoCode={setPromoCode}
+                            setPromoCode={(code) => dispatch(setPromoCode(code))}
                             promoError={promoError}
-                            setPromoError={setPromoError}
+                            setPromoError={(error) => dispatch(setPromoError(error))}
                             appliedPromotion={appliedPromotion}
-                            applyPromoCode={applyPromoCode}
-                            removePromotion={removePromotion}
+                            applyPromoCode={handleApplyPromoCode}
+                            removePromotion={handleRemovePromotion}
                         />
 
                         <div className="space-y-3 mb-6 bg-white p-5 rounded-xl border border-green-200 shadow-sm">
@@ -383,7 +362,7 @@ export default function SellsContent() {
             {/* Customer Form Dialog */}
             <DialogCustomer
                 isOpen={showCustomerForm}
-                onClose={() => setShowCustomerForm(false)}
+                onClose={() => dispatch(setShowCustomerForm(false))}
                 customerInfo={customerInfo}
                 onCustomerInfoChange={handleCustomerInfoChange}
                 onNext={handleCustomerFormNext}
@@ -393,9 +372,9 @@ export default function SellsContent() {
             {/* Payment Method Dialog */}
             <DialogPayment
                 isOpen={isPaymentOpen}
-                onClose={() => setIsPaymentOpen(false)}
+                onClose={() => dispatch(setIsPaymentOpen(false))}
                 selectedPaymentMethod={selectedPaymentMethod}
-                onPaymentMethodChange={setSelectedPaymentMethod}
+                onPaymentMethodChange={(method) => dispatch(setSelectedPaymentMethod(method))}
                 paymentMethods={mockPaymentMethods}
                 total={total}
                 customerInfo={customerInfo}

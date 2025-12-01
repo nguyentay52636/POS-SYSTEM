@@ -27,7 +27,7 @@ export default function HeaderSells({ cart, total }: HeaderSellsProps) {
                                 <h1 className="text-xl font-bold text-gray-900 mb-0.5 dark:text-white! text-black!  ">Bán hàng trực tiếp</h1>
                                 <p className="text-sm text-gray-600 flex items-center gap-2 dark:text-white! text-black!  ">
                                     <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                    Point of Sale System
+                                    Hệ thống bán hàng trực tiếp
                                 </p>
                             </div>
                         </div>

@@ -28,15 +28,15 @@ export default function CartItem({ cart, updateQuantity, removeFromCart }: CartI
                         <div className="space-y-4">
                             {cart.map((item) => (
                                 <Card
-                                    key={item.product.product_id}
-                                    className="border border-green-200 shadow-sm hover:shadow-md transition-all duration-200 bg-gray-500!"
+                                    key={item.product.productId}
+                                    className="border border-green-200 shadow-sm hover:shadow-md transition-all duration-200"
                                 >
                                     <CardContent className="p-4">
                                         <div className="flex gap-4">
                                             <div className="relative">
                                                 <img
-                                                    src={item.product.image || "/placeholder.svg"}
-                                                    alt={item.product.product_name}
+                                                    src={item.product.imageUrl || "/placeholder.svg"}
+                                                    alt={item.product.productName}
                                                     className="w-16 h-16 rounded-lg object-cover border border-green-200 shadow-sm"
                                                 />
                                                 <div className="absolute -top-2 -right-2 bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg">
@@ -45,7 +45,7 @@ export default function CartItem({ cart, updateQuantity, removeFromCart }: CartI
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <h4 className="font-semibold text-sm mb-1 line-clamp-2 text-gray-800">
-                                                    {item.product.product_name}
+                                                    {item.product.productName}
                                                 </h4>
                                                 <p className="text-xs text-gray-600 mb-3 font-medium">
                                                     {item.product.price.toLocaleString("vi-VN")}đ / {item.product.unit}
@@ -55,7 +55,7 @@ export default function CartItem({ cart, updateQuantity, removeFromCart }: CartI
                                                         <Button
                                                             size="sm"
                                                             variant="outline"
-                                                            onClick={() => updateQuantity(item.product.product_id, item.quantity - 1)}
+                                                            onClick={() => updateQuantity(item.product.productId, item.quantity - 1)}
                                                             className="h-7 w-7 p-0 border border-gray-200 hover:bg-red-50 hover:border-red-300 hover:text-red-600"
                                                         >
                                                             <Minus className="h-3 w-3" />
@@ -64,7 +64,7 @@ export default function CartItem({ cart, updateQuantity, removeFromCart }: CartI
                                                         <Button
                                                             size="sm"
                                                             variant="outline"
-                                                            onClick={() => updateQuantity(item.product.product_id, item.quantity + 1)}
+                                                            onClick={() => updateQuantity(item.product.productId, item.quantity + 1)}
                                                             className="h-7 w-7 p-0 border border-gray-200 hover:bg-green-50 hover:border-green-300 hover:text-green-600"
                                                         >
                                                             <Plus className="h-3 w-3" />
@@ -73,7 +73,7 @@ export default function CartItem({ cart, updateQuantity, removeFromCart }: CartI
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
-                                                        onClick={() => removeFromCart(item.product.product_id)}
+                                                        onClick={() => removeFromCart(item.product.productId)}
                                                         className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0"
                                                     >
                                                         <X className="h-4 w-4" />
