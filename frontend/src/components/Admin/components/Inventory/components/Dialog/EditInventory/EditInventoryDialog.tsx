@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Hash } from "lucide-react"
-import { UpdateInventoryDTO } from "@/apis/inventoryApi"
 import { IInventory } from "@/types/types"
 import { Input } from "@/components/ui/input"
 
@@ -24,7 +23,7 @@ interface EditInventoryDialogProps {
     isOpen: boolean
     onOpenChange: (open: boolean) => void
     selectedInventory: IInventory | null
-    onSubmit: (data: UpdateInventoryDTO) => Promise<void>
+    onSubmit: (data: IInventory) => Promise<void>
 }
 
 export default function EditInventoryDialog({ isOpen, onOpenChange, selectedInventory, onSubmit }: EditInventoryDialogProps) {
@@ -40,7 +39,8 @@ export default function EditInventoryDialog({ isOpen, onOpenChange, selectedInve
     })
 
     const onSubmitForm = async (data: EditInventoryFormData) => {
-        await onSubmit(data)
+        // Cast to IInventory as we only update specific fields
+        await onSubmit(data as unknown as IInventory)
         onOpenChange(false)
     }
 
@@ -56,7 +56,7 @@ export default function EditInventoryDialog({ isOpen, onOpenChange, selectedInve
                     <Card className="border-l-4 border-l-blue-500">
                         <CardHeader className="bg-blue-50">
                             <CardTitle className="text-blue-700">
-                                Thông tin sản phẩm: {selectedInventory.product?.product_name || 'N/A'}
+                                Thông tin sản phẩm: {selectedInventory.product?.productName || 'N/A'}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4 pt-6">

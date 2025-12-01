@@ -2,12 +2,12 @@ import { Warehouse } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import DialogAddInventory from './Dialog/AddInventory/DialogAddInventory'
-import { CreateInventoryDTO } from '@/apis/inventoryApi'
+import { IInventory } from '@/types/types'
 
 interface HeaderManagerInventoryProps {
     isAddDialogOpen: boolean
     setIsAddDialogOpen: (open: boolean) => void
-    handleAddInventory: (inventory: CreateInventoryDTO) => void | Promise<void>
+    handleAddInventory: (inventory: IInventory) => void | Promise<void>
 }
 
 export default function HeaderManagerInventory({

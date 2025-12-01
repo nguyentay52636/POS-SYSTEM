@@ -103,11 +103,13 @@ export interface IPayment {
   updatedAt: string;
 }
 export interface IInventory {
-  inventory_id: number;
-  product_id: number;
+  inventoryId: number;
+  productId: number;
   quantity: number;
-  updated_at: string;
-  product?: IProduct; // Full product information
+  product?: IProduct;
+  productName?: string;
+  updatedAt: string;
+
 }
 export interface IProduct {
   productId?: number;

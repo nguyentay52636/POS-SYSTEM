@@ -1,53 +1,32 @@
 "use client"
-
-import { useState, useEffect, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { IInventory } from "@/types/types"
 import StatsCard from "./components/StatsCard"
 import SearchAction from "./components/SearchAction"
 import TableManagerInventory from "./components/TableInventory/TableManagerInventory"
 import PaginationInventory from "./components/PaginationInventory"
-import { getAllInventories, addInventory, updateInventory, deleteInventory, CreateInventoryDTO, UpdateInventoryDTO } from "@/apis/inventoryApi"
-import { toast } from "sonner"
 import HeaderManagerInventory from "./components/HeaderManagerInventory"
 import EditInventoryDialog from "./components/Dialog/EditInventory/EditInventoryDialog"
 import ViewDetailsInventory from "./components/Dialog/ViewDetailsInventory/ViewDetailsInventory"
 import { usePagination } from "@/context/PaginationContext"
+import { useInventory } from "@/hooks/useInventory"
 
 export default function InventoryContent() {
-    const [inventories, setInventories] = useState<IInventory[]>([])
-    const [loading, setLoading] = useState(true)
+    const { inventories, loading, addInventory, updateInventory, deleteInventory } = useInventory()
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedInventory, setSelectedInventory] = useState<IInventory | null>(null)
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
 
-    // Fetch inventories on component mount
-    useEffect(() => {
-        fetchInventories()
-    }, [])
-
-    const fetchInventories = async () => {
-        try {
-            setLoading(true)
-            const data = await getAllInventories()
-            setInventories(data)
-        } catch (error) {
-            console.error("Error fetching inventories:", error)
-            toast.error("Không thể tải danh sách tồn kho")
-        } finally {
-            setLoading(false)
-        }
-    }
-
     const { paginationState } = usePagination()
 
     const filteredInventories = useMemo(() => {
         return inventories.filter((inventory) => {
             const matchesSearch =
-                inventory.product?.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                inventory.inventory_id.toString().includes(searchTerm.toLowerCase()) ||
-                inventory.product_id.toString().includes(searchTerm.toLowerCase())
+                (inventory.productName || inventory.product?.productName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                inventory.inventoryId.toString().includes(searchTerm.toLowerCase()) ||
+                inventory.productId.toString().includes(searchTerm.toLowerCase())
 
             return matchesSearch
         })
@@ -63,49 +42,36 @@ export default function InventoryContent() {
     const lowStockInventories = inventories.filter(i => i.quantity < 10).length
     const outOfStockInventories = inventories.filter(i => i.quantity === 0).length
 
-    const handleAddInventory = async (data: CreateInventoryDTO) => {
+    const handleAddInventoryWrapper = async (data: IInventory) => {
         try {
-            const newInventory = await addInventory(data)
-            setInventories([...inventories, newInventory])
+            await addInventory(data)
             setIsAddDialogOpen(false)
-            toast.success("Thêm tồn kho thành công!")
-            fetchInventories() // Refresh the list
         } catch (error) {
-            console.error("Error adding inventory:", error)
-            toast.error("Không thể thêm tồn kho")
-            throw error
+            // Error handled in hook
         }
     }
 
-    const handleEditInventory = async (data: UpdateInventoryDTO) => {
+    const handleEditInventoryWrapper = async (data: IInventory) => {
         if (!selectedInventory) return
 
         try {
-            const updatedInventory = await updateInventory(selectedInventory.inventory_id, data)
-            setInventories(inventories.map((i) =>
-                i.inventory_id === selectedInventory.inventory_id ? updatedInventory : i
-            ))
+            // Merge existing inventory data with updates
+            const updatedData = { ...selectedInventory, ...data }
+            await updateInventory(selectedInventory.inventoryId, updatedData)
             setIsEditDialogOpen(false)
             setSelectedInventory(null)
-            toast.success("Cập nhật tồn kho thành công!")
-            fetchInventories() // Refresh the list
         } catch (error) {
-            console.error("Error updating inventory:", error)
-            toast.error("Không thể cập nhật tồn kho")
+            // Error handled in hook
         }
     }
 
-    const handleDeleteInventory = async (inventoryId: number) => {
+    const handleDeleteInventoryWrapper = async (inventoryId: number) => {
         if (!confirm("Bạn có chắc chắn muốn xóa tồn kho này?")) return
 
         try {
             await deleteInventory(inventoryId)
-            setInventories(inventories.filter((i) => i.inventory_id !== inventoryId))
-            toast.success("Xóa tồn kho thành công!")
-            fetchInventories() // Refresh the list
         } catch (error) {
-            console.error("Error deleting inventory:", error)
-            toast.error("Không thể xóa tồn kho")
+            // Error handled in hook
         }
     }
 
@@ -126,7 +92,7 @@ export default function InventoryContent() {
                 <HeaderManagerInventory
                     isAddDialogOpen={isAddDialogOpen}
                     setIsAddDialogOpen={setIsAddDialogOpen}
-                    handleAddInventory={handleAddInventory}
+                    handleAddInventory={handleAddInventoryWrapper}
                 />
                 <StatsCard
                     totalInventories={totalInventories}
@@ -143,7 +109,7 @@ export default function InventoryContent() {
                     setSelectedInventory={setSelectedInventory}
                     setIsDetailDialogOpen={setIsDetailDialogOpen}
                     setIsEditDialogOpen={setIsEditDialogOpen}
-                    handleDeleteInventory={handleDeleteInventory}
+                    handleDeleteInventory={handleDeleteInventoryWrapper}
                 />
 
                 <PaginationInventory totalItems={filteredInventories.length} />
@@ -160,8 +126,8 @@ export default function InventoryContent() {
                     isOpen={isEditDialogOpen}
                     onOpenChange={setIsEditDialogOpen}
                     selectedInventory={selectedInventory}
-                    onSubmit={async (data: UpdateInventoryDTO) => {
-                        await handleEditInventory(data)
+                    onSubmit={async (data: IInventory) => {
+                        await handleEditInventoryWrapper(data)
                         setSelectedInventory(null)
                     }}
                 />

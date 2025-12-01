@@ -10,6 +10,7 @@ public class InventoryResponseDto
     public string? ProductName { get; set; }
     public int Quantity { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public ProductResponseDto? Product { get; set; }
 }
 public class CreateInventoryDto
 {

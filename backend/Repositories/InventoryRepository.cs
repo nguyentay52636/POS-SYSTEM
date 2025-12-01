@@ -30,29 +30,23 @@ public class InventoryRepository : IInventoryRepository
     {
         return await _db.Inventories
             .AsNoTracking()
+            .Include(i => i.Product)
+                .ThenInclude(p => p.Category)
+            .Include(i => i.Product)
+                .ThenInclude(p => p.Supplier)
             .OrderBy(i => i.ProductId)
             .ToListAsync();
     }
 
     public async Task<Inventory?> GetByProductIdAsync(int productId)
     {
-        var query = from inv in _db.Inventories.AsNoTracking() // Thêm AsNoTracking
-                    join p in _db.Products.AsNoTracking() on inv.ProductId equals p.ProductId // Thêm AsNoTracking
-                    where inv.ProductId == productId
-                    select new Inventory
-                    {
-                        InventoryId = inv.InventoryId,
-                        ProductId = inv.ProductId,
-                        Quantity = inv.Quantity,
-                        UpdatedAt = inv.UpdatedAt,
-                        Product = new Product
-                        {
-                            ProductId = p.ProductId,
-                            ProductName = p.ProductName
-                        }
-                    };
-        
-        return await query.FirstOrDefaultAsync(); 
+        return await _db.Inventories
+            .AsNoTracking()
+            .Include(i => i.Product)
+                .ThenInclude(p => p.Category)
+            .Include(i => i.Product)
+                .ThenInclude(p => p.Supplier)
+            .FirstOrDefaultAsync(i => i.ProductId == productId);
     }
 
     public async Task<Inventory> UpdateAsync(Inventory inventory)

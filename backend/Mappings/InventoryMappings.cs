@@ -9,7 +9,8 @@ public class InventoryMappings : Profile
     public InventoryMappings()
     {
         CreateMap<Inventory, InventoryResponseDto>()
-            .ForMember(dest => dest.ProductName, opt => opt.Ignore());
+            .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName))
+            .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product));
 
         CreateMap<UpdateInventoryDto, Inventory>()
             .ForMember(dest => dest.InventoryId, opt => opt.Ignore())

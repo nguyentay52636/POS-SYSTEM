@@ -95,7 +95,7 @@ export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCate
                 <ScrollArea className="flex-1">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pr-4 pb-4">
                         {filteredProducts.map((product) => (
-                            <CardItemProduct key={product.product_id} product={product} />
+                            <CardItemProduct key={product.product_id} product={product} addToCart={addToCart} />
                         ))}
                     </div>
                 </ScrollArea>

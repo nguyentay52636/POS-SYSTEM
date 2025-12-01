@@ -4,16 +4,16 @@ import React from 'react'
 import { Plus } from 'lucide-react'
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { InventoryForm } from './InventoryForm'
-import { CreateInventoryDTO } from '@/apis/inventoryApi'
+import { IInventory } from '@/types/types'
 
 export interface DialogAddInventoryProps {
     isAddDialogOpen: boolean
     setIsAddDialogOpen: (open: boolean) => void
-    handleAddInventory: (inventory: CreateInventoryDTO) => void | Promise<void>
+    handleAddInventory: (inventory: IInventory) => void | Promise<void>
 }
 
 export default function DialogAddInventory({ isAddDialogOpen, setIsAddDialogOpen, handleAddInventory }: DialogAddInventoryProps) {
-    const handleSubmit = async (data: CreateInventoryDTO) => {
+    const handleSubmit = async (data: IInventory) => {
         await handleAddInventory(data)
         setIsAddDialogOpen(false)
     }

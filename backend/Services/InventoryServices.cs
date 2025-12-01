@@ -33,11 +33,6 @@ public class InventoryService : IInventoryService
     {
         var inventories = await _repo.ListAllAsync();
         var result = _mapper.Map<InventoryResponseDto[]>(inventories);
-        foreach (var item in result)
-        {
-            var product = inventories.FirstOrDefault(i => i.ProductId == item.ProductId)?.Product;
-            item.ProductName = product?.ProductName;
-        }
         return result;
     }
 
