@@ -380,6 +380,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.ProductName)
                 .HasMaxLength(100)
                 .HasColumnName("product_name");
+
+            entity.Property(e => e.ImageUrl)
+                .HasMaxLength(255)
+                .HasColumnName("image_url");
             entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
             entity.Property(e => e.Unit)
                 .HasMaxLength(20)

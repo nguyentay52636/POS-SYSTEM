@@ -4,7 +4,9 @@ import baseApi from "./baseApi";
 export const getProducts = async (): Promise<IProduct[]> => {
     try {
         const { data } = await baseApi.get('/Product')
+        console.log(data);
         return data;
+ 
     } catch (error) {
         console.error('Error fetching products:', error)
         throw error

@@ -19,14 +19,7 @@ import { IInventory, IProduct } from "@/types/types"
 import DialogCustomer from "./DialogCustomer"
 import DialogPayment from "./DialogPayment"
 import { useInventory } from "@/hooks/useInventory"
-
-
-export interface ICategory {
-    category_id: number
-    category_name: string
-    createdAt: string
-    updatedAt: string
-}
+import { useCategory } from "@/hooks/useCategory"
 
 
 
@@ -60,14 +53,7 @@ export interface Transaction {
     customerInfo?: CustomerInfo
 }
 
-// Mock data
-const mockCategories: ICategory[] = [
-    { category_id: 1, category_name: "Trái cây", createdAt: "2024-01-01", updatedAt: "2024-01-01" },
-    { category_id: 2, category_name: "Rau củ", createdAt: "2024-01-01", updatedAt: "2024-01-01" },
-    { category_id: 3, category_name: "Thịt", createdAt: "2024-01-01", updatedAt: "2024-01-01" },
-    { category_id: 4, category_name: "Hải sản", createdAt: "2024-01-01", updatedAt: "2024-01-01" },
-    { category_id: 5, category_name: "Sữa", createdAt: "2024-01-01", updatedAt: "2024-01-01" },
-]
+
 
 const mockPromotions: IPromotion[] = [
     {
@@ -143,6 +129,7 @@ const mockPaymentMethods: PaymentMethodType[] = [
 
 export default function SellsContent() {
     const { inventories, loading } = useInventory()
+    const { categories, loading: categoryLoading } = useCategory()
     const [cart, setCart] = useState<CartItem[]>([])
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<number | "all">("all")
@@ -160,7 +147,6 @@ export default function SellsContent() {
     })
     const [showCustomerForm, setShowCustomerForm] = useState(false)
 
-    // Filter products from inventory API
     const filteredInventories: IInventory[] = inventories.filter((inventory) => {
         const name =
             inventory.product?.productName ??
@@ -333,7 +319,7 @@ export default function SellsContent() {
                         selectedCategory={selectedCategory}
                         setSelectedCategory={setSelectedCategory}
                         filteredInventories={filteredInventories}
-                        mockCategories={mockCategories}
+                        mockCategories={categories}
                         addToCart={addToCart}
                     />
                 </div>

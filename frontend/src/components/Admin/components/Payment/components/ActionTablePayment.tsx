@@ -59,7 +59,7 @@ export default function ActionTablePayment(props: {
         <DropdownMenuContent align="end" className="w-44">
           <DropdownMenuLabel>Hành động</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          
+
           <DropdownMenuItem onClick={onEdit} disabled={!onEdit}>
             <Pencil className="mr-2 h-4 w-4" /> Chỉnh sửa
           </DropdownMenuItem>

@@ -28,10 +28,10 @@ export const updateCategory = async (category: ICategory):Promise<ICategory> => 
         throw error
     }
 }
-export const deleteCategory = async (category: ICategory):Promise<void> => { 
+export const deleteCategory = async (categoryId: number):Promise<void> => { 
     try {
-        const { data } = await baseApi.delete(`/Category/${category.category_id}`)
-            return data
+        const { data } = await baseApi.delete(`/Category/${categoryId}`)
+        return data;
     } catch (error) {
         console.error('Error deleting category:', error)
         throw error

@@ -136,8 +136,8 @@ export interface ICustomer {
   updatedAt: string;
 }
 export interface ICategory {
-  categoryId: number;
-  categoryName: string;
+  categoryId?: number;
+  categoryName?: string;
   createdAt: string;
   updatedAt: string;
 }

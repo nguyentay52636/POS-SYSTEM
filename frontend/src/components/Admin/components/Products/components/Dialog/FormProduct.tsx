@@ -159,7 +159,7 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl! max-h-[90vh] overflow-y-auto">
                 <DialogHeader className="border-b pb-4">
                     <DialogTitle className="flex items-center gap-3 text-xl text-gray-900">
                         <Badge variant="outline" className="rounded-full px-3 py-1 text-xs font-medium">

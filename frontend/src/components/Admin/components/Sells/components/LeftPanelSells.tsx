@@ -8,13 +8,7 @@ import { X } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { CardContent } from '@/components/ui/card'
 import CardItemProduct from './ListItem/CartItemProduct'
-import { IInventory } from '@/types/types'
-interface ICategory {
-    category_id: number
-    category_name: string
-    createdAt: string
-    updatedAt: string
-}
+import { IInventory, ICategory } from '@/types/types'
 interface LeftPanelSellsProps {
     searchTerm: string
     setSearchTerm: (value: string) => void
@@ -52,11 +46,13 @@ export default function LeftPanelSells({ searchTerm, setSearchTerm, selectedCate
                                     <SelectItem value="all">
                                         <span className="font-medium dark:text-white text-black">Tất cả danh mục</span>
                                     </SelectItem>
-                                    {mockCategories.map((cat) => (
-                                        <SelectItem key={cat.category_id} value={cat.category_id.toString()}>
-                                            {cat.category_name}
-                                        </SelectItem>
-                                    ))}
+                                    {mockCategories
+                                        .filter((cat): cat is ICategory & { categoryId: number } => typeof cat.categoryId === "number")
+                                        .map((cat) => (
+                                            <SelectItem key={cat.categoryId} value={cat.categoryId.toString()}>
+                                                {cat.categoryName}
+                                            </SelectItem>
+                                        ))}
                                 </SelectContent>
                             </Select>
                         </div>
