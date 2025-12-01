@@ -66,4 +66,5 @@ public class PaymentDetailResponseDto
     public string? OrderStatus { get; set; }
     public decimal? OrderTotalAmount { get; set; }
     public string? CustomerName { get; set; }
+    public OrderResponseDto? Order { get; set; }
 }

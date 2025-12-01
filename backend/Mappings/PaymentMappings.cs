@@ -8,8 +8,10 @@ public class PaymentMappings : Profile
 {
     public PaymentMappings()
     {
-        CreateMap<Payment, PaymentResponseDto>();
-        CreateMap<Payment, PaymentDetailResponseDto>();
+        CreateMap<Payment, PaymentResponseDto>()
+            .ForMember(dest => dest.Order, opt => opt.MapFrom(src => src.Order));
+        CreateMap<Payment, PaymentDetailResponseDto>()
+            .ForMember(dest => dest.Order, opt => opt.MapFrom(src => src.Order));
 
         CreateMap<CreatePaymentDto, Payment>()
             .ForMember(dest => dest.PaymentId, opt => opt.Ignore())

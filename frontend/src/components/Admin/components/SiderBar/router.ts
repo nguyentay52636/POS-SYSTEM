@@ -1,4 +1,4 @@
-import { BarChart3, Warehouse } from "lucide-react"
+import { BarChart3, PackagePlus, Warehouse } from "lucide-react"
 import { Building2 } from "lucide-react"
 import { DollarSign } from "lucide-react"
 import { Star } from "lucide-react"
@@ -20,6 +20,13 @@ export const navigation = (pathname: string) => [
         href: "/admin/sells",
         icon: ShoppingCart,
         current: pathname === "/admin/sells",
+        badge: null,
+    },
+    {
+        name: "Quản lý nhập hàng",
+        href: "/admin/importgoods",
+        icon: PackagePlus,
+        current: pathname === "/admin/importgoods",
         badge: null,
     },
     {
@@ -73,13 +80,7 @@ export const navigation = (pathname: string) => [
         current: pathname === "/admin/receipts",
         badge: null,
     },
-    {
-        name: "Quản lý phiếu xuất",
-        href: "/admin/inventory-outvoices",
-        icon: ShoppingCart,
-        current: pathname === "/admin/inventory-outvoices",
-        badge: null,
-    },
+
     {
         name: "Khách hàng",
         href: "/admin/customers",

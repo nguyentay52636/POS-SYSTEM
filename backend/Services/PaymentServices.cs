@@ -84,25 +84,6 @@ public class PaymentService : IPaymentService
         if (payment == null) return null;
 
         var paymentDto = _mapper.Map<PaymentDetailResponseDto>(payment);
-
-        // Get order details
-        var order = await _orderRepo.GetByIdAsync(payment.OrderId);
-        if (order != null)
-        {
-            paymentDto.OrderStatus = order.Status;
-            paymentDto.OrderTotalAmount = order.TotalAmount;
-
-            // Get customer name
-            if (order.CustomerId.HasValue)
-            {
-                var customer = await _customerRepo.GetByIdAsync(order.CustomerId.Value);
-                if (customer != null)
-                {
-                    paymentDto.CustomerName = customer.Name;
-                }
-            }
-        }
-
         return paymentDto;
     }
 

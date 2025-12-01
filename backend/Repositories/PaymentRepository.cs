@@ -42,6 +42,12 @@ public class PaymentRepository : IPaymentRepository
     {
         return await _db.Payments
             .AsNoTracking()
+            .Include(p => p.Order)
+                .ThenInclude(o => o.OrderItems)
+            .Include(p => p.Order)
+                .ThenInclude(o => o.Customer)
+            .Include(p => p.Order)
+                .ThenInclude(o => o.User)
             .FirstOrDefaultAsync(p => p.PaymentId == id);
     }
 
@@ -63,7 +69,14 @@ public class PaymentRepository : IPaymentRepository
 
     public async Task<(IReadOnlyList<Payment> Items, int Total)> SearchAsync(PaymentQueryParams query)
     {
-        IQueryable<Payment> q = _db.Payments.AsNoTracking();
+        IQueryable<Payment> q = _db.Payments
+            .AsNoTracking()
+            .Include(p => p.Order)
+                .ThenInclude(o => o.OrderItems)
+            .Include(p => p.Order)
+                .ThenInclude(o => o.Customer)
+            .Include(p => p.Order)
+                .ThenInclude(o => o.User);
 
         // Apply filters
         q = q.WhereIf(query.OrderId.HasValue, p => p.OrderId == query.OrderId)
@@ -91,6 +104,12 @@ public class PaymentRepository : IPaymentRepository
     {
         return await _db.Payments
             .AsNoTracking()
+            .Include(p => p.Order)
+                .ThenInclude(o => o.OrderItems)
+            .Include(p => p.Order)
+                .ThenInclude(o => o.Customer)
+            .Include(p => p.Order)
+                .ThenInclude(o => o.User)
             .OrderByDescending(p => p.PaymentDate)
             .ToListAsync();
     }
@@ -99,6 +118,12 @@ public class PaymentRepository : IPaymentRepository
     {
         return await _db.Payments
             .AsNoTracking()
+            .Include(p => p.Order)
+                .ThenInclude(o => o.OrderItems)
+            .Include(p => p.Order)
+                .ThenInclude(o => o.Customer)
+            .Include(p => p.Order)
+                .ThenInclude(o => o.User)
             .Where(p => p.OrderId == orderId)
             .OrderByDescending(p => p.PaymentDate)
             .ToListAsync();
