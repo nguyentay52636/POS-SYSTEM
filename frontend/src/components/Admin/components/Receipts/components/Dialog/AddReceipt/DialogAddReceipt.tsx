@@ -27,7 +27,7 @@ export default function DialogAddReceipt({ isAddDialogOpen, setIsAddDialogOpen, 
                         Thêm phiếu nhập
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-w-6xl! max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-gray-900 dark:text-white!">Thêm phiếu nhập mới</DialogTitle>
                     </DialogHeader>

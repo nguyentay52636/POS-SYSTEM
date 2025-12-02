@@ -13,19 +13,26 @@ import { toast } from "sonner"
 
 import { createUser, CreateUserRequest } from "@/apis/userApi"
 import { IUser } from "@/types/types"
+import type { IRole } from "@/apis/roleApi"
 
 interface DialogAddUserProps {
     isAddDialogOpen: boolean
     setIsAddDialogOpen: (open: boolean) => void
     onUserAdded: (user: IUser) => void
+    roles: IRole[]
+    loadingRoles?: boolean
+    errorRoles?: string | null
 }
 
 export default function DialogAddUser({
     isAddDialogOpen,
     setIsAddDialogOpen,
-    onUserAdded
+    onUserAdded,
+    roles,
+    loadingRoles,
+    errorRoles
 }: DialogAddUserProps) {
-const [user, setUser] = useState({
+    const [user, setUser] = useState({
         username: "",
         password: "",
         full_name: "",
@@ -127,13 +134,32 @@ const [user, setUser] = useState({
                         <Select
                             onValueChange={(value) => handleChange("role", value)}
                             value={user.role}
+                            disabled={loadingRoles}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Chọn vai trò" />
+                                <SelectValue
+                                    placeholder={
+                                        loadingRoles
+                                            ? "Đang tải vai trò..."
+                                            : errorRoles
+                                                ? "Lỗi tải vai trò"
+                                                : "Chọn vai trò"
+                                    }
+                                />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="1">Admin</SelectItem>
-                                <SelectItem value="2">Staff</SelectItem>
+                                {roles.length > 0 ? (
+                                    roles.map((r) => (
+                                        <SelectItem key={r.roleId} value={String(r.roleId)}>
+                                            {r.roleName}
+                                        </SelectItem>
+                                    ))
+                                ) : (
+                                    <>
+                                        <SelectItem value="1">Admin</SelectItem>
+                                        <SelectItem value="2">Staff</SelectItem>
+                                    </>
+                                )}
                             </SelectContent>
                         </Select>
                     </div>

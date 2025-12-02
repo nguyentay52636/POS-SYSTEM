@@ -9,6 +9,7 @@ import DialogViewDetails from './components/DIalog/DIalogVIewDetails'
 import DialogConfirmDelete from './components/DIalog/DIalogConfirmDelete'
 import { usePagination } from '@/context/PaginationContext'
 import { useUser } from '@/hooks/useUser'
+import { useRole } from '@/hooks/useRole'
 
 export default function ManagerUserContent() {
     const [searchQuery, setSearchQuery] = useState("")
@@ -35,6 +36,8 @@ export default function ManagerUserContent() {
         handleUpdateUser,
         handleConfirmDelete
     } = useUser()
+
+    const { roles, loading: loadingRoles, error: errorRoles } = useRole()
 
     const filteredUsers = useMemo(() => {
         if (!searchQuery) return users
@@ -79,6 +82,7 @@ export default function ManagerUserContent() {
                     <>
                         <TableManagerUser
                             users={paginatedUsers}
+                            roles={roles}
                             searchQuery={searchQuery}
                             setSearchQuery={setSearchQuery}
                             onView={handleView}
@@ -94,6 +98,9 @@ export default function ManagerUserContent() {
                     isAddDialogOpen={isAddDialogOpen}
                     setIsAddDialogOpen={setIsAddDialogOpen}
                     onUserAdded={handleUserAdded}
+                    roles={roles}
+                    loadingRoles={loadingRoles}
+                    errorRoles={errorRoles}
                 />
 
                 {selectedUser && (
@@ -103,6 +110,7 @@ export default function ManagerUserContent() {
                             isEditDialogOpen={isEditDialogOpen}
                             setIsEditDialogOpen={setIsEditDialogOpen}
                             onUpdateUser={handleUpdateUser}
+                            roles={roles}
                         />
 
                         <DialogViewDetails

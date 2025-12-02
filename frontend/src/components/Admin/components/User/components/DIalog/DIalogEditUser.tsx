@@ -13,6 +13,7 @@ import { Edit } from "lucide-react"
 import { toast } from "sonner"
 import { updateUser, UpdateUserRequest } from "@/apis/userApi"
 import { IUser, role } from "@/types/types"
+import type { IRole } from "@/apis/roleApi"
 
 
 interface DialogEditUserProps {
@@ -20,13 +21,15 @@ interface DialogEditUserProps {
     isEditDialogOpen: boolean
     setIsEditDialogOpen: (open: boolean) => void
     onUpdateUser: (updatedUser: IUser) => void
+    roles: IRole[]
 }
 
 export default function DialogEditUser({
     user,
     isEditDialogOpen,
     setIsEditDialogOpen,
-    onUpdateUser
+    onUpdateUser,
+    roles
 }: DialogEditUserProps) {
     const [editedUser, setEditedUser] = useState<IUser>({
         user_id: 0,
@@ -121,8 +124,21 @@ export default function DialogEditUser({
                                 <SelectValue placeholder="Chọn vai trò" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value={role.ADMIN}>Admin</SelectItem>
-                                <SelectItem value={role.STAFF}>Staff</SelectItem>
+                                {roles.length > 0 ? (
+                                    roles.map((r) => (
+                                        <SelectItem
+                                            key={r.roleId}
+                                            value={editedUser.role}
+                                        >
+                                            {r.roleName}
+                                        </SelectItem>
+                                    ))
+                                ) : (
+                                    <>
+                                        <SelectItem value={role.ADMIN}>Admin</SelectItem>
+                                        <SelectItem value={role.STAFF}>Staff</SelectItem>
+                                    </>
+                                )}
                             </SelectContent>
                         </Select>
                     </div>

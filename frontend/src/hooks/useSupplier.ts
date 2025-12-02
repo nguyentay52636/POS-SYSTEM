@@ -9,7 +9,8 @@ import { toast } from "sonner"
 const normalizeSupplier = (supplier: any): ISupplier => {
     return {
         ...supplier,
-        supplierId: supplier.supplierId 
+        // Đảm bảo luôn có supplierId dù API trả về supplierId hay supplier_id
+        supplierId: supplier.supplierId ?? supplier.supplier_id,
     }
 }
 
@@ -50,9 +51,14 @@ export const useSupplier = () => {
     // Filter suppliers
     const filteredSuppliers = useMemo(() => {
         return suppliers.filter((supplier) => {
+            const id =
+                supplier.supplierId ??
+                // fallback nếu backend trả về supplier_id mà type chưa có
+                (supplier as any).supplier_id
+
             const matchesSearch =
                 supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (supplier.supplierId || supplier.supplierId)?.toString().includes(searchTerm.toLowerCase()) ||
+                (id ? id.toString().includes(searchTerm.toLowerCase()) : false) ||
                 supplier.email.toLowerCase().includes(searchTerm.toLowerCase())
 
             const matchesStatus = statusFilter === "all" || supplier.trangThai === statusFilter

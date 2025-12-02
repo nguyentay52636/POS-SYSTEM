@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { IUser } from '@/types/types'
 import ActionTableUser from './ActionTableUser'
+import type { IRole } from '@/apis/roleApi'
 
 interface TableManagerUserProps {
     users: IUser[];
+    roles: IRole[];
     searchQuery: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
     onView: (user: IUser) => void;
@@ -16,7 +18,19 @@ interface TableManagerUserProps {
     onDelete: (user: IUser) => void;
 }
 
-export default function TableManagerUser({ users, searchQuery, setSearchQuery, onView, onEdit, onDelete }: TableManagerUserProps) {
+const getRoleName = (userRole: string, roles: IRole[]): string => {
+    const lower = userRole.toLowerCase()
+    const match = roles.find(r => r.roleName.toLowerCase().includes(lower))
+    if (match) return match.roleName
+
+    // Fallback mapping if no role from API matches
+    if (lower === 'admin') return 'Admin'
+    if (lower === 'staff') return 'Nhân viên'
+    if (lower === 'user') return 'Khách hàng'
+    return userRole
+}
+
+export default function TableManagerUser({ users, roles, searchQuery, setSearchQuery, onView, onEdit, onDelete }: TableManagerUserProps) {
     return (
         <Card className="shadow-xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
@@ -85,7 +99,9 @@ export default function TableManagerUser({ users, searchQuery, setSearchQuery, o
                                         <TableCell>
                                             <div className="inline-flex items-center px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800">
                                                 <Shield className="h-3 w-3 mr-2 text-blue-600" />
-                                                <span className="font-medium capitalize">{u.role}</span>
+                                                <span className="font-medium">
+                                                    {getRoleName(u.role, roles)}
+                                                </span>
                                             </div>
                                         </TableCell>
                                         <TableCell>

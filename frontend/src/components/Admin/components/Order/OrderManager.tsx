@@ -8,7 +8,6 @@ import { getOrderById } from "@/apis/orderApi";
 import { buildInvoiceHtml } from "@/lib/invoice";
 import PaginationManagerOrder from "./components/PaginationManagerOrder";
 import { useOrder, calculateGross, calculateNet } from "@/hooks/useOrder";
-import type { UiStatus } from "@/hooks/useOrder";
 
 export default function OrderManager() {
   const {
@@ -36,7 +35,6 @@ export default function OrderManager() {
   return (
     <div className="bg-gradient-to-br from-green-50/30 via-gray-50 to-green-100/30 dark:from-green-900/10 dark:via-gray-900 dark:to-green-800/10 min-h-screen">
       <div className="p-6 space-y-8">
-        {/* Thanh hành động: tìm kiếm, lọc trạng thái, export */}
         <ActionOrder
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -61,7 +59,6 @@ export default function OrderManager() {
               w.document.write(html);
               w.document.close();
               w.focus();
-              // delay to ensure resources/styles load
               setTimeout(() => w.print(), 600);
             } catch (err) {
               console.error("Export invoice error:", err);
@@ -69,9 +66,7 @@ export default function OrderManager() {
             }
           }}
         />
-        {/* Pass selection handlers so checking a row sets selectedOrder for export */}
 
-        {/* Bảng đơn hàng */}
         <OrderTable
           paginatedpayments={paginatedOrders}
           calculateTotalAmount={calculateGross} // gross (nếu bảng còn dùng)
