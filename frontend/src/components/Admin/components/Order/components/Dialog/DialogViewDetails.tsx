@@ -76,7 +76,7 @@ export default function DialogViewDetails({
         if (!open) setSelectedOrder(null);
       }}
     >
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl! max-h-[90vh] overflow-y-auto">
         <DialogHeader className="border-b border-green-200 dark:border-green-700 pb-4">
           <DialogTitle className="text-green-800 dark:text-green-200 flex items-center space-x-2">
             <div className="w-6 h-6 bg-green-600 rounded-md flex items-center justify-center">

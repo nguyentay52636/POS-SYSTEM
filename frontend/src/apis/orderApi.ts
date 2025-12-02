@@ -29,26 +29,36 @@ export interface Order {
   orderItems: OrderItem[];
 }
 
-// =============================
-// 🧩 API FUNCTIONS
-// =============================
 
-// ✅ Lấy tất cả đơn hàng
 export const getOrders = async (): Promise<Order[]> => {
-  const res = await baseApi.get("/Order");
-  return res.data;
+try {
+  const { data } = await baseApi.get("/Order");
+  return data;
+} catch (error) {
+  console.error('Error fetching orders:', error)
+  throw error
+}
 };
 
-// ✅ Lấy chi tiết đơn hàng theo ID
 export const getOrderById = async (id: number): Promise<Order> => {
-  const res = await baseApi.get(`/Order/${id}`);
-  return res.data;
+try {
+  const { data } = await baseApi.get(`/Order/${id}`);
+  return data;
+} catch (error) {
+    console.error('Error fetching order:', error)
+    throw error
+  }
 };
 
 // ✅ Tạo mới đơn hàng
 export const createOrder = async (order: Order): Promise<Order> => {
-  const res = await baseApi.post("/Order", order);
-  return res.data;
+ try{
+  const { data } = await baseApi.post("/Order", order);
+  return data;
+ }catch (error) {
+  console.error('Error creating order:', error)
+  throw error
+ }
 };
 
 // ✅ Cập nhật đơn hàng (PUT full body)
@@ -83,11 +93,10 @@ const uiToApiStatus = (s: string) => {
   if (k === "dahuy") return "canceled";
   if (k === "daduyet") return "paid";
   if (k === "choduyet") return "pending";
-  return s; // nếu đã là "pending|paid|canceled" thì giữ nguyên
+  return s; 
 };
 
-// DTO backend thường nhận (tối giản, KHÔNG gửi name/code/total/subtotal/barcode)
-type UpdateOrderDto = {
+export interface UpdateOrderDto {
   customerId: number;
   userId: number;
   promoId: number;
