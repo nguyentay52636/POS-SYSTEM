@@ -67,7 +67,7 @@ export function SupplierForm({ supplier, onSubmit, onCancel }: SupplierFormProps
                         Thông tin cơ bản
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4 pt-6">
+                <CardContent className="space-y-4 pt-6 ">
                     <div className="space-y-2">
                         <Label htmlFor="tenNhaCungCap">Tên nhà cung cấp *</Label>
                         <Input

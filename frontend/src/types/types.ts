@@ -5,36 +5,15 @@ export interface INhanVien {
   ngaySinh: string;
   anhDaiDien: string;
   soDienThoai: string;
-  vaiTro: IVaiTro;
+  vaiTro: IRole;
   trangThai: string;
 }
-export interface IVaiTro {
+export interface IRole {
   maVaiTro: string;
   role: string;
   description: string;
 }
-export interface SanPham {
-  maSanPham: string;
-  tenSanPham: string;
-  donVi: string;
-  soLuongTon: number;
-  maThuongHieu: string;
-  maDanhMuc: string;
-  maLoai: string;
-  moTa: string;
-  giaBan: number;
-  // Optional nhập price for supplier/inventory contexts
-  giaNhap?: number;
-  hinhAnh: string;
-  xuatXu: string;
-  hsd: string;
-  trangThai: "active" | "inactive" | "out-of-stock";
-  categoryName?: string;
-  brandName?: string;
-  typeName?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+
 
 //create  type models
 
@@ -60,7 +39,6 @@ export interface IOrder {
   updatedAt: string;
 }
 
-// Extended Order interface for UI with related data
 export interface Order {
   id: number;
   customer_id: number;
@@ -163,7 +141,6 @@ export enum role {
   STAFF = "staff",
 }
 export interface ISupplier {
-  supplier_id: number;
   supplierId?: number;
   name: string;
   phone: string;

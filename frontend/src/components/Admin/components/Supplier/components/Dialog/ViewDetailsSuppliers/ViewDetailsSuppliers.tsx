@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Phone, Mail, MapPin, Calendar, Edit, ShoppingCart } from 'lucide-react'
-import { ISupplier, SanPham } from '@/types/types'
+import { ISupplier, IProduct } from '@/types/types'
+import { formatPrice } from '@/utils/productUtils'
 
 interface ViewDetailsSuppliersProps {
-    mockProducts: SanPham[]
+    supplierProducts: IProduct[]
     isDetailDialogOpen: boolean
     setIsDetailDialogOpen: (open: boolean) => void
     selectedSupplier: ISupplier | null
@@ -17,7 +18,7 @@ interface ViewDetailsSuppliersProps {
 }
 
 export default function ViewDetailsSuppliers({
-    mockProducts,
+    supplierProducts,
     isDetailDialogOpen,
     setIsDetailDialogOpen,
     selectedSupplier,
@@ -29,7 +30,7 @@ export default function ViewDetailsSuppliers({
 
     return (
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl! max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-gray-900">
                         Chi tiết nhà cung cấp: {selectedSupplier.name}
@@ -44,9 +45,13 @@ export default function ViewDetailsSuppliers({
                                 <span>Thông tin nhà cung cấp</span>
                                 <Badge
                                     variant="default"
-                                    className="bg-green-100 text-green-800"
+                                    className={
+                                        selectedSupplier.trangThai === "active"
+                                            ? "bg-green-100 text-green-800"
+                                            : "bg-gray-100 text-gray-800"
+                                    }
                                 >
-                                    Hoạt động
+                                    {selectedSupplier.trangThai === "active" ? "Hoạt động" : "Tạm ngưng"}
                                 </Badge>
                             </CardTitle>
                         </CardHeader>
@@ -56,7 +61,7 @@ export default function ViewDetailsSuppliers({
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium text-gray-700">Mã NCC:</span>
                                         <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
-                                            {selectedSupplier.supplier_id}
+                                            {selectedSupplier.supplierId}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -85,26 +90,45 @@ export default function ViewDetailsSuppliers({
                     {/* Available Products */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Sản phẩm có thể cung cấp</CardTitle>
+                            <CardTitle>Sản phẩm có thể cung cấp ({supplierProducts.length})</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {mockProducts.slice(0, 6).map((product) => (
-                                    <div key={product.maSanPham} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                                        <div className="space-y-2">
-                                            <h4 className="font-medium text-gray-900">{product.tenSanPham}</h4>
-                                            <div className="text-sm text-gray-600">
-                                                <p>Mã SP: {product.maSanPham}</p>
-                                                <p>Giá bán: {product.giaBan.toLocaleString()} VNĐ</p>
-                                                <p>Tồn kho: {product.soLuongTon} {product.donVi}</p>
+                            {supplierProducts.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500">
+                                    <p>Chưa có sản phẩm nào từ nhà cung cấp này</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {supplierProducts.map((product) => (
+                                        <div key={product.productId} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                            <div className="flex items-center justify-space-between">
+                                                <div className="space-y-2">
+                                                    <h4 className="font-medium text-gray-900">{product.productName}</h4>
+                                                    <div className="text-sm text-gray-600">
+                                                        <p>Mã SP: {product.productId}</p>
+                                                        {product.barcode && <p>Barcode: {product.barcode}</p>}
+                                                        <p>Giá bán: {formatPrice(product.price)}</p>
+                                                        <p>Tồn kho: {product.unit}</p>
+                                                    </div>
+                                                    {product.category?.categoryName && (
+                                                        <Badge variant="outline" className="text-xs">
+                                                            {product.category.categoryName}
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                <div className="">
+                                                    <img
+                                                        src={product.imageUrl}
+                                                        alt={product.productName}
+                                                        width={180}
+                                                        height={100}
+                                                    />
+                                                </div>
                                             </div>
-                                            <Badge variant="outline" className="text-xs">
-                                                {product.categoryName}
-                                            </Badge>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 

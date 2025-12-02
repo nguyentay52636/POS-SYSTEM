@@ -20,7 +20,6 @@ export default function DialogEditSupplier({
     // Lưu supplier vào local state để tránh race condition
     const [currentSupplier, setCurrentSupplier] = useState<ISupplier | null>(null)
 
-    // Cập nhật currentSupplier khi selectedSupplier thay đổi và dialog mở
     useEffect(() => {
         if (isEditDialogOpen && selectedSupplier) {
             console.log("Setting currentSupplier:", selectedSupplier)
@@ -30,22 +29,21 @@ export default function DialogEditSupplier({
 
     const handleSubmit = async (data: UpdateSupplierDTO) => {
         console.log("DialogEditSupplier - currentSupplier:", currentSupplier)
-        
+
         if (!currentSupplier) {
             console.error("currentSupplier is null")
             return
         }
-        
-        // Xử lý cả supplier_id (snake_case) và supplierId (camelCase) do backend inconsistency
-        const supplierId = currentSupplier.supplier_id || currentSupplier.supplierId
-        
+
+        const supplierId = currentSupplier.supplierId
+
         console.log("DialogEditSupplier - supplierId:", supplierId)
-        
+
         if (!supplierId) {
             console.error("supplierId is invalid:", currentSupplier)
             return
         }
-        
+
         await handleEditSupplier(supplierId, data)
     }
 
@@ -53,7 +51,7 @@ export default function DialogEditSupplier({
 
     return (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl! max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-gray-900">
                         Chỉnh sửa nhà cung cấp: {currentSupplier.name}

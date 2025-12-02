@@ -1,12 +1,14 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
-import { Plus, Minus, Trash2 } from 'lucide-react'
-import { ISupplier, SanPham } from '@/types/types'
+import { Plus, Minus, Trash2, Loader2 } from 'lucide-react'
+import { ISupplier, IProduct } from '@/types/types'
+import { useProduct } from '@/hooks/useProduct'
+import { formatPrice } from '@/utils/productUtils'
 
 interface ImportCardProps {
     isImportDialogOpen: boolean
@@ -21,7 +23,7 @@ interface ImportCardProps {
 }
 
 interface ImportItem {
-    product: SanPham
+    product: IProduct
     quantity: number
     price: number
 }
@@ -33,75 +35,43 @@ export default function ImportCard({
     setSelectedSupplier,
     handleImportGoods
 }: ImportCardProps) {
+    const { products, loading: productsLoading } = useProduct()
     const [importDate, setImportDate] = useState(new Date().toISOString().split('T')[0])
     const [importItems, setImportItems] = useState<ImportItem[]>([])
-    const [availableProducts] = useState<SanPham[]>([
-        {
-            maSanPham: "SP001",
-            tenSanPham: "Cà phê đen",
-            donVi: "ly",
-            soLuongTon: 50,
-            maThuongHieu: "TH001",
-            maDanhMuc: "DM001",
-            maLoai: "TL001",
-            moTa: "Cà phê đen nguyên chất",
-            giaBan: 25000,
-            giaNhap: 15000,
-            hinhAnh: "/images/coffee-black.jpg",
-            xuatXu: "Việt Nam",
-            hsd: "2025-12-31",
-            trangThai: "active",
-            categoryName: "Đồ uống",
-            brandName: "ABC Coffee",
-            typeName: "Cà phê",
-            createdAt: "2024-01-15",
-            updatedAt: "2024-01-15"
-        },
-        {
-            maSanPham: "SP002",
-            tenSanPham: "Bánh mì thịt nướng",
-            donVi: "cái",
-            soLuongTon: 30,
-            maThuongHieu: "TH002",
-            maDanhMuc: "DM002",
-            maLoai: "TL002",
-            moTa: "Bánh mì với thịt nướng thơm ngon",
-            giaBan: 35000,
-            giaNhap: 20000,
-            hinhAnh: "/images/banh-mi.jpg",
-            xuatXu: "Việt Nam",
-            hsd: "2024-12-31",
-            trangThai: "active",
-            categoryName: "Đồ ăn",
-            brandName: "XYZ Bakery",
-            typeName: "Bánh mì",
-            createdAt: "2024-02-20",
-            updatedAt: "2024-02-20"
-        }
-    ])
 
-    const addProduct = (product: SanPham) => {
-        const existingItem = importItems.find(item => item.product.maSanPham === product.maSanPham)
+    // Filter products by selected supplier
+    const availableProducts = useMemo(() => {
+        if (!selectedSupplier) return []
+        const supplierId = selectedSupplier.supplierId
+        return products.filter((product) => {
+            const productSupplierId = product.supplierId || product.supplier?.supplierId
+            return productSupplierId === supplierId
+        })
+    }, [products, selectedSupplier])
+
+    const addProduct = (product: IProduct) => {
+        const existingItem = importItems.find(item => item.product.productId === product.productId)
         if (existingItem) {
             setImportItems(items =>
                 items.map(item =>
-                    item.product.maSanPham === product.maSanPham
+                    item.product.productId === product.productId
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 )
             )
         } else {
-            setImportItems([...importItems, { product, quantity: 1, price: product.giaNhap || product.giaBan }])
+            // Use price as import price (you might want to add a separate importPrice field)
+            setImportItems([...importItems, { product, quantity: 1, price: product.price }])
         }
     }
 
-    const updateQuantity = (productId: string, quantity: number) => {
+    const updateQuantity = (productId: number, quantity: number) => {
         if (quantity <= 0) {
-            setImportItems(items => items.filter(item => item.product.maSanPham !== productId))
+            setImportItems(items => items.filter(item => item.product.productId !== productId))
         } else {
             setImportItems(items =>
                 items.map(item =>
-                    item.product.maSanPham === productId
+                    item.product.productId === productId
                         ? { ...item, quantity }
                         : item
                 )
@@ -109,8 +79,8 @@ export default function ImportCard({
         }
     }
 
-    const removeItem = (productId: string) => {
-        setImportItems(items => items.filter(item => item.product.maSanPham !== productId))
+    const removeItem = (productId: number) => {
+        setImportItems(items => items.filter(item => item.product.productId !== productId))
     }
 
     const calculateTotal = () => {
@@ -121,7 +91,7 @@ export default function ImportCard({
         const importData = {
             ngayNhap: importDate,
             chiTietPhieuNhap: importItems.map(item => ({
-                productId: item.product.maSanPham,
+                productId: item.product.productId,
                 quantity: item.quantity,
                 price: item.price
             })),
@@ -173,31 +143,58 @@ export default function ImportCard({
                     {/* Available Products */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Sản phẩm có thể nhập</CardTitle>
+                            <CardTitle>
+                                Sản phẩm có thể nhập ({availableProducts.length})
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {availableProducts.map((product) => (
-                                    <div key={product.maSanPham} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                                        <div className="space-y-2">
-                                            <h4 className="font-medium text-gray-900">{product.tenSanPham}</h4>
-                                            <div className="text-sm text-gray-600">
-                                                <p>Mã SP: {product.maSanPham}</p>
-                                                <p>Giá nhập: {(product.giaNhap || product.giaBan).toLocaleString()} VNĐ</p>
-                                                <p>Tồn kho: {product.soLuongTon} {product.donVi}</p>
+                            {productsLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 className="h-6 w-6 animate-spin text-green-700 mr-2" />
+                                    <p className="text-gray-600">Đang tải sản phẩm...</p>
+                                </div>
+                            ) : availableProducts.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <p className="text-gray-500">Không có sản phẩm nào từ nhà cung cấp này</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {availableProducts.map((product) => (
+                                        <div key={product.productId} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                            <div className="space-y-2">
+                                                <h4 className="font-medium text-gray-900">{product.productName}</h4>
+                                                <div className="flex items-center justify-space-between p-2">
+                                                    <div className="text-sm text-gray-600">
+                                                        <p>Mã SP: {product.productId}</p>
+                                                        {product.barcode && <p>Barcode: {product.barcode}</p>}
+                                                        <p>Giá nhập: {formatPrice(product.price)}</p>
+                                                        <p>Tồn kho: {product.unit}</p>
+                                                        {product.category?.categoryName && (
+                                                            <p>Danh mục: {product.category.categoryName}</p>
+                                                        )}
+                                                    </div>
+                                                    <div className="">
+                                                        <img
+                                                            src={product.imageUrl}
+                                                            alt={product.productName}
+                                                            width={180}
+                                                            height={100}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => addProduct(product)}
+                                                    className="w-full"
+                                                >
+                                                    <Plus className="h-4 w-4 mr-2" />
+                                                    Thêm vào phiếu nhập
+                                                </Button>
                                             </div>
-                                            <Button
-                                                size="sm"
-                                                onClick={() => addProduct(product)}
-                                                className="w-full"
-                                            >
-                                                <Plus className="h-4 w-4 mr-2" />
-                                                Thêm vào phiếu nhập
-                                            </Button>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -220,11 +217,14 @@ export default function ImportCard({
                                     </TableHeader>
                                     <TableBody>
                                         {importItems.map((item) => (
-                                            <TableRow key={item.product.maSanPham}>
+                                            <TableRow key={item.product.productId}>
                                                 <TableCell>
                                                     <div>
-                                                        <p className="font-medium">{item.product.tenSanPham}</p>
-                                                        <p className="text-sm text-gray-600">{item.product.maSanPham}</p>
+                                                        <p className="font-medium">{item.product.productName}</p>
+                                                        <p className="text-sm text-gray-600">
+                                                            {item.product.productId}
+                                                            {item.product.barcode && ` - ${item.product.barcode}`}
+                                                        </p>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
@@ -232,7 +232,7 @@ export default function ImportCard({
                                                         <Button
                                                             size="sm"
                                                             variant="outline"
-                                                            onClick={() => updateQuantity(item.product.maSanPham, item.quantity - 1)}
+                                                            onClick={() => updateQuantity(item.product.productId!, item.quantity - 1)}
                                                         >
                                                             <Minus className="h-3 w-3" />
                                                         </Button>
@@ -240,7 +240,7 @@ export default function ImportCard({
                                                         <Button
                                                             size="sm"
                                                             variant="outline"
-                                                            onClick={() => updateQuantity(item.product.maSanPham, item.quantity + 1)}
+                                                            onClick={() => updateQuantity(item.product.productId!, item.quantity + 1)}
                                                         >
                                                             <Plus className="h-3 w-3" />
                                                         </Button>
@@ -254,7 +254,7 @@ export default function ImportCard({
                                                             const newPrice = Number(e.target.value)
                                                             setImportItems(items =>
                                                                 items.map(i =>
-                                                                    i.product.maSanPham === item.product.maSanPham
+                                                                    i.product.productId === item.product.productId
                                                                         ? { ...i, price: newPrice }
                                                                         : i
                                                                 )
@@ -270,7 +270,7 @@ export default function ImportCard({
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
-                                                        onClick={() => removeItem(item.product.maSanPham)}
+                                                        onClick={() => removeItem(item.product.productId!)}
                                                         className="text-red-600 hover:text-red-700"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
