@@ -19,7 +19,7 @@ export interface CartItem {
 
 interface CartState {
     items: CartItem[]
-    appliedPromotion: IPromotion | null
+    appliedPromotions: IPromotion[]
     promoCode: string
     promoError: string
     selectedEWallet: string
@@ -32,7 +32,7 @@ interface CartState {
 
 const initialState: CartState = {
     items: [],
-    appliedPromotion: null,
+    appliedPromotions: [],
     promoCode: "",
     promoError: "",
     selectedEWallet: "",
@@ -84,7 +84,7 @@ const cartSlice = createSlice({
         },
         clearCart: (state) => {
             state.items = []
-            state.appliedPromotion = null
+            state.appliedPromotions = []
             state.promoCode = ""
             state.promoError = ""
             state.selectedEWallet = ""
@@ -103,12 +103,24 @@ const cartSlice = createSlice({
             state.promoError = ""
         },
         applyPromotion: (state, action: PayloadAction<IPromotion>) => {
-            state.appliedPromotion = action.payload
+            const exists = state.appliedPromotions.some(
+                (p) => p.promo_id === action.payload.promo_id
+            )
+            if (!exists) {
+                state.appliedPromotions.push(action.payload)
+            }
             state.promoError = ""
         },
-        removePromotion: (state) => {
-            state.appliedPromotion = null
-            state.promoCode = ""
+        removePromotion: (state, action: PayloadAction<number | undefined>) => {
+            const promoId = action.payload
+            if (promoId != null) {
+                state.appliedPromotions = state.appliedPromotions.filter(
+                    (p) => p.promo_id !== promoId
+                )
+            } else {
+                state.appliedPromotions = []
+                state.promoCode = ""
+            }
             state.promoError = ""
         },
         setPromoError: (state, action: PayloadAction<string>) => {
@@ -168,13 +180,31 @@ export const selectCartItems = (state: RootState) => state.cart.items
 export const selectCartTotal = (state: RootState) => {
     const subtotal = state.cart.items.reduce((sum, item) => sum + item.subtotal, 0)
     let discountAmount = 0
-    if (state.cart.appliedPromotion) {
-        if (state.cart.appliedPromotion.discount_type === "percentage") {
-            discountAmount = (subtotal * (state.cart.appliedPromotion.discount_value || 0)) / 100
-        } else if (state.cart.appliedPromotion.discount_type === "fixed") {
-            discountAmount = state.cart.appliedPromotion.discount_value || 0
+
+    if (state.cart.appliedPromotions.length > 0) {
+        let percentTotal = 0
+        let fixedTotal = 0
+
+        state.cart.appliedPromotions.forEach((promo) => {
+            if (promo.discount_type === "percentage") {
+                percentTotal += promo.discount_value || 0
+            } else if (promo.discount_type === "fixed") {
+                fixedTotal += promo.discount_value || 0
+            }
+        })
+
+        // Giới hạn tổng % tối đa 100%
+        percentTotal = Math.min(percentTotal, 100)
+
+        const percentDiscount = (subtotal * percentTotal) / 100
+        discountAmount = percentDiscount + fixedTotal
+
+        // Không cho giảm quá subtotal
+        if (discountAmount > subtotal) {
+            discountAmount = subtotal
         }
     }
+
     return {
         subtotal,
         discountAmount,
@@ -188,7 +218,7 @@ export const selectCartStats = (state: RootState) => {
         totalProducts: items.length,
     }
 }
-export const selectAppliedPromotion = (state: RootState) => state.cart.appliedPromotion
+export const selectAppliedPromotions = (state: RootState) => state.cart.appliedPromotions
 export const selectPromoCode = (state: RootState) => state.cart.promoCode
 export const selectPromoError = (state: RootState) => state.cart.promoError
 export const selectCustomerInfo = (state: RootState) => state.cart.customerInfo

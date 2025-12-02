@@ -11,7 +11,7 @@ import CardStats from "@/components/Admin/components/Promotion/components/CardSt
 import { Promotion } from "@/apis/promotionsApi"
 import { toast } from "sonner"
 import { usePagination } from "@/context/PaginationContext"
-import { usePromotion } from "@/hooks/usePromotion"
+import { usePromotion } from "@/hooks/usePromotions"
 
 export default function ManagerPromotionsContent() {
     const { promotions, loading: isLoading, error, addPromotion, updatePromotion, deletePromotion } = usePromotion()

@@ -35,7 +35,7 @@ import {
     selectCartItems,
     selectCartTotal,
     selectCartStats,
-    selectAppliedPromotion,
+    selectAppliedPromotions,
     selectPromoCode,
     selectPromoError,
     selectCustomerInfo,
@@ -62,7 +62,7 @@ export interface Transaction {
     changeAmount: number
     createdAt: string
     cashier: string
-    appliedPromotion?: IPromotion
+    appliedPromotions?: IPromotion[]
     selectedEWallet?: string
     customerInfo?: CustomerInfo
 }
@@ -150,7 +150,7 @@ export default function SellsContent() {
     const cart = useSelector(selectCartItems)
     const { subtotal, discountAmount, total } = useSelector(selectCartTotal)
     const stats = useSelector(selectCartStats)
-    const appliedPromotion = useSelector(selectAppliedPromotion)
+    const appliedPromotions = useSelector(selectAppliedPromotions)
     const promoCode = useSelector(selectPromoCode)
     const promoError = useSelector(selectPromoError)
     const selectedEWallet = useSelector(selectSelectedEWallet)
@@ -245,7 +245,7 @@ export default function SellsContent() {
             changeAmount: receivedAmount - total,
             createdAt: new Date().toISOString(),
             cashier: "Admin",
-            appliedPromotion: appliedPromotion || undefined,
+            appliedPromotions: appliedPromotions.length ? appliedPromotions : undefined,
             selectedEWallet: selectedEWallet || undefined,
             customerInfo: customerInfo,
         }
@@ -269,13 +269,12 @@ export default function SellsContent() {
             dispatch(applyPromotion(promotion))
         } else {
             dispatch(setPromoError("Mã khuyến mãi không hợp lệ"))
-            dispatch(removePromotion())
         }
     }
 
     // Remove promotion handler
-    const handleRemovePromotion = () => {
-        dispatch(removePromotion())
+    const handleRemovePromotion = (promoId?: number) => {
+        dispatch(removePromotion(promoId))
     }
 
     // Stats (already computed from Redux selectors)
@@ -318,7 +317,7 @@ export default function SellsContent() {
                             setPromoCode={(code) => dispatch(setPromoCode(code))}
                             promoError={promoError}
                             setPromoError={(error) => dispatch(setPromoError(error))}
-                            appliedPromotion={appliedPromotion}
+                            appliedPromotions={appliedPromotions}
                             applyPromoCode={handleApplyPromoCode}
                             removePromotion={handleRemovePromotion}
                         />
@@ -328,14 +327,10 @@ export default function SellsContent() {
                                 <span className="text-gray-600 font-medium">Tạm tính:</span>
                                 <span className="font-semibold text-gray-900">{subtotal.toLocaleString("vi-VN")}đ</span>
                             </div>
-                            {appliedPromotion && discountAmount > 0 && (
+                            {appliedPromotions.length > 0 && discountAmount > 0 && (
                                 <div className="flex justify-between text-sm text-orange-600">
                                     <span className="font-medium">
-                                        Giảm giá (
-                                        {appliedPromotion.discount_type === "percentage"
-                                            ? `${appliedPromotion.discount_value}%`
-                                            : "Cố định"}
-                                        ):
+                                        Giảm giá ({appliedPromotions.length} KM):
                                     </span>
                                     <span className="font-semibold">-{discountAmount.toLocaleString("vi-VN")}đ</span>
                                 </div>
