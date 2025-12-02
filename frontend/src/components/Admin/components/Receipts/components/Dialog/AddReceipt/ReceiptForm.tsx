@@ -13,10 +13,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { Building2, Calendar, DollarSign, FileText, Package, Plus, Trash2 } from "lucide-react"
 import { CreateImportReceiptDTO } from "@/apis/importReceiptApi"
 import { IProduct } from "@/types/types"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useSupplier } from "@/hooks/useSupplier"
 import TableImportProduct from "../ProductImport/TableImportProduct"
+import DialogImportProduct from "../ProductImport/DialogImportProduct"
 
 // Zod validation schema
 const receiptSchema = z.object({
@@ -45,9 +46,7 @@ interface ReceiptItem {
 export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
     const [products, setProducts] = useState<IProduct[]>([])
     const [items, setItems] = useState<ReceiptItem[]>([])
-    const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
-    const [newItemQuantity, setNewItemQuantity] = useState<number>(1)
-    const [newItemPrice, setNewItemPrice] = useState<number>(0)
+    const [isProductImportDialogOpen, setIsProductImportDialogOpen] = useState(false)
 
     const {
         register,
@@ -66,27 +65,22 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
 
     const { suppliers, loading: loadingSuppliers } = useSupplier()
 
-    const addItem = () => {
-        if (!selectedProductId || !newItemQuantity || !newItemPrice) return
-
-        const product = products.find(p => p.productId === selectedProductId)
-        if (!product) return
+    const addItem = (product: IProduct) => {
+        if (!product.productId) return
+        const quantity = 1
+        const unitPrice = product.price
 
         const newItem: ReceiptItem = {
-            productId: selectedProductId,
-            quantity: newItemQuantity,
-            unitPrice: newItemPrice,
-            subtotal: newItemQuantity * newItemPrice
+            productId: product.productId,
+            quantity,
+            unitPrice,
+            subtotal: quantity * unitPrice
         }
 
-        setItems([...items, newItem])
-        const newTotal = items.reduce((sum, item) => sum + item.subtotal, 0) + newItem.subtotal
+        const newItems = [...items, newItem]
+        setItems(newItems)
+        const newTotal = newItems.reduce((sum, item) => sum + item.subtotal, 0)
         setValue('totalAmount', newTotal)
-
-        // Reset
-        setSelectedProductId(null)
-        setNewItemQuantity(1)
-        setNewItemPrice(0)
     }
 
     const removeItem = (index: number) => {
@@ -110,14 +104,6 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
         await onSubmit(receiptData)
     }
 
-    const selectedProduct = products.find(p => p.productId === selectedProductId)
-
-    useEffect(() => {
-        if (selectedProduct) {
-            setNewItemPrice(selectedProduct.price)
-        }
-    }, [selectedProduct])
-
     return (
         <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-6 pt-4 rounded-lg">
             {/* Thông tin cơ bản */}
@@ -128,7 +114,7 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
                         Thông tin phiếu nhập
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4 pt-6">
+                <CardContent className="space-y-4 pt-6 max-w-6xl!">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="supplierId" className="flex items-center gap-2">
@@ -204,7 +190,11 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
                         />
                     </div>
                     <div className="flex justify-end">
-                        <Button className="bg-green-700" onClick={() => setIsProductImportDialogOpen(true)}>
+                        <Button
+                            type="button"
+                            className="bg-green-700"
+                            onClick={() => setIsProductImportDialogOpen(true)}
+                        >
                             <Plus className="h-4 w-4 mr-2" />
                             Thêm sản phẩm
                         </Button>
@@ -213,6 +203,16 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
             </Card>
 
             <TableImportProduct products={products} onAddProduct={addItem} />
+            {/* Dialog chọn sản phẩm */}
+            <DialogImportProduct
+                isOpen={isProductImportDialogOpen}
+                onOpenChange={setIsProductImportDialogOpen}
+                onSelectProducts={(selected) => {
+                    setProducts(selected)
+                    setIsProductImportDialogOpen(false)
+                }}
+            />
+
             {/* Buttons */}
             <div className="flex gap-3 justify-end">
                 <Button

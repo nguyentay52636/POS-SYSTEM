@@ -46,7 +46,7 @@ export default function ViewDetailsReceipts({
 
     return (
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-6x! max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-gray-900">
                         Chi tiết phiếu nhập #{selectedReceipt.importId || selectedReceipt.import_id}
@@ -120,7 +120,7 @@ export default function ViewDetailsReceipts({
                                     <TableBody>
                                         {(selectedReceipt.importItems || selectedReceipt.import_items || []).map((item) => (
                                             <TableRow key={item.importItemId || item.import_item_id}>
-                                                <TableCell>{item.product?.product_name || 'N/A'}</TableCell>
+                                                <TableCell>{item.product?.productName || 'N/A'}</TableCell>
                                                 <TableCell>{item.quantity}</TableCell>
                                                 <TableCell>{(item.unitPrice || item.unit_price || 0).toLocaleString('vi-VN')} VNĐ</TableCell>
                                                 <TableCell className="font-semibold">{item.subtotal.toLocaleString('vi-VN')} VNĐ</TableCell>

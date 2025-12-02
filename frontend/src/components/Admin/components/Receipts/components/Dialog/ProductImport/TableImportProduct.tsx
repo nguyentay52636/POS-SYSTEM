@@ -20,7 +20,7 @@ export default function TableImportProduct({ products, onAddProduct }: TableImpo
                     Danh sách sản phẩm của nhà cung cấp
                 </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 pt-6">
+            <CardContent className="space-y-4 max-w-6xl! pt-6">
                 {products.length === 0 ? (
                     <div className="py-8 text-center text-gray-500">
                         Không có sản phẩm nào cho nhà cung cấp này

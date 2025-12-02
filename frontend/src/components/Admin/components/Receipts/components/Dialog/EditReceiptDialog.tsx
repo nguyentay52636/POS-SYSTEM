@@ -83,7 +83,7 @@ export default function EditReceiptDialog({ isOpen, onOpenChange, selectedReceip
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-6xl!">
                 <DialogHeader>
                     <DialogTitle>Cập nhật phiếu nhập #{receiptId}</DialogTitle>
                 </DialogHeader>
@@ -104,7 +104,7 @@ export default function EditReceiptDialog({ isOpen, onOpenChange, selectedReceip
                                     </SelectTrigger>
                                     <SelectContent>
                                         {suppliers.map((supplier) => (
-                                            <SelectItem key={supplier.supplier_id || supplier.supplierId} value={(supplier.supplier_id || supplier.supplierId)?.toString() || ''}>
+                                            <SelectItem key={supplier.supplierId || supplier.supplierId} value={(supplier.supplierId || supplier.supplierId)?.toString() || ''}>
                                                 {supplier.name}
                                             </SelectItem>
                                         ))}
