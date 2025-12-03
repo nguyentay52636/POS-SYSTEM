@@ -46,12 +46,12 @@ VALUES
 -------------------------------------------------
 -- 6) PRODUCTS
 -------------------------------------------------
-INSERT INTO products (category_id, supplier_id, product_name, barcode, price, unit)
+INSERT INTO products (category_id, supplier_id, product_name, barcode, price, unit, image_url)
 VALUES
-(1, 1, N'Coca Cola lon', 'SP1001', 10000, 'lon'),
-(1, 1, N'Trà xanh O', 'SP1002', 12000, 'chai'),
-(2, 2, N'Bánh Oreo', 'SP2001', 15000, 'gói'),
-(3, 2, N'Nước mắm Nam Ngư', 'SP3001', 30000, 'chai');
+(1, 1, N'Coca Cola lon', 'SP1001', 10000, 'lon', 'https://example.com/coca.jpg'),
+(1, 1, N'Trà xanh O', 'SP1002', 12000, 'chai', 'https://example.com/traxanh.jpg'),
+(2, 2, N'Bánh Oreo', 'SP2001', 15000, 'gói', 'https://example.com/oreo.jpg'),
+(3, 2, N'Nước mắm Nam Ngư', 'SP3001', 30000, 'chai', 'https://example.com/nuocmam.jpg');
 
 -------------------------------------------------
 -- 7) INVENTORY

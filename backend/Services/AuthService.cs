@@ -38,8 +38,22 @@ namespace backend.Services
             }
 
             // Verify password using BCrypt
-            if (string.IsNullOrEmpty(user.Password) || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
+            if (string.IsNullOrEmpty(user.Password))
             {
+                return null;
+            }
+
+            try
+            {
+                if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
+                {
+                    return null;
+                }
+            }
+            catch (BCrypt.Net.SaltParseException)
+            {
+                // Password is not a valid BCrypt hash (e.g., plain text from old data)
+                // This should not happen if all passwords are properly hashed
                 return null;
             }
 

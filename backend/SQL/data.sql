@@ -71,6 +71,7 @@ CREATE TABLE products (
     barcode NVARCHAR(50) UNIQUE,
     price DECIMAL(10,2) NOT NULL,
     unit NVARCHAR(20) DEFAULT 'pcs',
+    image_url NVARCHAR(255),
     created_at DATETIME DEFAULT GETDATE()
 );
 GO

@@ -18,7 +18,8 @@ public class UserMappings : Profile
             .ForMember(dest => dest.UserId, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
             .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src =>
-                UserRoleHelper.GetRoleValue(src.Role ?? "staff")));
+                UserRoleHelper.GetRoleValue(src.Role ?? "staff")))
+            .ForMember(dest => dest.Role, opt => opt.Ignore());
 
         CreateMap<UpdateUserDto, User>()
             .ForMember(dest => dest.UserId, opt => opt.Ignore())
@@ -26,6 +27,7 @@ public class UserMappings : Profile
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src =>
                 string.IsNullOrWhiteSpace(src.Role) ? (int?)null : UserRoleHelper.GetRoleValue(src.Role)))
+            .ForMember(dest => dest.Role, opt => opt.Ignore())
             .ForAllMembers(opt => opt.Condition((src, dest, srcMember) =>
                 srcMember != null && !string.IsNullOrWhiteSpace(srcMember.ToString())));
     }
