@@ -53,9 +53,11 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<ConfigCustomerPoint> ConfigCustomerPoints { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost,1433;Database=bachhoaxanh ;User Id=sa;Password=Tay52636@;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Data Source=.\\sqlexpress;Initial Catalog=bachhoaxanh;Integrated Security=True;Encrypt=False;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -92,6 +94,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Phone)
                 .HasMaxLength(20)
                 .HasColumnName("phone");
+            entity.Property(e => e.CustomerPoint)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("customer_point");
         });
 
         modelBuilder.Entity<ExportItem>(entity =>
@@ -548,6 +554,28 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__users__role_id__7B5B524B");
+        });
+
+        modelBuilder.Entity<ConfigCustomerPoint>(entity =>
+        {
+            entity.HasKey(e => e.ConfigId).HasName("PK__ConfigCu__1A5DE8F5A1B2C3D4");
+
+            entity.ToTable("ConfigCustomerPoint");
+
+            entity.Property(e => e.ConfigId).HasColumnName("config_id");
+            entity.Property(e => e.PointsPerUnit)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("points_per_unit");
+            entity.Property(e => e.MoneyPerUnit)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("money_per_unit");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -33,9 +33,11 @@ CREATE TABLE customers (
     phone NVARCHAR(20),
     email NVARCHAR(100),
     address NVARCHAR(MAX),
+    customer_point DECIMAL(10,2) DEFAULT 0,
     created_at DATETIME DEFAULT GETDATE()
 );
 GO
+
 
 -------------------------------------------------
 -- 4️⃣ Categories
@@ -179,6 +181,18 @@ CREATE TABLE import_items (
 );
 GO
 
+-------------------------------------------------
+-- 1️⃣5️⃣ Config Customer Point
+-------------------------------------------------
+CREATE TABLE ConfigCustomerPoint (
+    config_id INT IDENTITY(1,1) PRIMARY KEY,
+    points_per_unit DECIMAL(10,2) NOT NULL,
+    money_per_unit DECIMAL(10,2) NOT NULL,
+    is_active BIT DEFAULT 1,
+    updated_at DATETIME DEFAULT GETDATE()
+);
+GO
+
 CREATE TABLE export_receipts (
     export_id INT IDENTITY(1,1) PRIMARY KEY,
     customer_id INT NOT NULL,
@@ -199,7 +213,7 @@ CREATE TABLE export_items (
 );
 
 -------------------------------------------------
--- 1️⃣5️⃣ Features & PermissionTypes
+-- 1️⃣6️⃣ Features & PermissionTypes
 -------------------------------------------------
 CREATE TABLE Features (
     FeatureId INT IDENTITY(1,1) PRIMARY KEY,
@@ -214,7 +228,7 @@ CREATE TABLE PermissionTypes (
 GO
 
 -------------------------------------------------
--- 1️⃣6️⃣ RolePermissions
+-- 1️⃣7️⃣ RolePermissions
 -------------------------------------------------
 CREATE TABLE RolePermissions (
     RoleId INT NOT NULL,

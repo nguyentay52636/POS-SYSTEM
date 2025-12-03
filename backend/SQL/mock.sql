@@ -19,11 +19,12 @@ VALUES
 -------------------------------------------------
 -- 3) CUSTOMERS
 -------------------------------------------------
-INSERT INTO customers (name, phone, email, address)
+INSERT INTO customers (name, phone, email, address, customer_point)
 VALUES
-(N'Nguyễn Văn A', '0901111111', 'a@gmail.com', N'Quận 1'),
-(N'Lê Thị B', '0902222222', 'b@gmail.com', N'Quận 10'),
-(N'Phạm Văn C', '0903333333', 'c@gmail.com', N'Bình Thạnh');
+(N'Nguyễn Văn A', '0901111111', 'a@gmail.com', N'Quận 1', 0),
+(N'Lê Thị B', '0902222222', 'b@gmail.com', N'Quận 10', 150),
+(N'Phạm Văn C', '0903333333', 'c@gmail.com', N'Bình Thạnh', 500);
+
 
 -------------------------------------------------
 -- 4) CATEGORIES
@@ -170,3 +171,10 @@ INSERT INTO RolePermissions (RoleId, FeatureId, PermissionTypeId, IsAllowed)
 VALUES
 (3, 5, 1, 1),
 (3, 5, 2, 1);
+
+-------------------------------------------------
+-- 19) CONFIG CUSTOMER POINT
+-------------------------------------------------
+INSERT INTO ConfigCustomerPoint (points_per_unit, money_per_unit, is_active)
+VALUES
+(100, 100, 1);
