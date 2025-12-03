@@ -126,7 +126,7 @@ export default function EditReceiptDialog({ isOpen, onOpenChange, selectedReceip
                                     <SelectContent>
                                         <SelectItem value="pending">Đang chờ</SelectItem>
                                         <SelectItem value="completed">Đã hoàn thành</SelectItem>
-                                        <SelectItem value="cancelled">Đã hủy</SelectItem>
+                                        <SelectItem value="canceled">Đã hủy</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

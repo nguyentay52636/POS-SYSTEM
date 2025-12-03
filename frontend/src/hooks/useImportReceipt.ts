@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
 import { IImportReceipt } from "@/types/types"
-import { getAllImportReceipts, addImportReceipt, updateImportReceipt, deleteImportReceipt, CreateImportReceiptDTO, UpdateImportReceiptDTO } from "@/apis/importReceiptApi"
+import { getAllImportReceipts, addImportReceipt, updateImportReceipt, deleteImportReceipt, updateStatusImportReceipt, CreateImportReceiptDTO, UpdateImportReceiptDTO } from "@/apis/importReceiptApi"
 import { toast } from "sonner"
 import { usePagination } from "@/context/PaginationContext"
 
@@ -108,6 +108,21 @@ export const useImportReceipt = () => {
         }
     }
 
+    const handleUpdateStatus = async (receiptId: number, status: string) => {
+        try {
+            const updatedReceipt = await updateStatusImportReceipt(receiptId, status)
+            const currentReceiptId = (r: IImportReceipt) => r.importId || r.import_id
+            setReceipts(receipts.map((r) =>
+                currentReceiptId(r) === receiptId ? updatedReceipt : r
+            ))
+            toast.success("Cập nhật trạng thái thành công!")
+            fetchReceipts()
+        } catch (error) {
+            console.error("Error updating status:", error)
+            toast.error("Không thể cập nhật trạng thái")
+        }
+    }
+
     return {
         receipts,
         loading,
@@ -131,6 +146,7 @@ export const useImportReceipt = () => {
         handleAddReceipt,
         handleEditReceipt,
         handleDeleteReceipt,
+        handleUpdateStatus,
         fetchReceipts
     }
 }

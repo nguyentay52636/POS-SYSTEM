@@ -33,7 +33,8 @@ export default function ReceiptsContent() {
         completedReceipts,
         handleAddReceipt,
         handleEditReceipt,
-        handleDeleteReceipt
+        handleDeleteReceipt,
+        handleUpdateStatus
     } = useImportReceipt()
 
     if (loading) {
@@ -73,6 +74,7 @@ export default function ReceiptsContent() {
                     setIsDetailDialogOpen={setIsDetailDialogOpen}
                     setIsEditDialogOpen={setIsEditDialogOpen}
                     handleDeleteReceipt={handleDeleteReceipt}
+                    handleUpdateStatus={handleUpdateStatus}
                 />
 
                 <PaginationReceipts totalItems={filteredReceipts.length} />

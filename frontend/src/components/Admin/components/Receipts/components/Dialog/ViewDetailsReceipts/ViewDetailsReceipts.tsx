@@ -30,7 +30,7 @@ export default function ViewDetailsReceipts({
                 return <Badge className="bg-orange-100 text-orange-800 border-orange-200">Đang chờ</Badge>
             case 'completed':
                 return <Badge className="bg-green-100 text-green-800 border-green-200">Đã hoàn thành</Badge>
-            case 'cancelled':
+            case 'canceled':
                 return <Badge className="bg-red-100 text-red-800 border-red-200">Đã hủy</Badge>
             default:
                 return <Badge>{status}</Badge>

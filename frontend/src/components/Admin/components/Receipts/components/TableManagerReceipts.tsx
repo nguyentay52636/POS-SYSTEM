@@ -4,6 +4,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { Button } from '@/components/ui/button'
 import { FileText, Eye, Edit, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { IImportReceipt } from '@/types/types'
 
 interface TableManagerReceiptsProps {
@@ -13,6 +14,7 @@ interface TableManagerReceiptsProps {
     setIsDetailDialogOpen: (open: boolean) => void
     setIsEditDialogOpen: (open: boolean) => void
     handleDeleteReceipt: (receiptId: number) => void
+    handleUpdateStatus: (receiptId: number, status: string) => void
 }
 
 export default function TableManagerReceipts({
@@ -21,8 +23,22 @@ export default function TableManagerReceipts({
     setSelectedReceipt,
     setIsDetailDialogOpen,
     setIsEditDialogOpen,
-    handleDeleteReceipt
+    handleDeleteReceipt,
+    handleUpdateStatus
 }: TableManagerReceiptsProps) {
+
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case 'pending':
+                return 'Đang chờ'
+            case 'completed':
+                return 'Đã hoàn thành'
+            case 'canceled':
+                return 'Đã hủy'
+            default:
+                return status
+        }
+    }
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -30,10 +46,23 @@ export default function TableManagerReceipts({
                 return <Badge className="bg-orange-100 text-orange-800 border-orange-200">Đang chờ</Badge>
             case 'completed':
                 return <Badge className="bg-green-100 text-green-800 border-green-200">Đã hoàn thành</Badge>
-            case 'cancelled':
+            case 'canceled':
                 return <Badge className="bg-red-100 text-red-800 border-red-200">Đã hủy</Badge>
             default:
                 return <Badge>{status}</Badge>
+        }
+    }
+
+    const getStatusBadgeClassName = (status: string) => {
+        switch (status) {
+            case 'pending':
+                return 'bg-orange-100 text-orange-800 border-orange-200'
+            case 'completed':
+                return 'bg-green-100 text-green-800 border-green-200'
+            case 'canceled':
+                return 'bg-red-100 text-red-800 border-red-200'
+            default:
+                return ''
         }
     }
 
@@ -87,7 +116,26 @@ export default function TableManagerReceipts({
                                             <p className="font-semibold text-blue-600 dark:text-white           ">{formatPrice(receipt.totalAmount || receipt.total_amount || 0)}</p>
                                         </TableCell>
                                         <TableCell>
-                                            {getStatusBadge(receipt.status)}
+                                            <Select
+                                                value={receipt.status}
+                                                onValueChange={(value) => {
+                                                    const receiptId = receipt.importId || receipt.import_id
+                                                    if (receiptId) {
+                                                        handleUpdateStatus(receiptId, value)
+                                                    }
+                                                }}
+                                            >
+                                                <SelectTrigger className={`w-[140px] ${getStatusBadgeClassName(receipt.status)}`}>
+                                                    <SelectValue>
+                                                        {getStatusText(receipt.status)}
+                                                    </SelectValue>
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="pending">Đang chờ</SelectItem>
+                                                    <SelectItem value="completed">Đã hoàn thành</SelectItem>
+                                                    <SelectItem value="canceled">Đã hủy</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
