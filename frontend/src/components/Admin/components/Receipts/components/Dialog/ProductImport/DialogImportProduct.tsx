@@ -6,17 +6,18 @@ import type { IProduct } from "@/types/types"
 interface DialogImportProductProps {
     isOpen: boolean
     onOpenChange: (open: boolean) => void
+    products?: IProduct[]
     onSelectProducts: (products: IProduct[]) => void
 }
 
-export default function DialogImportProduct({ isOpen, onOpenChange, onSelectProducts }: DialogImportProductProps) {
+export default function DialogImportProduct({ isOpen, onOpenChange, products = [], onSelectProducts }: DialogImportProductProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-7xl! max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Chọn sản phẩm để nhập hàng</DialogTitle>
                 </DialogHeader>
-                <ChoiceProduct onSelectProducts={onSelectProducts} />
+                <ChoiceProduct products={products} onSelectProducts={onSelectProducts} />
             </DialogContent>
         </Dialog>
     )

@@ -1,5 +1,5 @@
 import baseApi from "./baseApi"
-import { IImportReceipt, IImportItem } from "@/types/types"
+import { IImportReceipt, IImportItem, IProduct } from "@/types/types"
 
 // DTOs
 export interface CreateImportReceiptDTO {
@@ -76,6 +76,15 @@ const getImportReceiptById = async (receiptId: number): Promise<IImportReceipt> 
         throw error
     }
 }
+const  getAllProductBySupplierId = async (supplierId: number) =>{
+    try {
+        const {data}  = await baseApi.get(`/Product/supplier/${supplierId}`)
+        return data
+    }catch(error) {
+        console.error('Error fetching products by supplier:', error)
+        throw error
+    }
+}
 
-export { getAllImportReceipts, addImportReceipt, updateImportReceipt, deleteImportReceipt, getImportReceiptById }
+export {getAllProductBySupplierId, getAllImportReceipts, addImportReceipt, updateImportReceipt, deleteImportReceipt, getImportReceiptById }
 

@@ -21,6 +21,7 @@ public interface IProductRepository
     Task<bool> ExistsAsync(int id);
     Task<bool> CategoryExistsAsync(int categoryId);
     Task<bool> SupplierExistsAsync(int supplierId);
+    Task<IReadOnlyList<Product>> GetBySupplierIdAsync(int supplierId);
 }
 
 public class ProductRepository : IProductRepository
@@ -134,5 +135,13 @@ public class ProductRepository : IProductRepository
     public async Task<bool> SupplierExistsAsync(int supplierId)
     {
         return await _db.Suppliers.AnyAsync(s => s.SupplierId == supplierId);
+    }
+
+    public async Task<IReadOnlyList<Product>> GetBySupplierIdAsync(int supplierId)
+    {
+        return await QueryWithDetails()
+            .Where(p => p.SupplierId == supplierId)
+            .OrderBy(p => p.ProductName)
+            .ToListAsync();
     }
 }

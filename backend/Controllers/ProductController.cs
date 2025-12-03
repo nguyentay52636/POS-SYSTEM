@@ -62,6 +62,18 @@ public class ProductController : ControllerBase
     }
 
     /// <summary>
+    /// Get products by supplier id.
+    /// </summary>
+    /// <param name="supplierId">Supplier id</param>
+    [HttpGet("supplier/{supplierId:int}")]
+    [ProducesResponseType(typeof(ProductResponseDto[]), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ProductResponseDto[]>> GetBySupplier(int supplierId)
+    {
+        var products = await _service.GetBySupplierIdAsync(supplierId);
+        return Ok(products);
+    }
+
+    /// <summary>
     /// Search products with pagination and filtering.
     /// </summary>
     /// <remarks>

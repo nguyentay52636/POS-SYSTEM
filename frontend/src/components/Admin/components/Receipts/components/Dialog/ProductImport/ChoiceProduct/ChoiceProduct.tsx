@@ -5,17 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { useProduct } from "@/hooks/useProduct"
 import TableChoiceProduct from "./components/TableChoiceProduct"
 import type { IProduct } from "@/types/types"
 import { mockCategories } from "@/components/Admin/components/Products/mock/data"
 
 interface ChoiceProductProps {
+    products?: IProduct[]
+    loading?: boolean
     onSelectProducts?: (products: IProduct[]) => void
 }
 
-export default function ChoiceProduct({ onSelectProducts }: ChoiceProductProps) {
-    const { products, loading } = useProduct()
+export default function ChoiceProduct({ products = [], loading = false, onSelectProducts }: ChoiceProductProps) {
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<string>("all")
     const [selectedStatus, setSelectedStatus] = useState<string>("all")

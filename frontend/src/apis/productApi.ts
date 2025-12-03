@@ -52,3 +52,4 @@ export const deleteProduct = async (productId: number): Promise<void> => {
     }
 }
 
+

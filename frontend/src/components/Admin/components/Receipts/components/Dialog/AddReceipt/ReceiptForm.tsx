@@ -5,19 +5,13 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Building2, Calendar, DollarSign, FileText, Package, Plus, Trash2 } from "lucide-react"
 import { CreateImportReceiptDTO } from "@/apis/importReceiptApi"
 import { IProduct } from "@/types/types"
 import { useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useSupplier } from "@/hooks/useSupplier"
 import TableImportProduct from "../ProductImport/TableImportProduct"
 import DialogImportProduct from "../ProductImport/DialogImportProduct"
+import BasicFormReceipt from "./BasicFormReceipt"
 
 // Zod validation schema
 const receiptSchema = z.object({
@@ -53,6 +47,7 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
         handleSubmit,
         formState: { errors, isSubmitting },
         setValue,
+        watch,
     } = useForm<ReceiptFormData>({
         resolver: zodResolver(receiptSchema),
         defaultValues: {
@@ -63,7 +58,9 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
         }
     })
 
-    const { suppliers, loading: loadingSuppliers } = useSupplier()
+    const { suppliers } = useSupplier()
+    const supplierId = watch("supplierId")
+    const [supplierProducts, setSupplierProducts] = useState<IProduct[]>([])
 
     const addItem = (product: IProduct) => {
         if (!product.productId) return
@@ -77,10 +74,12 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
             subtotal: quantity * unitPrice
         }
 
-        const newItems = [...items, newItem]
-        setItems(newItems)
-        const newTotal = newItems.reduce((sum, item) => sum + item.subtotal, 0)
-        setValue('totalAmount', newTotal)
+        setItems((prev) => {
+            const updated = [...prev, newItem]
+            const newTotal = updated.reduce((sum, item) => sum + item.subtotal, 0)
+            setValue('totalAmount', newTotal)
+            return updated
+        })
     }
 
     const removeItem = (index: number) => {
@@ -106,107 +105,27 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
 
     return (
         <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-6 pt-4 rounded-lg">
-            {/* Thông tin cơ bản */}
-            <Card className="border-l-4 border-l-green-500">
-                <CardHeader className="bg-green-50">
-                    <CardTitle className="flex items-center gap-2 text-green-700">
-                        <FileText className="h-5 w-5" />
-                        Thông tin phiếu nhập
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 pt-6 max-w-6xl!">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="supplierId" className="flex items-center gap-2">
-                                <Building2 className="h-4 w-4" />
-                                Nhà cung cấp *
-                            </Label>
-                            <Select
-                                onValueChange={(value) => setValue('supplierId', parseInt(value))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Chọn nhà cung cấp" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {suppliers.map((supplier) => (
-                                        <SelectItem
-                                            key={supplier.supplierId}
-                                            value={supplier.supplierId?.toString() || ""}
-                                        >
-                                            {supplier.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.supplierId && (
-                                <p className="text-sm text-red-600">{errors.supplierId.message}</p>
-                            )}
-                        </div>
+            <BasicFormReceipt
+                suppliers={suppliers}
+                supplierId={supplierId}
+                register={register}
+                errors={errors}
+                setValue={setValue}
+                onOpenProductImportDialog={() => setIsProductImportDialogOpen(true)}
+                onProductsLoaded={setSupplierProducts}
+            />
 
-                        <div className="space-y-2">
-                            <Label htmlFor="importDate" className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
-                                Ngày nhập *
-                            </Label>
-                            <Input
-                                id="importDate"
-                                type="date"
-                                {...register("importDate")}
-                            />
-                            {errors.importDate && (
-                                <p className="text-sm text-red-600">{errors.importDate.message}</p>
-                            )}
-                        </div>
-
-                        {/* <div className="space-y-2">
-                            <Label htmlFor="status">
-                                Trạng thái *
-                            </Label>
-                            <Select
-                                onValueChange={(value) => setValue('status', value)}
-                                defaultValue="pending"
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Chọn trạng thái" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="pending">Đang chờ</SelectItem>
-                                    <SelectItem value="completed">Đã hoàn thành</SelectItem>
-                                    <SelectItem value="cancelled">Đã hủy</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div> */}
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="note">
-                            Ghi chú
-                        </Label>
-                        <Textarea
-                            id="note"
-                            {...register("note")}
-                            placeholder="Nhập ghi chú nếu có"
-                            rows={3}
-                        />
-                    </div>
-                    <div className="flex justify-end">
-                        <Button
-                            type="button"
-                            className="bg-green-700"
-                            onClick={() => setIsProductImportDialogOpen(true)}
-                        >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Thêm sản phẩm
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <TableImportProduct products={products} onAddProduct={addItem} />
+            <TableImportProduct
+                products={products}
+                onAddSelected={(selectedProducts) => {
+                    selectedProducts.forEach(addItem)
+                }}
+            />
             {/* Dialog chọn sản phẩm */}
             <DialogImportProduct
                 isOpen={isProductImportDialogOpen}
                 onOpenChange={setIsProductImportDialogOpen}
+                products={supplierProducts}
                 onSelectProducts={(selected) => {
                     setProducts(selected)
                     setIsProductImportDialogOpen(false)

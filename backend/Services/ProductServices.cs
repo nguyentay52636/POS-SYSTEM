@@ -19,6 +19,7 @@ public interface IProductService
     Task<PagedResponse<ProductResponseDto>> SearchAsync(ProductQueryParams query);
     Task<int> ImportAsync(IEnumerable<CreateProductDto> products);
     Task<ProductResponseDto[]> ListAllAsync();
+    Task<ProductResponseDto[]> GetBySupplierIdAsync(int supplierId);
 }
 
 public class ProductService : IProductService
@@ -168,6 +169,12 @@ public class ProductService : IProductService
     public async Task<ProductResponseDto[]> ListAllAsync()
     {
         var items = await _repo.ListAllAsync();
+        return _mapper.Map<ProductResponseDto[]>(items);
+    }
+
+    public async Task<ProductResponseDto[]> GetBySupplierIdAsync(int supplierId)
+    {
+        var items = await _repo.GetBySupplierIdAsync(supplierId);
         return _mapper.Map<ProductResponseDto[]>(items);
     }
 }
