@@ -19,11 +19,12 @@ VALUES
 -------------------------------------------------
 -- 3) CUSTOMERS
 -------------------------------------------------
-INSERT INTO customers (name, phone, email, address)
+INSERT INTO customers (name, phone, email, address, customer_point)
 VALUES
-(N'Nguyễn Văn A', '0901111111', 'a@gmail.com', N'Quận 1'),
-(N'Lê Thị B', '0902222222', 'b@gmail.com', N'Quận 10'),
-(N'Phạm Văn C', '0903333333', 'c@gmail.com', N'Bình Thạnh');
+(N'Nguyễn Văn A', '0901111111', 'a@gmail.com', N'Quận 1', 0),
+(N'Lê Thị B', '0902222222', 'b@gmail.com', N'Quận 10', 150),
+(N'Phạm Văn C', '0903333333', 'c@gmail.com', N'Bình Thạnh', 500);
+
 
 -------------------------------------------------
 -- 4) CATEGORIES
@@ -45,12 +46,12 @@ VALUES
 -------------------------------------------------
 -- 6) PRODUCTS
 -------------------------------------------------
-INSERT INTO products (category_id, supplier_id, product_name, barcode, price, unit)
+INSERT INTO products (category_id, supplier_id, product_name, barcode, price, unit, image_url)
 VALUES
-(1, 1, N'Coca Cola lon', 'SP1001', 10000, 'lon'),
-(1, 1, N'Trà xanh O', 'SP1002', 12000, 'chai'),
-(2, 2, N'Bánh Oreo', 'SP2001', 15000, 'gói'),
-(3, 2, N'Nước mắm Nam Ngư', 'SP3001', 30000, 'chai');
+(1, 1, N'Coca Cola lon', 'SP1001', 10000, 'lon', 'https://example.com/coca.jpg'),
+(1, 1, N'Trà xanh O', 'SP1002', 12000, 'chai', 'https://example.com/traxanh.jpg'),
+(2, 2, N'Bánh Oreo', 'SP2001', 15000, 'gói', 'https://example.com/oreo.jpg'),
+(3, 2, N'Nước mắm Nam Ngư', 'SP3001', 30000, 'chai', 'https://example.com/nuocmam.jpg');
 
 -------------------------------------------------
 -- 7) INVENTORY
@@ -170,3 +171,10 @@ INSERT INTO RolePermissions (RoleId, FeatureId, PermissionTypeId, IsAllowed)
 VALUES
 (3, 5, 1, 1),
 (3, 5, 2, 1);
+
+-------------------------------------------------
+-- 19) CONFIG CUSTOMER POINT
+-------------------------------------------------
+INSERT INTO ConfigCustomerPoint (points_per_unit, money_per_unit, is_active)
+VALUES
+(100, 100, 1);

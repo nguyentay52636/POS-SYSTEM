@@ -20,6 +20,8 @@ public interface ICustomerService
     Task<PagedResponse<CustomerResponseDto>> SearchAsync(CustomerQueryParams query);
     Task<int> ImportAsync(IEnumerable<CreateCustomerDto> customers);
     Task<CustomerResponseDto[]> ListAllAsync();
+    Task<CustomerResponseDto?> AddPointsAsync(int customerId, decimal points);
+    Task<decimal?> GetCustomerPointsAsync(int customerId);
 }
 
 public class CustomerService : ICustomerService
@@ -159,5 +161,21 @@ public class CustomerService : ICustomerService
     {
         var items = await _repo.ListAllAsync();
         return _mapper.Map<CustomerResponseDto[]>(items);
+    }
+
+    public async Task<CustomerResponseDto?> AddPointsAsync(int customerId, decimal points)
+    {
+        var customer = await _repo.GetByIdAsync(customerId);
+        if (customer == null) return null;
+
+        customer.CustomerPoint = (customer.CustomerPoint ?? 0) + points;
+        var updated = await _repo.UpdateAsync(customer);
+        return _mapper.Map<CustomerResponseDto>(updated);
+    }
+
+    public async Task<decimal?> GetCustomerPointsAsync(int customerId)
+    {
+        var customer = await _repo.GetByIdAsync(customerId);
+        return customer?.CustomerPoint;
     }
 }

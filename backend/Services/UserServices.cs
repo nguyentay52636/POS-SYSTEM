@@ -6,6 +6,7 @@ using backend.DTOs;
 using backend.Models;
 using backend.Repositories;
 using AutoMapper;
+using BCrypt.Net;
 
 namespace backend.Services;
 
@@ -44,6 +45,8 @@ public class UserService : IUserService
         }
 
         var user = _mapper.Map<User>(dto);
+        // Hash password using BCrypt before saving
+        user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         user = await _repo.CreateAsync(user);
         // Reload with Role navigation property
         var created = await _repo.GetByIdAsync(user.UserId);
@@ -75,6 +78,11 @@ public class UserService : IUserService
         if (existing == null) return null;
 
         _mapper.Map(dto, existing);
+        // Hash password if it was provided
+        if (!string.IsNullOrWhiteSpace(dto.Password))
+        {
+            existing.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+        }
         var updated = await _repo.UpdateAsync(existing);
         // Reload with Role navigation property
         var reloaded = await _repo.GetByIdAsync(id);
@@ -107,7 +115,10 @@ public class UserService : IUserService
             var validation = await _validationService.ValidateCreateUserAsync(dto);
             if (validation.IsValid)
             {
-                validUsers.Add(_mapper.Map<User>(dto));
+                var user = _mapper.Map<User>(dto);
+                // Hash password using BCrypt before saving
+                user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+                validUsers.Add(user);
             }
         }
 

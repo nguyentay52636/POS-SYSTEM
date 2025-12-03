@@ -160,4 +160,36 @@ public class CustomerController : ControllerBase
         var count = await _service.ImportAsync(customers);
         return Ok(new { inserted = count });
     }
+
+    /// <summary>
+    /// Thêm điểm cho khách hàng
+    /// </summary>
+    [HttpPost("{id:int}/points")]
+    [ProducesResponseType(typeof(CustomerResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<CustomerResponseDto>> AddPoints(int id, [FromBody] AddCustomerPointDto dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var updated = await _service.AddPointsAsync(id, dto.Points);
+        if (updated == null) return NotFound();
+        return Ok(updated);
+    }
+
+    /// <summary>
+    /// Lấy số dư điểm của khách hàng
+    /// </summary>
+    [HttpGet("{id:int}/points")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<object>> GetPoints(int id)
+    {
+        var points = await _service.GetCustomerPointsAsync(id);
+        if (points == null) return NotFound();
+        return Ok(new { customerId = id, points });
+    }
 }

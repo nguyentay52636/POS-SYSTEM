@@ -15,6 +15,8 @@ public partial class Customer
 
     public string? Address { get; set; }
 
+    public decimal? CustomerPoint { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<ExportReceipt> ExportReceipts { get; set; } = new List<ExportReceipt>();

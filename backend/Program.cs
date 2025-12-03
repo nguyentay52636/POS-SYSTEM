@@ -57,7 +57,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings), typeof(OrderMappings), typeof(InventoryMappings), typeof(PaymentMappings), typeof(ImportReceiptMappings), typeof(RbacMappings), typeof(ExportReceiptMappings), typeof(FeatureMappings));
+builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings), typeof(OrderMappings), typeof(InventoryMappings), typeof(PaymentMappings), typeof(ImportReceiptMappings), typeof(RbacMappings), typeof(ExportReceiptMappings), typeof(FeatureMappings), typeof(ConfigCustomerPointMappings));
 
 // DI
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -81,6 +81,10 @@ builder.Services.AddScoped<IProductService, ProductService>();
 // Customer
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+// Config Customer Point
+builder.Services.AddScoped<IConfigCustomerPointRepository, ConfigCustomerPointRepository>();
+builder.Services.AddScoped<IConfigCustomerPointService, ConfigCustomerPointService>();
 
 // Promotion
 builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
