@@ -64,8 +64,40 @@ public class ImportReceiptService : IImportReceiptService
         var importReceipt = _mapper.Map<ImportReceipt>(dto);
         var created = await _importRepo.CreateAsync(importReceipt);
 
-        // Reload with full details (Supplier and User)
-        var fullDetails = await _importRepo.GetByIdAsync(created.ImportId);
+        // Add items if present
+        if (dto.Items != null && dto.Items.Any())
+        {
+            // Validate all products exist
+            var productIds = dto.Items.Select(item => item.ProductId).Distinct().ToList();
+            foreach (var productId in productIds)
+            {
+                var product = await _productRepo.GetByIdAsync(productId);
+                if (product == null)
+                {
+                    // Rollback creation if possible, or throw. 
+                    // Since we already created the receipt, we should probably delete it or use a transaction.
+                    // For simplicity in this context, we'll throw and let the user handle the partial state or 
+                    // ideally we should have validated products before creating the receipt.
+                    // Let's move product validation to before receipt creation.
+                    await _importRepo.DeleteAsync(created.ImportId);
+                    throw new ArgumentException($"Product with ID {productId} not found");
+                }
+            }
+
+            var importItems = dto.Items.Select(item => new ImportItem
+            {
+                ImportId = created.ImportId,
+                ProductId = item.ProductId,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice,
+                Subtotal = item.UnitPrice * item.Quantity
+            }).ToList();
+
+            await _importRepo.AddImportItemsAsync(importItems);
+        }
+
+        // Reload with full details (Supplier, User, and Items)
+        var fullDetails = await _importRepo.GetByIdWithDetailsAsync(created.ImportId);
         if (fullDetails == null)
         {
             throw new InvalidOperationException("Failed to retrieve created import receipt");
@@ -85,6 +117,22 @@ public class ImportReceiptService : IImportReceiptService
         {
             responseDto.UserName = fullDetails.User.FullName ?? fullDetails.User.Username;
             responseDto.User = _mapper.Map<UserResponseDto>(fullDetails.User);
+        }
+        
+        // Map items (already handled by AutoMapper if configured, but let's ensure)
+        if (fullDetails.ImportItems != null && fullDetails.ImportItems.Any())
+        {
+            responseDto.ImportItems = fullDetails.ImportItems.Select(ii => new ImportItemResponseDto
+            {
+                ImportItemId = ii.ImportItemId,
+                ImportId = ii.ImportId,
+                ProductId = ii.ProductId,
+                ProductName = ii.Product?.ProductName,
+                Barcode = ii.Product?.Barcode,
+                Quantity = ii.Quantity,
+                UnitPrice = ii.UnitPrice,
+                Subtotal = ii.Subtotal
+            }).ToList();
         }
 
         return responseDto;
@@ -149,21 +197,42 @@ public class ImportReceiptService : IImportReceiptService
     public async Task<PagedResponse<ImportReceiptResponseDto>> SearchAsync(ImportReceiptQueryParams query)
     {
         var (items, total) = await _importRepo.SearchAsync(query);
-        var dtos = items.Select(ir => _mapper.Map<ImportReceiptResponseDto>(ir)).ToList();
-
-        // Map supplier and user names
-        foreach (var dto in dtos)
+        var dtos = items.Select(ir => 
         {
-            var importReceipt = items.FirstOrDefault(ir => ir.ImportId == dto.ImportId);
-            if (importReceipt?.Supplier != null)
+            var dto = _mapper.Map<ImportReceiptResponseDto>(ir);
+            
+            // Map supplier details
+            if (ir.Supplier != null)
             {
-                dto.SupplierName = importReceipt.Supplier.Name;
+                dto.SupplierName = ir.Supplier.Name;
+                dto.Supplier = _mapper.Map<SupplierResponseDto>(ir.Supplier);
             }
-            if (importReceipt?.User != null)
+
+            // Map user details
+            if (ir.User != null)
             {
-                dto.UserName = importReceipt.User.FullName ?? importReceipt.User.Username;
+                dto.UserName = ir.User.FullName ?? ir.User.Username;
+                dto.User = _mapper.Map<UserResponseDto>(ir.User);
             }
-        }
+
+            // Map import items
+            if (ir.ImportItems != null && ir.ImportItems.Any())
+            {
+                dto.ImportItems = ir.ImportItems.Select(ii => new ImportItemResponseDto
+                {
+                    ImportItemId = ii.ImportItemId,
+                    ImportId = ii.ImportId,
+                    ProductId = ii.ProductId,
+                    ProductName = ii.Product?.ProductName,
+                    Barcode = ii.Product?.Barcode,
+                    Quantity = ii.Quantity,
+                    UnitPrice = ii.UnitPrice,
+                    Subtotal = ii.Subtotal
+                }).ToList();
+            }
+
+            return dto;
+        }).ToList();
 
         return new PagedResponse<ImportReceiptResponseDto>
         {
@@ -177,20 +246,42 @@ public class ImportReceiptService : IImportReceiptService
     public async Task<ImportReceiptResponseDto[]> ListAllAsync()
     {
         var importReceipts = await _importRepo.ListAllAsync();
-        var dtos = importReceipts.Select(ir => _mapper.Map<ImportReceiptResponseDto>(ir)).ToArray();
-
-        // Map supplier and user names
-        for (int i = 0; i < dtos.Length; i++)
+        var dtos = importReceipts.Select(ir => 
         {
-            if (importReceipts[i].Supplier != null)
+            var dto = _mapper.Map<ImportReceiptResponseDto>(ir);
+
+            // Map supplier details
+            if (ir.Supplier != null)
             {
-                dtos[i].SupplierName = importReceipts[i].Supplier.Name;
+                dto.SupplierName = ir.Supplier.Name;
+                dto.Supplier = _mapper.Map<SupplierResponseDto>(ir.Supplier);
             }
-            if (importReceipts[i].User != null)
+
+            // Map user details
+            if (ir.User != null)
             {
-                dtos[i].UserName = importReceipts[i].User.FullName ?? importReceipts[i].User.Username;
+                dto.UserName = ir.User.FullName ?? ir.User.Username;
+                dto.User = _mapper.Map<UserResponseDto>(ir.User);
             }
-        }
+
+            // Map import items
+            if (ir.ImportItems != null && ir.ImportItems.Any())
+            {
+                dto.ImportItems = ir.ImportItems.Select(ii => new ImportItemResponseDto
+                {
+                    ImportItemId = ii.ImportItemId,
+                    ImportId = ii.ImportId,
+                    ProductId = ii.ProductId,
+                    ProductName = ii.Product?.ProductName,
+                    Barcode = ii.Product?.Barcode,
+                    Quantity = ii.Quantity,
+                    UnitPrice = ii.UnitPrice,
+                    Subtotal = ii.Subtotal
+                }).ToList();
+            }
+
+            return dto;
+        }).ToArray();
 
         return dtos;
     }

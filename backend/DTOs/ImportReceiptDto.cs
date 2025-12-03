@@ -44,6 +44,8 @@ public class CreateImportReceiptDto
 
     [RegularExpression("^(pending|completed|canceled)$", ErrorMessage = "Status must be 'pending', 'completed', or 'canceled'")]
     public string Status { get; set; } = "pending";
+
+    public List<CreateImportItemDto>? Items { get; set; }
 }
 
 public class UpdateImportStatusDto

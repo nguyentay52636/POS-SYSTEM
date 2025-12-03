@@ -97,7 +97,9 @@ public class ImportReceiptRepository : IImportReceiptRepository
         IQueryable<ImportReceipt> q = _db.ImportReceipts
             .AsNoTracking()
             .Include(ir => ir.Supplier)
-            .Include(ir => ir.User);
+            .Include(ir => ir.User)
+            .Include(ir => ir.ImportItems)
+                .ThenInclude(ii => ii.Product);
 
         // Apply filters
         q = q.WhereIf(query.SupplierId.HasValue, ir => ir.SupplierId == query.SupplierId)
@@ -127,6 +129,8 @@ public class ImportReceiptRepository : IImportReceiptRepository
             .AsNoTracking()
             .Include(ir => ir.Supplier)
             .Include(ir => ir.User)
+            .Include(ir => ir.ImportItems)
+                .ThenInclude(ii => ii.Product)
             .OrderByDescending(ir => ir.ImportDate)
             .ToListAsync();
     }

@@ -33,9 +33,9 @@ public class ValidationService : IValidationService
         }
 
         // Validate role
-        if (!string.IsNullOrWhiteSpace(dto.Role) && !UserRoleHelper.IsValidRole(dto.Role))
+        if (dto.RoleId.HasValue && dto.RoleId != 1 && dto.RoleId != 2)
         {
-            result.AddError("Role", "Invalid role. Must be 'admin' or 'staff'");
+            result.AddError("RoleId", "Invalid role ID. Must be 1 (Admin) or 2 (Staff)");
         }
 
         return result;

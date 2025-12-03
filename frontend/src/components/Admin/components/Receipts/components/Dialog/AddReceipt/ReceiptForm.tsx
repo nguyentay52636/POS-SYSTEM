@@ -7,18 +7,31 @@ import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { CreateImportReceiptDTO } from "@/apis/importReceiptApi"
 import { IProduct } from "@/types/types"
-import { useState } from "react"
 import { useSupplier } from "@/hooks/useSupplier"
-import TableImportProduct from "../ProductImport/TableImportProduct"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch } from "@/redux/store"
+import {
+    addItem,
+    updateItem,
+    removeItem,
+    addProducts,
+    setSupplierProducts,
+    setIsProductImportDialogOpen,
+    resetReceipt,
+    selectReceiptItems,
+    selectReceiptProducts,
+    selectSupplierProducts,
+    selectIsProductImportDialogOpen,
+} from "@/redux/Slice/ReceiptStore"
 import DialogImportProduct from "../ProductImport/DialogImportProduct"
 import BasicFormReceipt from "./BasicFormReceipt"
+import ReceiptItemsTable from "./ReceiptItemsTable"
+import { useEffect } from "react"
 
 // Zod validation schema
 const receiptSchema = z.object({
     supplierId: z.number().min(1, "Vui lòng chọn nhà cung cấp"),
     userId: z.number().min(1),
-    importDate: z.string().min(1, "Vui lòng chọn ngày nhập"),
-    totalAmount: z.number().min(0, "Tổng tiền không được âm"),
     status: z.string().min(1, "Vui lòng chọn trạng thái"),
     note: z.string().optional(),
 })
@@ -30,17 +43,14 @@ interface ReceiptFormProps {
     onCancel: () => void
 }
 
-interface ReceiptItem {
-    productId: number
-    quantity: number
-    unitPrice: number
-    subtotal: number
-}
-
 export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
-    const [products, setProducts] = useState<IProduct[]>([])
-    const [items, setItems] = useState<ReceiptItem[]>([])
-    const [isProductImportDialogOpen, setIsProductImportDialogOpen] = useState(false)
+    const dispatch = useDispatch<AppDispatch>()
+
+    // Redux state
+    const items = useSelector(selectReceiptItems)
+    const products = useSelector(selectReceiptProducts)
+    const supplierProducts = useSelector(selectSupplierProducts)
+    const isProductImportDialogOpen = useSelector(selectIsProductImportDialogOpen)
 
     const {
         register,
@@ -52,55 +62,48 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
         resolver: zodResolver(receiptSchema),
         defaultValues: {
             userId: 1, // TODO: Get from auth context
-            importDate: new Date().toISOString().split('T')[0],
             status: 'pending',
-            totalAmount: 0,
         }
     })
 
     const { suppliers } = useSupplier()
     const supplierId = watch("supplierId")
-    const [supplierProducts, setSupplierProducts] = useState<IProduct[]>([])
 
-    const addItem = (product: IProduct) => {
-        if (!product.productId) return
-        const quantity = 1
-        const unitPrice = product.price
-
-        const newItem: ReceiptItem = {
-            productId: product.productId,
-            quantity,
-            unitPrice,
-            subtotal: quantity * unitPrice
+    // Reset receipt when component unmounts or form is cancelled
+    useEffect(() => {
+        return () => {
+            // Optional: Reset on unmount if needed
+            // dispatch(resetReceipt())
         }
+    }, [dispatch])
 
-        setItems((prev) => {
-            const updated = [...prev, newItem]
-            const newTotal = updated.reduce((sum, item) => sum + item.subtotal, 0)
-            setValue('totalAmount', newTotal)
-            return updated
-        })
+    const handleAddItem = (product: IProduct) => {
+        dispatch(addItem(product))
     }
 
-    const removeItem = (index: number) => {
-        const newItems = items.filter((_, i) => i !== index)
-        setItems(newItems)
-        const newTotal = newItems.reduce((sum, item) => sum + item.subtotal, 0)
-        setValue('totalAmount', newTotal)
+    const handleUpdateItem = (index: number, field: 'quantity' | 'unitPrice', value: number) => {
+        dispatch(updateItem({ index, field, value }))
+    }
+
+    const handleRemoveItem = (index: number) => {
+        dispatch(removeItem(index))
     }
 
     const onSubmitForm = async (data: ReceiptFormData) => {
         const receiptData: CreateImportReceiptDTO = {
-            ...data,
-            totalAmount: items.reduce((sum, item) => sum + item.subtotal, 0),
-            importItems: items.map(item => ({
+            supplierId: data.supplierId,
+            userId: data.userId,
+            status: data.status,
+            note: data.note,
+            items: items.map(item => ({
                 productId: item.productId,
                 quantity: item.quantity,
-                unitPrice: item.unitPrice,
-                subtotal: item.subtotal
+                unitPrice: item.unitPrice
             }))
         }
         await onSubmit(receiptData)
+        // Reset receipt after successful submission
+        dispatch(resetReceipt())
     }
 
     return (
@@ -111,24 +114,29 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
                 register={register}
                 errors={errors}
                 setValue={setValue}
-                onOpenProductImportDialog={() => setIsProductImportDialogOpen(true)}
-                onProductsLoaded={setSupplierProducts}
+                onOpenProductImportDialog={() => dispatch(setIsProductImportDialogOpen(true))}
+                onProductsLoaded={(products) => dispatch(setSupplierProducts(products))}
             />
 
-            <TableImportProduct
+            <ReceiptItemsTable
+                items={items}
                 products={products}
-                onAddSelected={(selectedProducts) => {
-                    selectedProducts.forEach(addItem)
-                }}
+                onUpdateItem={handleUpdateItem}
+                onRemoveItem={handleRemoveItem}
             />
             {/* Dialog chọn sản phẩm */}
             <DialogImportProduct
                 isOpen={isProductImportDialogOpen}
-                onOpenChange={setIsProductImportDialogOpen}
+                onOpenChange={(open) => dispatch(setIsProductImportDialogOpen(open))}
                 products={supplierProducts}
                 onSelectProducts={(selected) => {
-                    setProducts(selected)
-                    setIsProductImportDialogOpen(false)
+                    // Lưu thông tin sản phẩm để hiển thị trong bảng phiếu nhập
+                    dispatch(addProducts(selected))
+
+                    // Thêm/xử lý số lượng cho các sản phẩm đã chọn
+                    selected.forEach(handleAddItem)
+
+                    dispatch(setIsProductImportDialogOpen(false))
                 }}
             />
 
@@ -137,7 +145,10 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
                 <Button
                     type="button"
                     variant="outline"
-                    onClick={onCancel}
+                    onClick={() => {
+                        dispatch(resetReceipt())
+                        onCancel()
+                    }}
                     disabled={isSubmitting}
                 >
                     Hủy

@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Building2, Calendar, FileText, Plus } from "lucide-react"
+import { Building2, FileText, Plus } from "lucide-react"
 import type { ISupplier, IProduct } from "@/types/types"
 import type { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form"
 import { useProductBySupplier } from "@/hooks/useProductBySupplier"
@@ -70,23 +70,6 @@ export default function BasicFormReceipt({
                         {errors.supplierId && (
                             <p className="text-sm text-red-600">
                                 {String(errors.supplierId.message)}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="importDate" className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            Ngày nhập *
-                        </Label>
-                        <Input
-                            id="importDate"
-                            type="date"
-                            {...register("importDate")}
-                        />
-                        {errors.importDate && (
-                            <p className="text-sm text-red-600">
-                                {String(errors.importDate.message)}
                             </p>
                         )}
                     </div>

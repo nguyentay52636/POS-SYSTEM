@@ -16,8 +16,7 @@ public class CreateUserDto
     [StringLength(100, ErrorMessage = "Full name cannot exceed 100 characters")]
     public string? FullName { get; set; }
 
-    [StringLength(10, ErrorMessage = "Role cannot exceed 10 characters")]
-    public string? Role { get; set; }
+    public int? RoleId { get; set; }
 }
 
 public class UpdateUserDto

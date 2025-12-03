@@ -5,18 +5,15 @@ import { IImportReceipt, IImportItem, IProduct } from "@/types/types"
 export interface CreateImportReceiptDTO {
     supplierId: number
     userId: number
-    importDate: string
-    totalAmount: number
     status: string
     note?: string
-    importItems: CreateImportItemDTO[]
+    items: CreateImportItemDTO[]
 }
 
 export interface CreateImportItemDTO {
     productId: number
     quantity: number
     unitPrice: number
-    subtotal: number
 }
 
 export interface UpdateImportReceiptDTO {
