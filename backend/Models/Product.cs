@@ -19,9 +19,9 @@ public partial class Product
 
     public string? Unit { get; set; }
 
-    public string? ImageUrl { get; set; }
-
     public DateTime? CreatedAt { get; set; }
+
+    public string? ImageUrl { get; set; }
 
     public virtual Category? Category { get; set; }
 

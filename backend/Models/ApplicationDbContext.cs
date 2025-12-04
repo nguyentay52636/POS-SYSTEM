@@ -17,6 +17,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<ConfigCustomerPoint> ConfigCustomerPoints { get; set; }
+
     public virtual DbSet<Customer> Customers { get; set; }
 
     public virtual DbSet<ExportItem> ExportItems { get; set; }
@@ -53,11 +55,9 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    public virtual DbSet<ConfigCustomerPoint> ConfigCustomerPoints { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=.\\sqlexpress;Initial Catalog=bachhoaxanh;Integrated Security=True;Encrypt=False;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=localhost,1433;Database=bachhoaxanh ;User Id=sa;Password=Tay52636@;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -73,6 +73,28 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnName("category_name");
         });
 
+        modelBuilder.Entity<ConfigCustomerPoint>(entity =>
+        {
+            entity.HasKey(e => e.ConfigId).HasName("PK__ConfigCu__4AD1BFF1D1BEB998");
+
+            entity.ToTable("ConfigCustomerPoint");
+
+            entity.Property(e => e.ConfigId).HasColumnName("config_id");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.MoneyPerUnit)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("money_per_unit");
+            entity.Property(e => e.PointsPerUnit)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("points_per_unit");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+        });
+
         modelBuilder.Entity<Customer>(entity =>
         {
             entity.HasKey(e => e.CustomerId).HasName("PK__customer__CD65CB85BE807D9F");
@@ -85,6 +107,10 @@ public partial class ApplicationDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
+            entity.Property(e => e.CustomerPoint)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("customer_point");
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
                 .HasColumnName("email");
@@ -94,10 +120,6 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Phone)
                 .HasMaxLength(20)
                 .HasColumnName("phone");
-            entity.Property(e => e.CustomerPoint)
-                .HasDefaultValue(0m)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("customer_point");
         });
 
         modelBuilder.Entity<ExportItem>(entity =>
@@ -380,16 +402,16 @@ public partial class ApplicationDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
+            entity.Property(e => e.ImageUrl)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("image_url");
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("price");
             entity.Property(e => e.ProductName)
                 .HasMaxLength(100)
                 .HasColumnName("product_name");
-
-            entity.Property(e => e.ImageUrl)
-                .HasMaxLength(255)
-                .HasColumnName("image_url");
             entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
             entity.Property(e => e.Unit)
                 .HasMaxLength(20)
@@ -554,28 +576,6 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__users__role_id__7B5B524B");
-        });
-
-        modelBuilder.Entity<ConfigCustomerPoint>(entity =>
-        {
-            entity.HasKey(e => e.ConfigId).HasName("PK__ConfigCu__1A5DE8F5A1B2C3D4");
-
-            entity.ToTable("ConfigCustomerPoint");
-
-            entity.Property(e => e.ConfigId).HasColumnName("config_id");
-            entity.Property(e => e.PointsPerUnit)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("points_per_unit");
-            entity.Property(e => e.MoneyPerUnit)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("money_per_unit");
-            entity.Property(e => e.IsActive)
-                .HasDefaultValue(true)
-                .HasColumnName("is_active");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updated_at");
         });
 
         OnModelCreatingPartial(modelBuilder);

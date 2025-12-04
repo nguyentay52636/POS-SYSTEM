@@ -50,7 +50,7 @@ export interface IProduct {
   updatedAt?: string;
 }
 export interface ICustomer {
-  customer_id: number;
+  customerId: number;
   name: string;
   phone: string;
   email: string;
