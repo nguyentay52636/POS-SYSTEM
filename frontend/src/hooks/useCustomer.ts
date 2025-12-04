@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useContext } from "react"
 import { ICustomer } from "@/types/types"
 import { getCustomers, getCustomerById, createCustomer, updateCustomer, deleteCustomer, CustomerInput } from "@/apis/customerApi"
 import { toast } from "sonner"
-import { usePagination } from "@/context/PaginationContext"
+import { PaginationContext } from "@/context/PaginationContext"
 
 export const useCustomer = () => {
     const [customers, setCustomers] = useState<ICustomer[]>([])
@@ -13,7 +13,14 @@ export const useCustomer = () => {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
 
-    const { paginationState } = usePagination()
+    // Try to use global pagination if provider exists; otherwise fallback
+    const paginationContext = useContext(PaginationContext)
+    const paginationState = paginationContext?.paginationState ?? {
+        currentPage: 1,
+        rowsPerPage: 10,
+        totalItems: customers.length,
+        totalPages: 1,
+    }
 
     // Fetch customers on component mount
     useEffect(() => {

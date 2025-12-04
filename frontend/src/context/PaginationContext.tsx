@@ -25,7 +25,7 @@ const defaultPaginationState: PaginationState = {
     totalPages: 1,
 };
 
-const PaginationContext = createContext<PaginationContextType | undefined>(undefined);
+export const PaginationContext = createContext<PaginationContextType | undefined>(undefined);
 
 interface PaginationProviderProps {
     children: ReactNode;

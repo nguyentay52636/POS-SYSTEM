@@ -10,11 +10,12 @@ import HeaderCartSells from "./HeaderCartSells"
 import CartItemComponent from "./CartSells/CartItem"
 import PromotionCodeSells from "@/app/admin/orders/PromotionCodeSells"
 import { PaymentMethod as PaymentMethodType } from "@/types/paymentType"
-import { IInventory } from "@/types/types"
+import { ICustomer, IInventory } from "@/types/types"
 import DialogCustomer from "./DialogCustomer"
 import DialogPayment from "./DialogPayment"
-import { useInventory } from "@/hooks/useInventory"
-import { useCategory } from "@/hooks/useCategory"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import ChoiceCustomerPayment from "./ChoiceCustomerPayment/ChoiceCustomerPayment"
+import CustomerPoints from "./CustomerPoints/CustomerPoints"
 import { CustomerInfo } from "./CustomerForm"
 import {
     addToCart,
@@ -44,12 +45,13 @@ import {
     selectSelectedPaymentMethod,
     selectReceivedAmount,
     selectSelectedEWallet,
+    setCustomerInfo,
     type IPromotion,
     type CartItem,
 } from "@/redux/Slice/cartSlice"
 import type { AppDispatch } from "@/redux/store"
-
-
+import { useInventory } from "@/hooks/useInventory"
+import { useCategory } from "@/hooks/useCategory"
 
 export interface Transaction {
     transaction_id: string
@@ -66,8 +68,6 @@ export interface Transaction {
     selectedEWallet?: string
     customerInfo?: CustomerInfo
 }
-
-
 
 const mockPromotions: IPromotion[] = [
     {
@@ -163,6 +163,8 @@ export default function SellsContent() {
     // Local state for UI
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<number | "all">("all")
+    const [isChoiceDialogOpen, setIsChoiceDialogOpen] = useState(false)
+    const [isCustomerPointsOpen, setIsCustomerPointsOpen] = useState(false)
 
     const filteredInventories: IInventory[] = inventories.filter((inventory) => {
         const name =
@@ -215,9 +217,31 @@ export default function SellsContent() {
         dispatch(clearCart())
     }
 
-    // Handle payment
+    // Handle payment - open choice dialog
     const handlePayment = () => {
         if (cart.length === 0) return
+        setIsChoiceDialogOpen(true)
+    }
+
+    const handleChoiceCustomer = () => {
+        setIsChoiceDialogOpen(false)
+        setIsCustomerPointsOpen(true)
+    }
+
+    const handleChoiceSkip = () => {
+        setIsChoiceDialogOpen(false)
+        dispatch(setIsPaymentOpen(true))
+    }
+
+    const handleSelectCustomerFromPoints = (customer: ICustomer) => {
+        // Map ICustomer -> CustomerInfo in cart slice
+        const info: CustomerInfo = {
+            fullName: customer.name,
+            phone: customer.phone || "",
+            email: customer.email || "",
+        }
+        dispatch(setCustomerInfo(info))
+        setIsCustomerPointsOpen(false)
         dispatch(setShowCustomerForm(true))
     }
 
@@ -354,6 +378,29 @@ export default function SellsContent() {
                 </div>
             </div>
 
+            {/* Choice products & customer dialog */}
+            <Dialog open={isChoiceDialogOpen} onOpenChange={setIsChoiceDialogOpen}>
+                <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>Danh sách sản phẩm trước khi chọn khách hàng</DialogTitle>
+                    </DialogHeader>
+                    <ChoiceCustomerPayment
+                        onChooseCustomer={handleChoiceCustomer}
+                        onSkip={handleChoiceSkip}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            {/* Customer points / list dialog */}
+            <Dialog open={isCustomerPointsOpen} onOpenChange={setIsCustomerPointsOpen}>
+                <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                        <DialogTitle>Danh sách khách hàng tích điểm</DialogTitle>
+                    </DialogHeader>
+                    <CustomerPoints onSelectCustomer={handleSelectCustomerFromPoints} />
+                </DialogContent>
+            </Dialog>
+
             {/* Customer Form Dialog */}
             <DialogCustomer
                 isOpen={showCustomerForm}
@@ -378,4 +425,3 @@ export default function SellsContent() {
         </div>
     )
 }
-

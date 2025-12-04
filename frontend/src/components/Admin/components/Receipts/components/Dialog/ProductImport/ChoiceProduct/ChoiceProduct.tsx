@@ -94,7 +94,7 @@ export default function ChoiceProduct({ products = [], loading = false, onSelect
                 <CardHeader>
                     <CardTitle>Chọn sản phẩm để nhập hàng</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4 max-h-[70vh] overflow-y-auto">
+                <CardContent className="space-y-4 max-h-[70vh] overflow-y-auto max-w-6xl!">
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                         <div className="w-full md:max-w-sm">
                             <Input
@@ -150,7 +150,7 @@ export default function ChoiceProduct({ products = [], loading = false, onSelect
                     </div>
 
                     {loading ? (
-                        <div className="flex items-center justify-center py-12 text-gray-500">
+                        <div className="flex items-center justify-center  text-gray-500">
                             Đang tải dữ liệu sản phẩm...
                         </div>
                     ) : (

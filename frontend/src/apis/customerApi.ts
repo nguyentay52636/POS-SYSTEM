@@ -10,6 +10,7 @@ export interface CustomerInput {
     phone: string;
     email: string;
     address: string;
+    customerPoints: number;
 }
 
 
