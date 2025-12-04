@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import React, { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -40,18 +40,23 @@ import {
     selectPromoCode,
     selectPromoError,
     selectCustomerInfo,
+    selectSelectedCustomerId,
     selectShowCustomerForm,
     selectIsPaymentOpen,
     selectSelectedPaymentMethod,
     selectReceivedAmount,
     selectSelectedEWallet,
     setCustomerInfo,
+    setSelectedCustomerId,
     type IPromotion,
     type CartItem,
 } from "@/redux/Slice/cartSlice"
 import type { AppDispatch } from "@/redux/store"
 import { useInventory } from "@/hooks/useInventory"
 import { useCategory } from "@/hooks/useCategory"
+import { getConfigCustomerPoints } from "@/apis/configCustomerPoints"
+import { addPointsToCustomer } from "@/apis/customerApi"
+import { toast } from "sonner"
 
 export interface Transaction {
     transaction_id: string
@@ -155,6 +160,7 @@ export default function SellsContent() {
     const promoError = useSelector(selectPromoError)
     const selectedEWallet = useSelector(selectSelectedEWallet)
     const customerInfo = useSelector(selectCustomerInfo)
+    const selectedCustomerId = useSelector(selectSelectedCustomerId)
     const showCustomerForm = useSelector(selectShowCustomerForm)
     const isPaymentOpen = useSelector(selectIsPaymentOpen)
     const selectedPaymentMethod = useSelector(selectSelectedPaymentMethod)
@@ -165,6 +171,27 @@ export default function SellsContent() {
     const [selectedCategory, setSelectedCategory] = useState<number | "all">("all")
     const [isChoiceDialogOpen, setIsChoiceDialogOpen] = useState(false)
     const [isCustomerPointsOpen, setIsCustomerPointsOpen] = useState(false)
+    const [configPoints, setConfigPoints] = useState<{ pointsPerUnit: number; moneyPerUnit: number; isActive: boolean } | null>(null)
+
+    // Load config customer points
+    React.useEffect(() => {
+        const loadConfig = async () => {
+            try {
+                const configs = await getConfigCustomerPoints()
+                const activeConfig = configs.find(c => c.isActive) || configs[0]
+                if (activeConfig) {
+                    setConfigPoints({
+                        pointsPerUnit: activeConfig.pointsPerUnit,
+                        moneyPerUnit: activeConfig.moneyPerUnit,
+                        isActive: activeConfig.isActive,
+                    })
+                }
+            } catch (error) {
+                console.error("Error loading config customer points:", error)
+            }
+        }
+        loadConfig()
+    }, [])
 
     const filteredInventories: IInventory[] = inventories.filter((inventory) => {
         const name =
@@ -241,6 +268,7 @@ export default function SellsContent() {
             email: customer.email || "",
         }
         dispatch(setCustomerInfo(info))
+        dispatch(setSelectedCustomerId(customer.customerId))
         setIsCustomerPointsOpen(false)
         dispatch(setShowCustomerForm(true))
     }

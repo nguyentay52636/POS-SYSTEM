@@ -10,7 +10,7 @@ export interface CustomerInput {
     phone: string;
     email: string;
     address: string;
-    customerPoints: number;
+    customerPoint: number;
 }
 
 
@@ -64,6 +64,18 @@ try {
   return data
  }catch(error :any) {
   console.error('Error deleting customer:', error)
+  throw error
+ }
+}
+export interface AddPointsToCustomerRequest {
+  points: number;
+}
+export  async function addPointsToCustomer (customerId: number, request: AddPointsToCustomerRequest) {
+try {
+  const {data} = await baseApi.post(`/Customer/${customerId}/points`, request)
+  return data
+}catch(error :any) {
+  console.error('Error adding points to customer:', error)
   throw error
  }
 }

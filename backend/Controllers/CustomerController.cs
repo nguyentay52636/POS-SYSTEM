@@ -162,6 +162,32 @@ public class CustomerController : ControllerBase
     }
 
     /// <summary>
+    /// Tích điểm cho khách hàng dựa trên số tiền chi tiêu
+    /// </summary>
+    [HttpPost("{id:int}/accumulate-points")]
+    [ProducesResponseType(typeof(CustomerResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<CustomerResponseDto>> AccumulatePoints(int id, [FromBody] AccumulatePointsDto dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            var updated = await _service.AccumulatePointsAsync(id, dto.Amount);
+            if (updated == null) return NotFound();
+            return Ok(updated);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    /// <summary>
     /// Thêm điểm cho khách hàng
     /// </summary>
     [HttpPost("{id:int}/points")]

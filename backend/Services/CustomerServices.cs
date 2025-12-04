@@ -22,16 +22,19 @@ public interface ICustomerService
     Task<CustomerResponseDto[]> ListAllAsync();
     Task<CustomerResponseDto?> AddPointsAsync(int customerId, decimal points);
     Task<decimal?> GetCustomerPointsAsync(int customerId);
+    Task<CustomerResponseDto?> AccumulatePointsAsync(int customerId, decimal amount);
 }
 
 public class CustomerService : ICustomerService
 {
     private readonly ICustomerRepository _repo;
+    private readonly IConfigCustomerPointRepository _configRepo;
     private readonly IMapper _mapper;
 
-    public CustomerService(ICustomerRepository repo, IMapper mapper)
+    public CustomerService(ICustomerRepository repo, IConfigCustomerPointRepository configRepo, IMapper mapper)
     {
         _repo = repo;
+        _configRepo = configRepo;
         _mapper = mapper;
     }
 
@@ -177,5 +180,32 @@ public class CustomerService : ICustomerService
     {
         var customer = await _repo.GetByIdAsync(customerId);
         return customer?.CustomerPoint;
+    }
+
+    public async Task<CustomerResponseDto?> AccumulatePointsAsync(int customerId, decimal amount)
+    {
+        var customer = await _repo.GetByIdAsync(customerId);
+        if (customer == null) return null;
+
+        var config = await _configRepo.GetActiveConfigAsync();
+        if (config == null)
+        {
+            throw new InvalidOperationException("No active point configuration found");
+        }
+
+        if (config.MoneyPerUnit == 0)
+        {
+             throw new InvalidOperationException("Invalid point configuration: MoneyPerUnit cannot be zero");
+        }
+
+        // Calculate points: (Amount / MoneyPerUnit) * PointsPerUnit
+        var points = (amount / config.MoneyPerUnit) * config.PointsPerUnit;
+        
+        // Round points to 2 decimal places
+        points = Math.Round(points, 2);
+
+        customer.CustomerPoint = (customer.CustomerPoint ?? 0) + points;
+        var updated = await _repo.UpdateAsync(customer);
+        return _mapper.Map<CustomerResponseDto>(updated);
     }
 }

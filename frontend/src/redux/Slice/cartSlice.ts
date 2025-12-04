@@ -26,6 +26,7 @@ interface CartState {
     selectedPaymentMethod: string
     receivedAmount: number
     customerInfo: CustomerInfo
+    selectedCustomerId: number | null
     showCustomerForm: boolean
     isPaymentOpen: boolean
 }
@@ -43,6 +44,7 @@ const initialState: CartState = {
         phone: "",
         email: "",
     },
+    selectedCustomerId: null,
     showCustomerForm: false,
     isPaymentOpen: false,
 }
@@ -138,6 +140,9 @@ const cartSlice = createSlice({
         setCustomerInfo: (state, action: PayloadAction<CustomerInfo>) => {
             state.customerInfo = action.payload
         },
+        setSelectedCustomerId: (state, action: PayloadAction<number | null>) => {
+            state.selectedCustomerId = action.payload
+        },
         updateCustomerInfo: (state, action: PayloadAction<{ field: keyof CustomerInfo; value: string }>) => {
             const { field, value } = action.payload
             state.customerInfo[field] = value
@@ -152,6 +157,12 @@ const cartSlice = createSlice({
             state.isPaymentOpen = false
             state.receivedAmount = 0
             state.selectedPaymentMethod = ""
+            state.selectedCustomerId = null
+            state.customerInfo = {
+                fullName: "",
+                phone: "",
+                email: "",
+            }
         },
     },
 })
@@ -169,6 +180,7 @@ export const {
     setSelectedPaymentMethod,
     setReceivedAmount,
     setCustomerInfo,
+    setSelectedCustomerId,
     updateCustomerInfo,
     setShowCustomerForm,
     setIsPaymentOpen,
@@ -222,6 +234,7 @@ export const selectAppliedPromotions = (state: RootState) => state.cart.appliedP
 export const selectPromoCode = (state: RootState) => state.cart.promoCode
 export const selectPromoError = (state: RootState) => state.cart.promoError
 export const selectCustomerInfo = (state: RootState) => state.cart.customerInfo
+export const selectSelectedCustomerId = (state: RootState) => state.cart.selectedCustomerId
 export const selectShowCustomerForm = (state: RootState) => state.cart.showCustomerForm
 export const selectIsPaymentOpen = (state: RootState) => state.cart.isPaymentOpen
 export const selectSelectedPaymentMethod = (state: RootState) => state.cart.selectedPaymentMethod

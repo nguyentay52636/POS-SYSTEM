@@ -18,7 +18,7 @@ export default function CustomerPoints({ onSelectCustomer }: CustomerPointsProps
 
     const filteredByPoints = useMemo(() => {
         return customers.filter((customer) => {
-            const points = customer.customerPoints ?? 0
+            const points = customer.customerPoint
             switch (pointsFilter) {
                 case 'gt0':
                     return points > 0
@@ -101,7 +101,7 @@ export default function CustomerPoints({ onSelectCustomer }: CustomerPointsProps
                                         <TableCell>{customer.name}</TableCell>
                                         <TableCell>{customer.phone || '-'}</TableCell>
                                         <TableCell>{customer.email || '-'}</TableCell>
-                                        <TableCell>{customer.customerPoints ?? 0}</TableCell>
+                                        <TableCell>{customer.customerPoint}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>

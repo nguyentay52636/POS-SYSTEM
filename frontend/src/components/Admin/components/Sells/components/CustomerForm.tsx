@@ -22,7 +22,7 @@ export default function CustomerForm({
     customerInfo,
     onCustomerInfoChange,
     onNext,
-    disabled = false,
+    disabled = true,
 }: CustomerFormProps) {
     const isFormValid = customerInfo.fullName.trim() && customerInfo.phone.trim();
 
@@ -49,7 +49,7 @@ export default function CustomerForm({
                                 onChange={(e) => onCustomerInfoChange('fullName', e.target.value)}
                                 placeholder="Nhập họ và tên khách hàng"
                                 className="pl-10 h-11 border border-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                                disabled={disabled}
+                                disabled
                             />
                         </div>
                     </div>
@@ -67,7 +67,7 @@ export default function CustomerForm({
                                 onChange={(e) => onCustomerInfoChange('phone', e.target.value)}
                                 placeholder="Nhập số điện thoại"
                                 className="pl-10 h-11 border border-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                                disabled={disabled}
+                                disabled
                             />
                         </div>
                     </div>
@@ -85,14 +85,14 @@ export default function CustomerForm({
                                 onChange={(e) => onCustomerInfoChange('email', e.target.value)}
                                 placeholder="Nhập email khách hàng"
                                 className="pl-10 h-11 border border-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                                disabled={disabled}
+                                disabled
                             />
                         </div>
                     </div>
 
                     <Button
                         onClick={onNext}
-                        disabled={!isFormValid || disabled}
+                        disabled={!isFormValid}
                         className="w-full bg-green-600 hover:bg-green-700 text-white h-11 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Tiếp tục thanh toán

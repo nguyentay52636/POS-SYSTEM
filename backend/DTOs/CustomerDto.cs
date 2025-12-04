@@ -59,3 +59,10 @@ public class CustomerQueryParams
     public string? SortBy { get; set; } = "name"; // name | email | createdAt
     public string? SortDir { get; set; } = "asc"; // asc | desc
 }
+
+public class AccumulatePointsDto
+{
+    [Required(ErrorMessage = "Amount is required")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
+    public decimal Amount { get; set; }
+}

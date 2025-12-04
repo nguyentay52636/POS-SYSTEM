@@ -55,7 +55,7 @@ export interface ICustomer {
   phone: string;
   email: string;
   address: string;
-  customerPoints: number;
+  customerPoint: number;
   createdAt: string;
   updatedAt: string;
 }
