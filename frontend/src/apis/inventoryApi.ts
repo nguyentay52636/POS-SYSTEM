@@ -43,3 +43,14 @@ export const deleteInventory = async (inventoryId: number) => {
         throw error
     }
 }
+export const updateInventoryQuantity = async (inventoryId: number, quantity: number, productId: number) => {
+    try {
+        const { data } = await baseApi.put(`/Inventory/${inventoryId}`, {
+            quantity: quantity,
+            productId: productId
+        })
+        return data
+    } catch (error: any) {
+        throw error
+    }
+}

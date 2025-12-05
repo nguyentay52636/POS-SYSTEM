@@ -22,6 +22,9 @@ public class CreateInventoryDto
 }
 public class UpdateInventoryDto
 {
+    [Required(ErrorMessage = "ProductId is required")]
+    public int ProductId { get; set; }
+
     [Required(ErrorMessage = "Quantity is required")]
     public int Quantity { get; set; }
 }

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -219,37 +218,7 @@ export default function PaymentMethod({
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {selectedMethod && (
-                        <>
-                            <Separator />
-                            <div className="mt-4">
-                                <h4 className="font-medium text-gray-900 mb-2">Chi tiết phương thức</h4>
-                                <div className="flex items-center space-x-3 p-4 border-2 rounded-lg border-green-500 bg-green-50">
-                                    <div className="flex-1">
-                                        <div className="font-medium text-gray-900">{selectedMethod.label}</div>
-                                        <p className="text-sm text-gray-600">{selectedMethod.description}</p>
-                                    </div>
-                                    <div
-                                        className={`w-10 h-10 ${getPaymentIconBg(selectedMethod)} rounded-full flex items-center justify-center`}
-                                    >
-                                        {getPaymentIcon(selectedMethod) || (
-                                            <span className="text-white text-sm font-bold">
-                                                {getPaymentIconText(selectedMethod)}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                                {/* Payment button */}
-                                <Button
-                                    onClick={handlePayment}
-                                    className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white"
-                                    disabled={!selectedMethod}
-                                >
-                                    Thanh toán
-                                </Button>
-                            </div>
-                        </>
-                    )}
+
                 </div>
             </CardContent>
 

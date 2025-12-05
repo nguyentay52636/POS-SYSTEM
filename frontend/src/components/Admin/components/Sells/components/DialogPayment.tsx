@@ -12,6 +12,9 @@ import { addPointsToCustomer } from '@/apis/customerApi';
 import { createOrder, getOrderById, type Order, type OrderItem, type CreateOrderDto } from '@/apis/orderApi';
 import { create as createPayment, type IPayment } from '@/apis/paymentApi';
 import { buildInvoiceHtml } from '@/lib/invoice';
+import { updateInventoryQuantity } from '@/apis/inventoryApi';
+import { getAllInventory } from '@/apis/inventoryApi';
+import { IInventory } from '@/types/types';
 import { toast } from 'sonner';
 
 interface DialogPaymentProps {
@@ -167,27 +170,98 @@ export default function DialogPayment({
             const createdPayment = await createPayment(paymentData)
             toast.success("Thanh toán thành công!")
 
-            // 3. Add points to customer if customer is selected and config is active
-            if (selectedCustomerId && configPoints?.isActive && total > 0) {
-                try {
-                    const pointsToAdd = Math.floor((total / configPoints.moneyPerUnit) * configPoints.pointsPerUnit)
-                    if (pointsToAdd > 0) {
-                        await addPointsToCustomer(selectedCustomerId, { points: pointsToAdd })
-                        toast.success(`Đã tích ${pointsToAdd} điểm cho khách hàng!`)
+            // 3. Update inventory quantities (subtract sold quantities)
+            try {
+                console.log("=== Updating Inventory ===")
+                // Get all inventories to find inventoryId by productId
+                const allInventories = await getAllInventory()
+
+                // Update inventory for each item in cart
+                for (const cartItem of cart) {
+                    if (!cartItem.product.productId) continue
+
+                    // Find inventory by productId
+                    const inventory = allInventories.find(
+                        (inv: IInventory) => inv.productId === cartItem.product.productId
+                    )
+
+                    if (inventory) {
+                        const newQuantity = inventory.quantity - cartItem.quantity
+
+                        if (newQuantity < 0) {
+                            console.warn(`Warning: Insufficient inventory for product ${cartItem.product.productName}. Current: ${inventory.quantity}, Requested: ${cartItem.quantity}`)
+                            toast.warning(`Cảnh báo: Tồn kho không đủ cho sản phẩm ${cartItem.product.productName}`)
+                        }
+
+                        console.log(`Updating inventory ${inventory.inventoryId}: ${inventory.quantity} -> ${newQuantity} (sold ${cartItem.quantity})`)
+
+                        await updateInventoryQuantity(
+                            inventory.inventoryId,
+                            Math.max(0, newQuantity), // Ensure quantity is not negative
+                            inventory.productId
+                        )
+                    } else {
+                        console.warn(`Inventory not found for product ${cartItem.product.productName} (ID: ${cartItem.product.productId})`)
                     }
-                } catch (error) {
-                    console.error("Error adding points to customer:", error)
-                    toast.error("Không thể tích điểm cho khách hàng")
                 }
+                console.log("Inventory updated successfully")
+            } catch (error: any) {
+                console.error("Error updating inventory:", error)
+                const errorMessage = error?.response?.data?.message ||
+                    error?.response?.data?.error ||
+                    error?.message ||
+                    "Không thể cập nhật tồn kho"
+                toast.error(`Lỗi cập nhật tồn kho: ${errorMessage}`)
+                // Don't throw error - payment is already successful
             }
 
-            // 4. Generate and open invoice
+            // 4. Add points to customer if customer is selected and config is active
+            if (selectedCustomerId && configPoints?.isActive && total > 0) {
+                try {
+                    // Calculate points based on total amount and config
+                    // Formula: (total / moneyPerUnit) * pointsPerUnit
+                    // Example: 128000 / 10000 * 1 = 12.8 -> 12 points
+                    const pointsToAdd = Math.floor((total / configPoints.moneyPerUnit) * configPoints.pointsPerUnit)
+
+                    console.log("=== Adding Points to Customer ===")
+                    console.log("Customer ID:", selectedCustomerId)
+                    console.log("Total amount:", total)
+                    console.log("Config - moneyPerUnit:", configPoints.moneyPerUnit)
+                    console.log("Config - pointsPerUnit:", configPoints.pointsPerUnit)
+                    console.log("Calculated points:", pointsToAdd)
+
+                    if (pointsToAdd > 0) {
+                        await addPointsToCustomer(selectedCustomerId, { points: pointsToAdd })
+                        console.log(`Successfully added ${pointsToAdd} points to customer ${selectedCustomerId}`)
+                        toast.success(`Đã tích ${pointsToAdd} điểm cho khách hàng!`)
+                    } else {
+                        console.log("Points to add is 0, skipping...")
+                    }
+                } catch (error: any) {
+                    console.error("Error adding points to customer:", error)
+                    const errorMessage = error?.response?.data?.message ||
+                        error?.response?.data?.error ||
+                        error?.message ||
+                        "Không thể tích điểm cho khách hàng"
+                    toast.error(errorMessage)
+                }
+            } else {
+                console.log("=== Skipping Points Addition ===")
+                console.log("Selected Customer ID:", selectedCustomerId)
+                console.log("Config Active:", configPoints?.isActive)
+                console.log("Total:", total)
+            }
+
+            // 5. Show success message
+            toast.success("Thanh toán thành công!")
+
+            // 6. Generate and open invoice in new tab
             try {
                 // Get full order details from API
                 const fullOrder = await getOrderById(createdOrder.orderId)
                 const invoiceHtml = buildInvoiceHtml(fullOrder)
 
-                // Open invoice in new window
+                // Open invoice in new tab/window
                 const invoiceWindow = window.open("", "_blank", "width=900,height=700")
                 if (invoiceWindow) {
                     invoiceWindow.document.write(invoiceHtml)
@@ -205,8 +279,9 @@ export default function DialogPayment({
                 toast.error("Không thể tạo hóa đơn")
             }
 
-            // Call original payment complete handler to clear cart
-            onPaymentComplete()
+            // 7. Close all dialogs and reset state
+            onClose() // Close payment dialog
+            onPaymentComplete() // Clear cart and reset payment state
         } catch (error: any) {
             console.error("Error processing payment:", error)
             const errorMessage = error?.response?.data?.message ||

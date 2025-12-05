@@ -50,21 +50,22 @@ public class InventoryController : ControllerBase
     /// <summary>
     /// Update inventory quantity for a product (stock in/out).
     /// </summary>
-    /// <param name="productId">Product ID</param>
+    /// <param name="inventoryId">Inventory ID</param>
     /// <param name="dto">Updated quantity data</param>
     /// <remarks>
     /// Sample request:
     ///
     ///     PUT /api/inventory/1
     ///     {
+    ///         "productId": 123,
     ///         "quantity": 150
     ///     }
     /// </remarks>
-    [HttpPut("{productId:int}")]
+    [HttpPut("{inventoryId:int}")]
     [ProducesResponseType(typeof(InventoryResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<InventoryResponseDto>> Update(int productId, [FromBody] UpdateInventoryDto dto)
+    public async Task<ActionResult<InventoryResponseDto>> Update(int inventoryId, [FromBody] UpdateInventoryDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -73,7 +74,7 @@ public class InventoryController : ControllerBase
 
         try
         {
-            var updated = await _service.UpdateAsync(productId, dto);
+            var updated = await _service.UpdateAsync(inventoryId, dto);
             if (updated == null) return NotFound();
             return Ok(updated);
         }

@@ -57,6 +57,7 @@ import { useCategory } from "@/hooks/useCategory"
 import { getConfigCustomerPoints } from "@/apis/configCustomerPoints"
 import { addPointsToCustomer } from "@/apis/customerApi"
 import { toast } from "sonner"
+import { mockPaymentMethods } from "@/utils/MethodPayment"
 
 export interface Transaction {
     transaction_id: string
@@ -98,53 +99,7 @@ const mockPromotions: IPromotion[] = [
     },
 ]
 
-const mockPaymentMethods: PaymentMethodType[] = [
-    {
-        type: "cash",
-        label: "Tiền mặt",
-        description: "Thanh toán bằng tiền mặt khi nhận hàng",
-        category: "offline",
-    },
-    {
-        type: "card",
-        label: "Thẻ tín dụng",
-        description: "Thanh toán bằng thẻ Visa, Mastercard",
-        category: "offline",
-    },
-    {
-        type: "momo",
-        label: "MoMo",
-        description: "Thanh toán qua ví điện tử MoMo",
-        category: "online",
-        accountInfo: {
-            bankId: "MOMO",
-            bankAccount: "0123456789",
-            phoneNumber: "789",
-        },
-    },
-    {
-        type: "zalopay",
-        label: "ZaloPay",
-        description: "Thanh toán qua ví điện tử ZaloPay",
-        category: "online",
-        accountInfo: {
-            bankId: "ZALOPAY",
-            bankAccount: "0987654321",
-        },
-    },
-    {
-        type: "vnpay",
-        label: "VNPay",
-        description: "Thanh toán qua cổng VNPay",
-        category: "online",
-        vnpayInfo: {
-            merchantId: "VNPAY001",
-            merchantName: "Cửa hàng ABC",
-            store: "Store 001",
-            terminal: "Terminal 001",
-        },
-    },
-]
+
 
 export default function SellsContent() {
     const dispatch = useDispatch<AppDispatch>()
@@ -212,7 +167,6 @@ export default function SellsContent() {
         return matchesSearch && matchesCategory
     })
 
-    // Add to cart handler
     const handleAddToCart = (inventory: IInventory) => {
         const product = inventory.product
         if (!product || !product.productId) return
@@ -225,7 +179,6 @@ export default function SellsContent() {
         }
     }
 
-    // Update quantity handler
     const handleUpdateQuantity = (productId: number, newQuantity: number) => {
         if (newQuantity <= 0) {
             dispatch(removeFromCart(productId))
@@ -244,7 +197,6 @@ export default function SellsContent() {
         dispatch(clearCart())
     }
 
-    // Handle payment - open choice dialog
     const handlePayment = () => {
         if (cart.length === 0) return
         setIsChoiceDialogOpen(true)
@@ -261,7 +213,6 @@ export default function SellsContent() {
     }
 
     const handleSelectCustomerFromPoints = (customer: ICustomer) => {
-        // Map ICustomer -> CustomerInfo in cart slice
         const info: CustomerInfo = {
             fullName: customer.name,
             phone: customer.phone || "",
@@ -305,12 +256,15 @@ export default function SellsContent() {
         console.log("Transaction completed:", transaction)
         // Here you would save the transaction to database
 
-        // Clear cart and close dialog
+        // Close all dialogs
+        setIsChoiceDialogOpen(false)
+        setIsCustomerPointsOpen(false)
+        dispatch(setShowCustomerForm(false))
+        dispatch(setIsPaymentOpen(false))
+
+        // Clear cart and reset payment state
         dispatch(clearCart())
         dispatch(resetPaymentState())
-
-        // Show success message or print receipt
-        alert("Thanh toán thành công!")
     }
 
     // Apply promotion code

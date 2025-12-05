@@ -13,7 +13,7 @@ public interface IInventoryService
 {
     Task<InventoryResponseDto[]> ListAllAsync();
     Task<InventoryResponseDto?> GetByProductIdAsync(int productId);
-    Task<InventoryResponseDto?> UpdateAsync(int productId, UpdateInventoryDto dto);
+    Task<InventoryResponseDto?> UpdateAsync(int inventoryId, UpdateInventoryDto dto);
     Task<InventoryResponseDto?> CreateAsync(CreateInventoryDto dto);
     Task<bool> DeleteAsync(int productId);
 }
@@ -42,19 +42,17 @@ public class InventoryService : IInventoryService
         return inventory == null ? null : _mapper.Map<InventoryResponseDto>(inventory);
     }
 
-    public async Task<InventoryResponseDto?> UpdateAsync(int productId, UpdateInventoryDto dto)
+    public async Task<InventoryResponseDto?> UpdateAsync(int inventoryId, UpdateInventoryDto dto)
     {
-        // Validate product exists
-        if (!await _repo.ProductExistsAsync(productId))
-        {
-            throw new ArgumentException($"Product with ID {productId} does not exist");
-        }
-
-        // Get existing inventory record
-        var existing = await _repo.GetByProductIdAsync(productId);
+        var existing = await _repo.GetByIdAsync(inventoryId);
         if (existing == null)
         {
-            throw new ArgumentException($"Inventory record for product ID {productId} does not exist");
+            throw new ArgumentException($"Inventory with ID {inventoryId} does not exist");
+        }
+
+        if (existing.ProductId != dto.ProductId)
+        {
+            throw new ArgumentException($"Product ID mismatch. Expected {existing.ProductId}, got {dto.ProductId}");
         }
 
         // Update quantity

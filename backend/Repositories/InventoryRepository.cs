@@ -10,6 +10,7 @@ namespace backend.Repositories;
 public interface IInventoryRepository
 {
     Task<IReadOnlyList<Inventory>> ListAllAsync();
+    Task<Inventory?> GetByIdAsync(int inventoryId);
     Task<Inventory?> GetByProductIdAsync(int productId);
     Task<Inventory> UpdateAsync(Inventory inventory);
     Task<bool> ProductExistsAsync(int productId);
@@ -38,6 +39,17 @@ public class InventoryRepository : IInventoryRepository
             .ToListAsync();
     }
 
+    public async Task<Inventory?> GetByIdAsync(int inventoryId)
+    {
+        return await _db.Inventories
+            .AsNoTracking()
+            .Include(i => i.Product)
+                .ThenInclude(p => p.Category)
+            .Include(i => i.Product)
+                .ThenInclude(p => p.Supplier)
+            .FirstOrDefaultAsync(i => i.InventoryId == inventoryId);
+    }
+
     public async Task<Inventory?> GetByProductIdAsync(int productId)
     {
         return await _db.Inventories
@@ -52,7 +64,9 @@ public class InventoryRepository : IInventoryRepository
     public async Task<Inventory> UpdateAsync(Inventory inventory)
     {
         inventory.UpdatedAt = DateTime.UtcNow;
-        _db.Inventories.Update(inventory);
+        _db.Inventories.Attach(inventory);
+        _db.Entry(inventory).Property(x => x.Quantity).IsModified = true;
+        _db.Entry(inventory).Property(x => x.UpdatedAt).IsModified = true;
         await _db.SaveChangesAsync();
         return inventory;
     }
