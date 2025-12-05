@@ -22,4 +22,8 @@ public partial class Customer
     public virtual ICollection<ExportReceipt> ExportReceipts { get; set; } = new List<ExportReceipt>();
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+
+    [System.ComponentModel.DataAnnotations.Schema.Column("IsDeleted")]
+    [System.ComponentModel.DefaultValue(false)]
+    public bool IsDeleted { get; set; }
 }

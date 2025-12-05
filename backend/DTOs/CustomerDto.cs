@@ -19,6 +19,7 @@ public class CreateCustomerDto
 
     [StringLength(255, ErrorMessage = "Address cannot exceed 255 characters")]
     public string? Address { get; set; }
+    public decimal? CustomerPoint { get; set; } = 0;
 }
 
 public class UpdateCustomerDto

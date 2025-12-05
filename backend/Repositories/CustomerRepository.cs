@@ -40,17 +40,17 @@ public class CustomerRepository : ICustomerRepository
 
     public Task<Customer?> GetByIdAsync(int id)
     {
-        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.CustomerId == id);
+        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.CustomerId == id && !c.IsDeleted);
     }
 
     public Task<Customer?> GetByNameAsync(string name)
     {
-        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Name == name);
+        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Name == name && !c.IsDeleted);
     }
 
     public Task<Customer?> GetByEmailAsync(string email)
     {
-        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Email == email);
+        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Email == email && !c.IsDeleted);
     }
 
     public async Task<Customer> UpdateAsync(Customer customer)
@@ -64,14 +64,17 @@ public class CustomerRepository : ICustomerRepository
     {
         var existing = await _db.Customers.FindAsync(id);
         if (existing == null) return false;
-        _db.Customers.Remove(existing);
+
+        // Soft delete: mark as deleted instead of removing
+        _db.Customers.Attach(existing);
+        existing.IsDeleted = true;
         await _db.SaveChangesAsync();
         return true;
     }
 
     public async Task<(IReadOnlyList<Customer> Items, int Total)> SearchAsync(CustomerQueryParams query)
     {
-        IQueryable<Customer> q = _db.Customers.AsNoTracking();
+        IQueryable<Customer> q = _db.Customers.AsNoTracking().Where(c => !c.IsDeleted);
 
         // Apply filters using extension methods
         q = q.WhereIf(!query.Name.IsNullOrWhiteSpace(),
@@ -103,7 +106,7 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task<IReadOnlyList<Customer>> ListAllAsync()
     {
-        IQueryable<Customer> q = _db.Customers.AsNoTracking();
+        IQueryable<Customer> q = _db.Customers.AsNoTracking().Where(c => !c.IsDeleted);
         q = q.OrderBy(c => c.Name);
         var items = await q.ToListAsync();
         return items;

@@ -138,12 +138,10 @@ export default function TableManagerCustomer({
                     <TableCell>
                       <div className="flex items-center text-sm bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-1">
                         <Gift className="h-3 w-3 mr-2 text-purple-600" />
-                        <span>{c.customerPoint || "-"}</span>
+                        <span>{c.customerPoint}</span>
                       </div>
                     </TableCell>
-
                     <TableCell>
-                      {/* Menu ba chấm */}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
