@@ -1,12 +1,11 @@
 import baseApi from "@/apis/baseApi";
 
-// DTO dùng xuyên suốt FE (trùng Swagger của bạn)
 export interface IPayment {
-  paymentId?: number;           // id có thể thiếu khi tạo
+  paymentId?: number;         
   orderId: number;
   amount: number;
   paymentMethod: string;
-  paymentDate: string;          // ISO string
+  paymentDate: string;          
 }
 
 const PREFIX = "/Payment";
@@ -18,14 +17,23 @@ const normalize = (p: Partial<IPayment>) => ({
 });
 
 export async function list(): Promise<IPayment[]> {
+try{
   const { data } = await baseApi.get<IPayment[]>(PREFIX);
-  // Backend đã camelCase -> trả thẳng
-  return Array.isArray(data) ? data : [];
+return data;
+}catch(error :any) {
+  console.error('Error getting payments:', error)
+  throw error
+ }
 }
 
 export async function create(payload: Omit<IPayment, "paymentId">): Promise<IPayment> {
+try {
   const { data } = await baseApi.post<IPayment>(PREFIX, normalize(payload));
   return data;
+}catch(error :any) {
+  console.error('Error creating payment:', error)
+  throw error
+ }
 }
 
 export async function update(id: number, payload: Partial<Omit<IPayment, "paymentId">>): Promise<IPayment> {

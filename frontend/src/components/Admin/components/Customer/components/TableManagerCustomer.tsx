@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Phone, Filter, Users, Mail, MapPin, MoreHorizontal, Pencil, Trash2, Search, AlertTriangle, X } from "lucide-react";
+import { Phone, Filter, Users, Mail, MapPin, MoreHorizontal, Pencil, Trash2, Search, AlertTriangle, X, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -89,6 +89,7 @@ export default function TableManagerCustomer({
                   <TableHead className="font-semibold">Khách hàng</TableHead>
                   <TableHead className="font-semibold">Liên hệ</TableHead>
                   <TableHead className="font-semibold">Địa chỉ</TableHead>
+                  <TableHead className="font-semibold">Điểm</TableHead>
                   <TableHead className="font-semibold">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
@@ -132,6 +133,12 @@ export default function TableManagerCustomer({
                       <div className="flex items-center text-sm bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-1">
                         <MapPin className="h-3 w-3 mr-2 text-rose-600" />
                         <span className="truncate max-w-[280px]">{c.address || "-"}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center text-sm bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-1">
+                        <Gift className="h-3 w-3 mr-2 text-purple-600" />
+                        <span>{c.customerPoint || "-"}</span>
                       </div>
                     </TableCell>
 

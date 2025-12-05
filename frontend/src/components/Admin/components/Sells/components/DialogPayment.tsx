@@ -6,9 +6,12 @@ import PaymentMethod from './SelectedPayment/PaymentMethod';
 import { PaymentMethod as PaymentMethodType } from '@/types/paymentType';
 import { CustomerInfo } from './CustomerForm';
 import { useSelector } from 'react-redux';
-import { selectSelectedCustomerId } from '@/redux/Slice/cartSlice';
+import { selectSelectedCustomerId, selectCartItems, type CartItem, type IPromotion } from '@/redux/Slice/cartSlice';
 import { getConfigCustomerPoints, ConfigCustomerPoints } from '@/apis/configCustomerPoints';
 import { addPointsToCustomer } from '@/apis/customerApi';
+import { createOrder, getOrderById, type Order, type OrderItem, type CreateOrderDto } from '@/apis/orderApi';
+import { create as createPayment, type IPayment } from '@/apis/paymentApi';
+import { buildInvoiceHtml } from '@/lib/invoice';
 import { toast } from 'sonner';
 
 interface DialogPaymentProps {
@@ -18,7 +21,10 @@ interface DialogPaymentProps {
     onPaymentMethodChange: (method: string) => void;
     paymentMethods: PaymentMethodType[];
     total: number;
+    subtotal: number;
+    discountAmount: number;
     customerInfo: CustomerInfo;
+    appliedPromotions: IPromotion[];
     onPaymentComplete: () => void;
 }
 
@@ -29,12 +35,31 @@ export default function DialogPayment({
     onPaymentMethodChange,
     paymentMethods,
     total,
+    subtotal,
+    discountAmount,
     customerInfo,
+    appliedPromotions,
     onPaymentComplete,
 }: DialogPaymentProps) {
     const selectedCustomerId = useSelector(selectSelectedCustomerId)
+    const cart = useSelector(selectCartItems)
     const [configPoints, setConfigPoints] = useState<ConfigCustomerPoints | null>(null)
-    const [isAddingPoints, setIsAddingPoints] = useState(false)
+    const [isProcessing, setIsProcessing] = useState(false)
+
+    // Get current user from localStorage
+    const getCurrentUser = () => {
+        if (typeof window !== 'undefined') {
+            const userStr = localStorage.getItem('currentUser')
+            if (userStr) {
+                try {
+                    return JSON.parse(userStr)
+                } catch {
+                    return null
+                }
+            }
+        }
+        return null
+    }
 
     // Load config customer points
     useEffect(() => {
@@ -54,26 +79,120 @@ export default function DialogPayment({
         }
     }, [isOpen])
 
-    // Handle payment complete with points calculation
+    // Handle payment complete - create order, payment, then add points
     const handlePaymentComplete = async () => {
-        // Add points to customer if customer is selected and config is active
-        if (selectedCustomerId && configPoints?.isActive && total > 0) {
+        if (!selectedPaymentMethod) return
+
+        setIsProcessing(true)
+        try {
+            const currentUser = getCurrentUser()
+            const userId = currentUser?.userId || currentUser?.user_id || 1 // Fallback to 1 if no user
+
+            // Validate required fields
+            if (!userId) {
+                toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!")
+                return
+            }
+
+            if (cart.length === 0) {
+                toast.error("Giỏ hàng trống!")
+                return
+            }
+
+            // 1. Create Order
+            const promoId = appliedPromotions.length > 0 ? appliedPromotions[0].promo_id : 0
+
+            const orderData: CreateOrderDto = {
+                customerId: selectedCustomerId || 0, // 0 means no customer (guest)
+                userId: userId,
+                promoId: promoId || 0, // 0 means no promotion
+                orderDate: new Date().toISOString(),
+                status: 'paid',
+                discountAmount: discountAmount || 0,
+                orderItems: cart.map((item) => {
+                    if (!item.product.productId) {
+                        throw new Error(`Sản phẩm ${item.product.productName} không có ID hợp lệ`)
+                    }
+                    return {
+                        productId: item.product.productId,
+                        quantity: item.quantity,
+                        price: item.product.price,
+                    }
+                }),
+            }
+
+            console.log("Creating order with data:", orderData)
+
+            const createdOrder = await createOrder(orderData)
+            console.log("Order created successfully:", createdOrder)
+            toast.success("Tạo đơn hàng thành công!")
+
+            // 2. Create Payment
+            const paymentData: Omit<IPayment, "paymentId"> = {
+                orderId: createdOrder.orderId,
+                amount: total,
+                paymentMethod: selectedPaymentMethod,
+                paymentDate: new Date().toISOString(),
+            }
+
+            const createdPayment = await createPayment(paymentData)
+            toast.success("Thanh toán thành công!")
+
+            // 3. Add points to customer if customer is selected and config is active
+            if (selectedCustomerId && configPoints?.isActive && total > 0) {
+                try {
+                    const pointsToAdd = Math.floor((total / configPoints.moneyPerUnit) * configPoints.pointsPerUnit)
+                    if (pointsToAdd > 0) {
+                        await addPointsToCustomer(selectedCustomerId, { points: pointsToAdd })
+                        toast.success(`Đã tích ${pointsToAdd} điểm cho khách hàng!`)
+                    }
+                } catch (error) {
+                    console.error("Error adding points to customer:", error)
+                    toast.error("Không thể tích điểm cho khách hàng")
+                }
+            }
+
+            // 4. Generate and open invoice
             try {
-                setIsAddingPoints(true)
-                const pointsToAdd = Math.floor((total / configPoints.moneyPerUnit) * configPoints.pointsPerUnit)
-                if (pointsToAdd > 0) {
-                    await addPointsToCustomer(selectedCustomerId, { points: pointsToAdd })
-                    toast.success(`Đã tích ${pointsToAdd} điểm cho khách hàng!`)
+                // Get full order details from API
+                const fullOrder = await getOrderById(createdOrder.orderId)
+                const invoiceHtml = buildInvoiceHtml(fullOrder)
+
+                // Open invoice in new window
+                const invoiceWindow = window.open("", "_blank", "width=900,height=700")
+                if (invoiceWindow) {
+                    invoiceWindow.document.write(invoiceHtml)
+                    invoiceWindow.document.close()
+                    invoiceWindow.focus()
+                    // Auto print after a short delay
+                    setTimeout(() => {
+                        invoiceWindow.print()
+                    }, 500)
+                } else {
+                    toast.warning("Không thể mở cửa sổ in hóa đơn. Vui lòng cho phép popup.")
                 }
             } catch (error) {
-                console.error("Error adding points to customer:", error)
-                toast.error("Không thể tích điểm cho khách hàng")
-            } finally {
-                setIsAddingPoints(false)
+                console.error("Error generating invoice:", error)
+                toast.error("Không thể tạo hóa đơn")
             }
+
+            // Call original payment complete handler to clear cart
+            onPaymentComplete()
+        } catch (error: any) {
+            console.error("Error processing payment:", error)
+            const errorMessage = error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.message ||
+                "Thanh toán thất bại. Vui lòng thử lại!"
+            console.error("Error details:", {
+                status: error?.response?.status,
+                data: error?.response?.data,
+                message: errorMessage
+            })
+            toast.error(errorMessage)
+        } finally {
+            setIsProcessing(false)
         }
-        // Call original payment complete handler
-        onPaymentComplete()
     }
 
     return (
@@ -120,18 +239,18 @@ export default function DialogPayment({
                         <Button
                             variant="outline"
                             onClick={onClose}
-                            disabled={isAddingPoints}
+                            disabled={isProcessing}
                             className="flex-1 h-12 border-2 font-semibold hover:bg-gray-50"
                         >
                             Hủy
                         </Button>
                         <Button
                             onClick={handlePaymentComplete}
-                            disabled={!selectedPaymentMethod || isAddingPoints}
+                            disabled={!selectedPaymentMethod || isProcessing}
                             className="flex-1 h-12 bg-green-700 hover:bg-green-800 font-bold shadow-lg"
                         >
                             <Receipt className="mr-2 h-5 w-5" />
-                            {isAddingPoints ? 'Đang tích điểm...' : 'Hoàn tất thanh toán'}
+                            {isProcessing ? 'Đang xử lý...' : 'Hoàn tất thanh toán'}
                         </Button>
                     </div>
                 </div>

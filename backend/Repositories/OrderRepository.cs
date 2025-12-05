@@ -52,6 +52,15 @@ public class OrderRepository : IOrderRepository
     {
         return await _db.Orders
             .AsNoTracking()
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                    .ThenInclude(p => p.Category)
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                    .ThenInclude(p => p.Supplier)
+            .Include(o => o.Customer)
+            .Include(o => o.User)
+            .Include(o => o.Promo)
             .FirstOrDefaultAsync(o => o.OrderId == id);
     }
 
@@ -73,7 +82,17 @@ public class OrderRepository : IOrderRepository
 
     public async Task<(IReadOnlyList<Order> Items, int Total)> SearchAsync(OrderQueryParams query)
     {
-        IQueryable<Order> q = _db.Orders.AsNoTracking();
+        IQueryable<Order> q = _db.Orders
+            .AsNoTracking()
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                    .ThenInclude(p => p.Category)
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                    .ThenInclude(p => p.Supplier)
+            .Include(o => o.Customer)
+            .Include(o => o.User)
+            .Include(o => o.Promo);
 
         // Apply filters
         q = q.WhereIf(query.CustomerId.HasValue, o => o.CustomerId == query.CustomerId)
@@ -101,6 +120,15 @@ public class OrderRepository : IOrderRepository
     {
         return await _db.Orders
             .AsNoTracking()
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                    .ThenInclude(p => p.Category)
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                    .ThenInclude(p => p.Supplier)
+            .Include(o => o.Customer)
+            .Include(o => o.User)
+            .Include(o => o.Promo)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
@@ -117,6 +145,10 @@ public class OrderRepository : IOrderRepository
     {
         return await _db.OrderItems
             .AsNoTracking()
+            .Include(oi => oi.Product)
+                .ThenInclude(p => p.Category)
+            .Include(oi => oi.Product)
+                .ThenInclude(p => p.Supplier)
             .Where(oi => oi.OrderId == orderId)
             .ToListAsync();
     }

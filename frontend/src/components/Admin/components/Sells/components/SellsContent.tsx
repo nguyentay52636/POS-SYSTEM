@@ -447,7 +447,10 @@ export default function SellsContent() {
                 onPaymentMethodChange={(method) => dispatch(setSelectedPaymentMethod(method))}
                 paymentMethods={mockPaymentMethods}
                 total={total}
+                subtotal={subtotal}
+                discountAmount={discountAmount}
                 customerInfo={customerInfo}
+                appliedPromotions={appliedPromotions}
                 onPaymentComplete={completeTransaction}
             />
         </div>
