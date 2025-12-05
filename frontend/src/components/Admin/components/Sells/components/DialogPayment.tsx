@@ -212,44 +212,87 @@ export default function DialogPayment({
                     error?.message ||
                     "Không thể cập nhật tồn kho"
                 toast.error(`Lỗi cập nhật tồn kho: ${errorMessage}`)
-                // Don't throw error - payment is already successful
             }
 
             // 4. Add points to customer if customer is selected and config is active
-            if (selectedCustomerId && configPoints?.isActive && total > 0) {
+            // Đối chiếu với config từ API: pointsPerUnit = 1, moneyPerUnit = 10000
+            // Ví dụ: 100000 VNĐ / 10000 * 1 = 10 điểm
+            console.log("=== Kiểm tra điều kiện tích điểm ===")
+            console.log("selectedCustomerId:", selectedCustomerId)
+            console.log("total:", total)
+
+            if (selectedCustomerId && total > 0) {
                 try {
-                    // Calculate points based on total amount and config
-                    // Formula: (total / moneyPerUnit) * pointsPerUnit
-                    // Example: 128000 / 10000 * 1 = 12.8 -> 12 points
-                    const pointsToAdd = Math.floor((total / configPoints.moneyPerUnit) * configPoints.pointsPerUnit)
+                    // Load config mới nhất từ API trước khi tính điểm
+                    console.log("📥 Đang load config từ API...")
+                    const configsData = await getConfigCustomerPoints()
+                    console.log("📥 Configs từ API:", configsData)
 
-                    console.log("=== Adding Points to Customer ===")
-                    console.log("Customer ID:", selectedCustomerId)
-                    console.log("Total amount:", total)
-                    console.log("Config - moneyPerUnit:", configPoints.moneyPerUnit)
-                    console.log("Config - pointsPerUnit:", configPoints.pointsPerUnit)
-                    console.log("Calculated points:", pointsToAdd)
-
-                    if (pointsToAdd > 0) {
-                        await addPointsToCustomer(selectedCustomerId, { points: pointsToAdd })
-                        console.log(`Successfully added ${pointsToAdd} points to customer ${selectedCustomerId}`)
-                        toast.success(`Đã tích ${pointsToAdd} điểm cho khách hàng!`)
+                    // API có thể trả về object hoặc array
+                    let activeConfig: ConfigCustomerPoints | null = null
+                    if (Array.isArray(configsData)) {
+                        // Nếu là array, tìm config active
+                        activeConfig = configsData.find(c => c.isActive) || configsData[0] || null
                     } else {
-                        console.log("Points to add is 0, skipping...")
+                        // Nếu là object, kiểm tra isActive
+                        activeConfig = configsData.isActive ? configsData : null
+                    }
+                    console.log("📥 Active config:", activeConfig)
+
+                    if (!activeConfig || !activeConfig.isActive) {
+                        console.log("⚠️ Config tích điểm không active hoặc không tồn tại, bỏ qua tích điểm")
+                    } else if (activeConfig.moneyPerUnit <= 0) {
+                        console.warn("⚠️ moneyPerUnit phải lớn hơn 0, bỏ qua tích điểm")
+                    } else {
+                        // Tính điểm dựa trên tổng tiền và config
+                        // Công thức: (tổng tiền / moneyPerUnit) * pointsPerUnit
+                        // Ví dụ: 100000 / 10000 * 1 = 10 điểm
+                        const pointsToAdd = Math.floor((total / activeConfig.moneyPerUnit) * activeConfig.pointsPerUnit)
+
+                        console.log("=== Tính điểm cho khách hàng ===")
+                        console.log("Customer ID:", selectedCustomerId)
+                        console.log("Tổng tiền:", total.toLocaleString("vi-VN"), "VNĐ")
+                        console.log("Config từ API:")
+                        console.log("  - moneyPerUnit:", activeConfig.moneyPerUnit.toLocaleString("vi-VN"), "VNĐ")
+                        console.log("  - pointsPerUnit:", activeConfig.pointsPerUnit)
+                        console.log("  - isActive:", activeConfig.isActive)
+                        console.log("Điểm tính được:", pointsToAdd, "điểm")
+                        console.log("Công thức:", `${total} / ${activeConfig.moneyPerUnit} * ${activeConfig.pointsPerUnit} = ${pointsToAdd}`)
+
+                        if (pointsToAdd > 0) {
+                            // Gọi API cập nhật điểm cho khách hàng
+                            // POST /Customer/{customerId}/points với body { points: pointsToAdd }
+                            console.log(`📤 Gọi API cộng điểm: POST /Customer/${selectedCustomerId}/points`)
+                            console.log(`📤 Request body:`, { points: pointsToAdd })
+
+                            const result = await addPointsToCustomer(selectedCustomerId, { points: pointsToAdd })
+
+                            console.log(`✅ Response từ API:`, result)
+                            console.log(`✅ Đã cộng ${pointsToAdd} điểm cho khách hàng ${selectedCustomerId}`)
+                            toast.success(`Đã tích ${pointsToAdd} điểm cho khách hàng!`)
+                        } else {
+                            console.log("⚠️ Điểm tính được = 0, bỏ qua...")
+                        }
                     }
                 } catch (error: any) {
-                    console.error("Error adding points to customer:", error)
+                    console.error("❌ Lỗi khi cộng điểm cho khách hàng:", error)
                     const errorMessage = error?.response?.data?.message ||
                         error?.response?.data?.error ||
                         error?.message ||
                         "Không thể tích điểm cho khách hàng"
-                    toast.error(errorMessage)
+                    toast.error(`Lỗi tích điểm: ${errorMessage}`)
+                    // Không throw error - thanh toán đã thành công, chỉ log lỗi
                 }
             } else {
-                console.log("=== Skipping Points Addition ===")
-                console.log("Selected Customer ID:", selectedCustomerId)
-                console.log("Config Active:", configPoints?.isActive)
-                console.log("Total:", total)
+                console.log("=== Bỏ qua tích điểm ===")
+                console.log("Customer ID:", selectedCustomerId || "Không có")
+                console.log("Tổng tiền:", total.toLocaleString("vi-VN"), "VNĐ")
+                if (!selectedCustomerId) {
+                    console.log("Lý do: Chưa chọn khách hàng")
+                }
+                if (total <= 0) {
+                    console.log("Lý do: Tổng tiền <= 0")
+                }
             }
 
             // 5. Show success message

@@ -70,12 +70,15 @@ try {
 export interface AddPointsToCustomerRequest {
   points: number;
 }
-export  async function addPointsToCustomer (customerId: number, request: AddPointsToCustomerRequest) {
-try {
-  const {data} = await baseApi.post(`/Customer/${customerId}/points`, request)
-  return data
-}catch(error :any) {
-  console.error('Error adding points to customer:', error)
-  throw error
- }
+export async function addPointsToCustomer(customerId: number, request: AddPointsToCustomerRequest) {
+    try {
+        console.log(`[API] Adding points to customer ${customerId}:`, request)
+        const { data } = await baseApi.post(`/Customer/${customerId}/points`, request)
+        console.log(`[API] Response from add points:`, data)
+        return data
+    } catch (error: any) {
+        console.error('[API] Error adding points to customer:', error)
+        console.error('[API] Error response:', error?.response?.data)
+        throw error
+    }
 }
