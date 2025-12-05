@@ -83,13 +83,13 @@ const  getAllProductBySupplierId = async (supplierId: number) =>{
     }
 }
 const updateStatusImportReceipt = async (receiptId: number, status: string): Promise<IImportReceipt> => {
-    try {
+try {
         const { data } = await baseApi.patch(`/imports/${receiptId}/status`, { status })
-        return data
+ return data
     } catch (error: any) {
-        console.error('Error updating status import receipt:', error)
-        throw error
-    }
+    console.error('Error updating status import receipt:', error)
+    throw error
+}
 }
 
 export {updateStatusImportReceipt,getAllProductBySupplierId, getAllImportReceipts, addImportReceipt, updateImportReceipt, deleteImportReceipt, getImportReceiptById }

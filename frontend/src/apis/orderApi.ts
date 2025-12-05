@@ -25,6 +25,15 @@ export interface Order {
   orderItems: OrderItem[];
 }
 
+  export interface CreateOrderRequest {
+    customerId: number;
+    userId: number;
+    promoId: number;
+    promoCode: string;
+    orderItems: IProduct[];
+    status: string;
+  }
+
 
 export const getOrders = async (): Promise<Order[]> => {
 try {
@@ -46,22 +55,31 @@ try {
   }
 };
 
+export interface CreateOrderItemDto {
+  productId: number;
+  quantity: number;
+  price: number;
+}
+
 export interface CreateOrderDto {
   customerId: number;
   userId: number;
-  promoId: number;
-  orderDate: string;
+  promoId: number | null;
+  promoCode: string | null;
+  orderItems: CreateOrderItemDto[];
   status: string;
-  discountAmount: number;
-  orderItems: IProduct[]
 }
 
 export const createOrder = async (order: CreateOrderDto): Promise<Order> => {
  try{
+  console.log('Sending order to API:', JSON.stringify(order, null, 2))
   const { data } = await baseApi.post("/Order", order);
+  console.log('Order created successfully:', data)
   return data;
- }catch (error) {
+ }catch (error: any) {
   console.error('Error creating order:', error)
+  console.error('Error response:', error?.response?.data)
+  console.error('Request payload:', order)
   throw error
  }
 };
@@ -82,7 +100,53 @@ export interface UpdateOrderDto {
   orderDate: string;
   status: string; // "pending" | "paid" | "canceled"
   discountAmount: number;
-  orderItems: IProduct[]
+  orderItems: Array<{
+    orderItemId: number;
+    orderId: number;
+    productId: number;
+    quantity: number;
+    price: number;
+  }>;
+};
+
+
+// PUT full body – dùng cho đổi trạng thái hoặc sửa items
+export const updateOrder = async (
+  id: number,
+  patch: Partial<Order>
+): Promise<Order> => {
+  // 1) Lấy bản hiện tại
+  const cur = await getOrderById(id);
+
+  // 2) Map sang DTO BE chấp nhận (chỉ các field cần thiết)
+  const items = (patch.orderItems ?? cur.orderItems ?? []).map((it) => ({
+    orderItemId: it.orderItemId,
+    orderId: id,
+    productId: it.productId,
+    quantity: it.quantity,
+    price: it.price,
+  }));
+
+  const dto: UpdateOrderDto = {
+    customerId: patch.customerId ?? cur.customerId,
+    userId: patch.userId ?? cur.userId,
+    promoId: patch.promoId ?? cur.promoId,
+    orderDate: patch.orderDate ?? cur.orderDate,
+    status: uiToApiStatus(patch.status ?? cur.status),
+    discountAmount: patch.discountAmount ?? cur.discountAmount ?? 0,
+    orderItems: items,
+  };
+
+  // 3) PUT đúng endpoint như Swagger
+  const res = await baseApi.put(`/Order/${id}`, dto, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return res.data;
+};
+
+// Đổi trạng thái (helper): dùng PUT full, KHÔNG gọi /cancel nữa
+export const updateOrderStatus = async (id: number, uiStatus: string) => {
+  return updateOrder(id, { status: uiStatus });
 };
 
 // ✅ Tìm kiếm đơn hàng (có query params)

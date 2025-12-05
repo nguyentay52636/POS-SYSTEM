@@ -86,13 +86,20 @@ export default function DialogPayment({
         setIsProcessing(true)
         try {
             const currentUser = getCurrentUser()
-            const userId = currentUser?.userId || currentUser?.user_id || 1 // Fallback to 1 if no user
+            console.log("Current user from localStorage:", currentUser)
+
+            // Try multiple possible user ID fields
+            const userId = currentUser?.userId || currentUser?.user_id || currentUser?.id || null
 
             // Validate required fields
-            if (!userId) {
+            if (!userId || userId === 0) {
+                console.error("Invalid userId:", userId)
                 toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!")
+                setIsProcessing(false)
                 return
             }
+
+            console.log("Using userId:", userId)
 
             if (cart.length === 0) {
                 toast.error("Giỏ hàng trống!")
@@ -100,28 +107,50 @@ export default function DialogPayment({
             }
 
             // 1. Create Order
-            const promoId = appliedPromotions.length > 0 ? appliedPromotions[0].promo_id : 0
+            // Use null instead of 0 for promoId to avoid foreign key constraint violation
+            const promoId = appliedPromotions.length > 0 ? appliedPromotions[0].promo_id : null
+            const promoCode = appliedPromotions.length > 0 ? appliedPromotions[0].promo_code || null : null
+
+            // Validate order items
+            const orderItems = cart.map((item) => {
+                if (!item.product.productId) {
+                    throw new Error(`Sản phẩm ${item.product.productName} không có ID hợp lệ`)
+                }
+                if (item.quantity <= 0) {
+                    throw new Error(`Số lượng sản phẩm ${item.product.productName} phải lớn hơn 0`)
+                }
+                if (item.product.price <= 0) {
+                    throw new Error(`Giá sản phẩm ${item.product.productName} phải lớn hơn 0`)
+                }
+                return {
+                    productId: item.product.productId,
+                    quantity: item.quantity,
+                    price: item.product.price,
+                }
+            })
+
+            if (orderItems.length === 0) {
+                toast.error("Không có sản phẩm hợp lệ trong giỏ hàng!")
+                return
+            }
 
             const orderData: CreateOrderDto = {
                 customerId: selectedCustomerId || 0, // 0 means no customer (guest)
                 userId: userId,
-                promoId: promoId || 0, // 0 means no promotion
-                orderDate: new Date().toISOString(),
+                promoId: promoId, // null if no promotion (to avoid FK constraint violation)
+                promoCode: promoCode, // null if no promotion
                 status: 'paid',
-                discountAmount: discountAmount || 0,
-                orderItems: cart.map((item) => {
-                    if (!item.product.productId) {
-                        throw new Error(`Sản phẩm ${item.product.productName} không có ID hợp lệ`)
-                    }
-                    return {
-                        productId: item.product.productId,
-                        quantity: item.quantity,
-                        price: item.product.price,
-                    }
-                }),
+                orderItems: orderItems,
             }
 
-            console.log("Creating order with data:", orderData)
+            console.log("=== Order Data to Send ===")
+            console.log("Full order data:", JSON.stringify(orderData, null, 2))
+            console.log("Order items count:", orderItems.length)
+            console.log("Customer ID:", orderData.customerId)
+            console.log("User ID:", orderData.userId)
+            console.log("Promo ID:", orderData.promoId)
+            console.log("Promo Code:", orderData.promoCode)
+            console.log("Status:", orderData.status)
 
             const createdOrder = await createOrder(orderData)
             console.log("Order created successfully:", createdOrder)

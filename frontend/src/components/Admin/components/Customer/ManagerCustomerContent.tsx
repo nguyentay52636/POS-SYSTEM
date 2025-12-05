@@ -97,16 +97,16 @@ export default function ManagerCustomerContent() {
           </Button>
         </div>
 
-        <TableManagerCustomer
-          customers={paginatedCustomers}
+            <TableManagerCustomer
+              customers={paginatedCustomers}
           searchQuery={searchTerm}
           setSearchQuery={setSearchTerm}
-          onEdit={handleEdit}
+              onEdit={handleEdit}
           onDelete={handleDeleteCustomer}
           busy={loading}
-        />
+            />
 
-        <PaginationManagerCustomer totalItems={filteredCustomers.length} />
+            <PaginationManagerCustomer totalItems={filteredCustomers.length} />
 
         {/* Dialog form thêm mới */}
         <CustomerFormDialog

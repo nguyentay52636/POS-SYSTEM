@@ -184,15 +184,14 @@ export default function DialogViewDetails({
                     key={it.orderItemId}
                     className="flex items-center gap-4 p-4 border rounded-lg"
                   >
-                    {/* API không có ảnh: hiển thị icon + tên */}
                     <div className="w-20 h-20 flex items-center justify-center bg-green-100 rounded-md">
-                      <ImageIcon className="w-6 h-6 text-green-600" />
+                      <img src={it.product.imageUrl} alt={it.product.productName} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1">
                       <div className="text-sm text-green-700">
                         SP: #{it.productId}
                       </div>
-                      <div className="text-lg font-semibold">{it.productName}</div>
+                      <div className="text-lg font-semibold">{it.product.productName}</div>
                       <div className="text-sm text-gray-600">
                         SL: {it.quantity} • Giá:{" "}
                         {it.price.toLocaleString("vi-VN")} đ
