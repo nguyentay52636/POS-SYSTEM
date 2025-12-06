@@ -5,7 +5,6 @@ import { Plus, Search, CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import TableManagerPayment from "./components/TableManagerPayment";
 import PaymentFormDialog from "./components/PaymentFormDialog";
 import paymentApi from "@/apis/paymentApi";
@@ -21,16 +20,16 @@ export default function ManagerPayment() {
   const [editing, setEditing] = useState<IPayment | null>(null);
 
   async function load() {
-  setLoading(true);
-  try {
-    const rows = await paymentApi.list();
-    setData(rows ?? []);                // ✅ dùng trực tiếp camelCase từ API layer
-  } catch (e) {
-    console.error(e);
-  } finally {
-    setLoading(false);
+    setLoading(true);
+    try {
+      const rows = await paymentApi.list();
+      setData(rows ?? []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
   useEffect(() => {
     load();

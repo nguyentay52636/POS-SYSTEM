@@ -144,7 +144,7 @@ export const updateOrder = async (
   return res.data;
 };
 
-// Đổi trạng thái (helper): dùng PUT full, KHÔNG gọi /cancel nữa
+
 export const updateOrderStatus = async (id: number, uiStatus: string) => {
   return updateOrder(id, { status: uiStatus });
 };
@@ -166,3 +166,4 @@ export const getOrderPayments = async (id: number): Promise<any[]> => {
   const res = await baseApi.get(`/Order/${id}/payments`);
   return res.data;
 };
+

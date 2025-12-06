@@ -1,8 +1,10 @@
 import baseApi from "@/apis/baseApi";
+import { Order } from "./orderApi";
 
 export interface IPayment {
   paymentId?: number;         
   orderId: number;
+  order?: Order
   amount: number;
   paymentMethod: string;
   paymentDate: string;          
@@ -10,7 +12,6 @@ export interface IPayment {
 
 const PREFIX = "/Payment";
 
-// Chuẩn hoá ngày về ISO trước khi gửi
 const normalize = (p: Partial<IPayment>) => ({
   ...p,
   paymentDate: p.paymentDate ? new Date(p.paymentDate).toISOString() : undefined,

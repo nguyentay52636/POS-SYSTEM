@@ -8,25 +8,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  MoreVertical,
   Eye,
-  ChevronDown,
   ShoppingCart,
-  Trash2,
-  Check,
 } from "lucide-react";
 import type { Order } from "@/apis/orderApi";
 import DialogConfirm from "../Dialog/DialogConfirm";
 import { toast } from "sonner";
+import ActionsOnTableOrder from "./ActionsOnTableOrder";
 
 export type UiStatus = "ALL" | "ChoDuyet" | "DaDuyet" | "DaHuy";
 
@@ -47,16 +37,6 @@ export interface OrderTableProps {
   onRowSelect?: (order: Order | null) => void;
 }
 
-/* ===========================
-   Trạng thái: mapping + helpers
-   =========================== */
-
-const STATUS_OPTIONS = [
-  { ui: "ChoDuyet", api: "pending", label: "Chờ Duyệt" },
-  { ui: "DaDuyet", api: "paid", label: "Đã Duyệt" },
-  { ui: "DaHuy", api: "canceled", label: "Đã Hủy" },
-];
-
 // Chuẩn hoá mọi biến thể về key UI
 const toUiStatus = (s: string) => {
   const k = (s || "").toLowerCase();
@@ -64,22 +44,6 @@ const toUiStatus = (s: string) => {
   if (k === "paid" || k === "approved" || k === "daduyet") return "DaDuyet";
   if (k === "canceled" || k === "cancelled" || k === "dahuy") return "DaHuy";
   return "ChoDuyet";
-};
-
-const getStatusLabel = (ui: string) =>
-  STATUS_OPTIONS.find((o) => o.ui === ui)?.label || ui;
-
-const getStatusBadgeClass = (ui: string) => {
-  switch (ui) {
-    case "ChoDuyet":
-      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
-    case "DaDuyet":
-      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
-    case "DaHuy":
-      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
-    default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300";
-  }
 };
 
 export default function OrderTable({
@@ -175,7 +139,7 @@ export default function OrderTable({
         </TableHeader>
 
         <TableBody>
-          {rows.map((order) => {
+          {rows.map((order: Order) => {
             const currentUi = toUiStatus(order.status);
 
             return (
@@ -209,18 +173,44 @@ export default function OrderTable({
                 </TableCell>
 
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span>{order.orderItems?.length} sản phẩm</span>
+                  <div className="space-y-2">
+                    {order.orderItems && order.orderItems.length > 0 ? (
+                      order.orderItems.slice(0, 3).map((item) => (
+                        <div key={item.orderItemId} className="flex items-center gap-3">
+                          <img
+                            src={item.product?.imageUrl || "/placeholder.svg"}
+                            alt={item.product?.imageUrl || item.product?.productName || "Sản phẩm"}
+                            className="h-10 w-10 rounded-lg border object-cover"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm text-gray-900 truncate">
+                              {item.product?.productName || "N/A"}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              SL: {item.quantity} × {item.price.toLocaleString("vi-VN")} đ
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-sm text-gray-500">Không có sản phẩm</span>
+                    )}
+                    {order.orderItems && order.orderItems.length > 3 && (
+                      <div className="text-xs text-gray-500 pt-1">
+                        +{order.orderItems.length - 3} sản phẩm khác
+                      </div>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="mt-2"
                       onClick={() => {
-                        // Open parent details dialog and mark row selected
                         onRowSelect?.(order);
                         handleViewDetails(order);
                       }}
                     >
-                      <Eye className="h-4 w-4 text-green-600" />
+                      <Eye className="h-4 w-4 text-green-600 mr-1" />
+                      <span className="text-xs">Xem tất cả</span>
                     </Button>
                   </div>
                 </TableCell>
@@ -229,74 +219,15 @@ export default function OrderTable({
                   {getNetAmount(order).toLocaleString("vi-VN")} đ
                 </TableCell>
 
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="flex items-center gap-2"
-                      >
-                        <Badge className={getStatusBadgeClass(currentUi)}>
-                          {getStatusLabel(currentUi)}
-                        </Badge>
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-
-                    <DropdownMenuContent align="start" className="w-44">
-                      {STATUS_OPTIONS.map((opt) => {
-                        const isActive = currentUi === opt.ui;
-                        return (
-                          <DropdownMenuItem
-                            key={opt.ui}
-                            onClick={() =>
-                              handleStatusChangeLocal(order.orderId, opt.ui)
-                            }
-                            className="flex items-center gap-2"
-                          >
-                            <Check
-                              className={`h-4 w-4 ${
-                                isActive ? "opacity-100" : "opacity-0"
-                              }`}
-                            />
-                            <span className={isActive ? "font-medium" : ""}>
-                              {opt.label}
-                            </span>
-                          </DropdownMenuItem>
-                        );
-                      })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem
-                        onClick={() => {
-                          onRowSelect?.(order);
-                          handleViewDetails(order);
-                        }}
-                      >
-                        <Eye className="h-4 w-4 text-green-600" />
-                        <span className="ml-2">Xem chi tiết</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setOrderToDelete(order)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="ml-2">Hủy đơn hàng</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+                <ActionsOnTableOrder
+                  order={order}
+                  currentUi={currentUi}
+                  onStatusChange={handleStatusChangeLocal}
+                  handleViewDetails={handleViewDetails}
+                  setOrderToDelete={setOrderToDelete}
+                  onRowSelect={onRowSelect}
+                  isUpdating={isUpdating}
+                />
               </TableRow>
             );
           })}

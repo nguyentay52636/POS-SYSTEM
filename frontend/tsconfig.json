@@ -35,7 +35,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/components/Admin/components/Products/ManagerProduct.tsx"
-  ],
+, "src/components/Admin/components/Order/components/TableManagerOrder/FormOrderTable"  ],
   "exclude": [
     "node_modules"
   ]

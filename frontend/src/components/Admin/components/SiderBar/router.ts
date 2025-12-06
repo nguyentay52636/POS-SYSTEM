@@ -37,10 +37,10 @@ export const navigation = (pathname: string) => [
         badge: null,
     },
     {
-        name: "Thống kê Doanh thu",
-        href: "/admin/revenue",
+        name: "Quản lý thanh toán",
+        href: "/admin/payments",
         icon: DollarSign,
-        current: pathname === "/admin/revenue",
+        current: pathname === "/admin/payments",
         badge: null,
     },
 

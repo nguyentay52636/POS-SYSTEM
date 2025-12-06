@@ -28,7 +28,6 @@ export default function TableManagerPayment({
   formatCurrency: (n: number) => string;
   formatDate: (iso: string) => string;
 }) {
-  // ✅ tính tổng tiền (chỉ khi có dữ liệu)
   const totalAmount = rows?.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
 
   return (
@@ -36,12 +35,13 @@ export default function TableManagerPayment({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/100 font-semibold">
-            <TableHead className="w-[110px] text-center">Mã Thanh Toán</TableHead>
-            <TableHead className="w-[100px] text-center">Mã hoá đơn</TableHead>
-            <TableHead className="w-[140px] text-center">Số tiền</TableHead>
-            <TableHead className="min-w-[160px] text-center">Phương thức</TableHead>
-            <TableHead className="min-w-[180px] text-center">Tạo lúc</TableHead>
-            <TableHead className="w-[130px] text-center">Thao tác</TableHead>
+            <TableHead className=" text-center">Mã Thanh Toán</TableHead>
+            <TableHead className="text-center">Mã hoá đơn</TableHead>
+            <TableHead className="text-center">Sản phẩm</TableHead>
+            <TableHead className=" text-center">Số tiền</TableHead>
+            <TableHead className=" text-center">Phương thức</TableHead>
+            <TableHead className=" text-center">Tạo lúc</TableHead>
+            <TableHead className=" text-center">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -101,7 +101,6 @@ export default function TableManagerPayment({
                 );
               })}
 
-              {/* ✅ Dòng tổng tiền */}
               <TableRow className="bg-muted/100 font-semibold">
                 <TableCell colSpan={1} className="capitalize text-right">
                   Tổng Doanh Thu:
