@@ -25,7 +25,7 @@ export default function ViewDetailsInventory({
 
     return (
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl! max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-gray-900">
                         Chi tiết tồn kho
@@ -62,23 +62,26 @@ export default function ViewDetailsInventory({
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium text-gray-700">Mã tồn kho:</span>
                                         <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
-                                            {selectedInventory.inventory_id}
+                                            {selectedInventory.inventoryId}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Hash className="h-4 w-4 text-gray-500" />
-                                        <span className="text-gray-700">Mã sản phẩm: {selectedInventory.product_id}</span>
+                                        <span className="text-gray-700">Mã sản phẩm: {selectedInventory.productId}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Package className="h-4 w-4 text-gray-500" />
                                         <span className="text-gray-700">Số lượng: {selectedInventory.quantity}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <img src={selectedInventory.product?.imageUrl} alt={selectedInventory.product?.productName} className="w-10 h-10 rounded-full" />
                                     </div>
                                 </div>
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2">
                                         <Calendar className="h-4 w-4 text-gray-500" />
                                         <span className="text-gray-700">
-                                            Cập nhật: {selectedInventory.updated_at ? new Date(selectedInventory.updated_at).toLocaleDateString('vi-VN') : '-'}
+                                            Cập nhật: {selectedInventory.updatedAt ? new Date(selectedInventory.updatedAt).toLocaleDateString('vi-VN') : '-'}
                                         </span>
                                     </div>
                                 </div>
@@ -96,7 +99,7 @@ export default function ViewDetailsInventory({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-sm font-medium text-gray-600">Tên sản phẩm</p>
-                                        <p className="text-base font-semibold text-gray-900">{selectedInventory.product.product_name}</p>
+                                        <p className="text-base font-semibold text-gray-900">{selectedInventory.product.productName}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-gray-600">Giá bán</p>
@@ -104,16 +107,16 @@ export default function ViewDetailsInventory({
                                             {new Intl.NumberFormat('vi-VN', {
                                                 style: 'currency',
                                                 currency: 'VND'
-                                            }).format(selectedInventory.product.price)}
+                                            }).format(selectedInventory.product.price || 0)}
                                         </p>
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-gray-600">Danh mục</p>
-                                        <p className="text-base text-gray-900">{selectedInventory.product.category_id?.category_name || 'N/A'}</p>
+                                        <p className="text-base text-gray-900">{selectedInventory.product.category?.categoryName || 'N/A'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-gray-600">Nhà cung cấp</p>
-                                        <p className="text-base text-gray-900">{selectedInventory.product.supplier_id?.name || 'N/A'}</p>
+                                        <p className="text-base text-gray-900">{selectedInventory.product.supplier?.name || 'N/A'}</p>
                                     </div>
                                 </div>
                             </CardContent>

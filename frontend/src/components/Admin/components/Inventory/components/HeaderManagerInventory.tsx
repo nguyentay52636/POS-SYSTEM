@@ -1,7 +1,4 @@
 import { Warehouse } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import DialogAddInventory from './Dialog/AddInventory/DialogAddInventory'
 import { IInventory } from '@/types/types'
 
 interface HeaderManagerInventoryProps {
@@ -31,11 +28,11 @@ export default function HeaderManagerInventory({
                         </div>
                     </div>
                 </div>
-                <DialogAddInventory
+                {/* <DialogAddInventory
                     isAddDialogOpen={isAddDialogOpen}
                     setIsAddDialogOpen={setIsAddDialogOpen}
                     handleAddInventory={handleAddInventory}
-                />
+                /> */}
             </div>
         </>
     )

@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react"
 import { IImportReceipt } from "@/types/types"
-import { getAllImportReceipts, addImportReceipt, updateImportReceipt, deleteImportReceipt, updateStatusImportReceipt, CreateImportReceiptDTO, UpdateImportReceiptDTO } from "@/apis/importReceiptApi"
+import { getAllImportReceipts, addImportReceipt, updateImportReceipt, deleteImportReceipt, updateStatusImportReceipt, getImportReceiptById, CreateImportReceiptDTO, UpdateImportReceiptDTO } from "@/apis/importReceiptApi"
+import { getAllInventory, addInventory, updateInventory } from "@/apis/inventoryApi"
+import { IInventory } from "@/types/types"
 import { toast } from "sonner"
 import { usePagination } from "@/context/PaginationContext"
 
@@ -110,12 +112,111 @@ export const useImportReceipt = () => {
 
     const handleUpdateStatus = async (receiptId: number, status: string) => {
         try {
+            // Lấy thông tin receipt hiện tại để kiểm tra status cũ
+            const currentReceipt = receipts.find((r) => (r.importId || r.import_id) === receiptId)
+            const oldStatus = currentReceipt?.status
+
+            // Cập nhật trạng thái
             const updatedReceipt = await updateStatusImportReceipt(receiptId, status)
             const currentReceiptId = (r: IImportReceipt) => r.importId || r.import_id
             setReceipts(receipts.map((r) =>
                 currentReceiptId(r) === receiptId ? updatedReceipt : r
             ))
             toast.success("Cập nhật trạng thái thành công!")
+
+            // Nếu chuyển từ pending/khác sang completed → Cập nhật inventory
+            if (status === 'completed' && oldStatus !== 'completed') {
+                try {
+                    console.log("=== Cập nhật tồn kho sau khi duyệt phiếu nhập ===")
+                    // Lấy thông tin đầy đủ của receipt (bao gồm items)
+                    const fullReceipt = await getImportReceiptById(receiptId)
+                    const items = fullReceipt.importItems || fullReceipt.import_items || []
+                    
+                    if (items.length === 0) {
+                        console.warn("⚠️ Phiếu nhập không có items, bỏ qua cập nhật tồn kho")
+                        fetchReceipts()
+                        return
+                    }
+
+                    // Lấy danh sách inventory hiện tại
+                    const allInventories = await getAllInventory()
+
+                    // Cập nhật inventory cho từng item
+                    let successCount = 0
+                    let errorCount = 0
+                    
+                    for (const item of items) {
+                        const productId = item.productId || item.product_id
+                        const quantity = item.quantity || 0
+
+                        if (!productId) {
+                            console.warn(`⚠️ Item không có productId, bỏ qua`)
+                            errorCount++
+                            continue
+                        }
+
+                        if (quantity <= 0) {
+                            console.warn(`⚠️ Item có số lượng <= 0 (${quantity}), bỏ qua`)
+                            errorCount++
+                            continue
+                        }
+
+                        try {
+                            // Tìm inventory theo productId
+                            const existingInventory = allInventories.find(
+                                (inv: IInventory) => inv.productId === productId
+                            )
+
+                            if (existingInventory) {
+                                // Sản phẩm đã có trong inventory → Cập nhật số lượng (cộng thêm)
+                                const newQuantity = existingInventory.quantity + quantity
+
+                                console.log(`📦 Sản phẩm đã có: Cập nhật inventory ${existingInventory.inventoryId}`)
+                                console.log(`   Product ID: ${productId}`)
+                                console.log(`   ${existingInventory.quantity} -> ${newQuantity} (nhập thêm ${quantity})`)
+
+                                await updateInventory({
+                                    ...existingInventory,
+                                    quantity: newQuantity
+                                })
+
+                                console.log(`✅ Đã cập nhật tồn kho cho sản phẩm ID: ${productId}`)
+                                successCount++
+                            } else {
+                                // Sản phẩm chưa có trong inventory → Tạo mới
+                                console.log(`🆕 Sản phẩm chưa có: Tạo inventory mới cho productId: ${productId}`)
+
+                                const newInventory: IInventory = {
+                                    inventoryId: 0, // Will be set by backend
+                                    productId: productId,
+                                    quantity: quantity, // Số lượng nhập vào
+                                    updatedAt: new Date().toISOString()
+                                }
+
+                                await addInventory(newInventory)
+
+                                console.log(`✅ Đã tạo tồn kho mới cho sản phẩm ID: ${productId} với số lượng: ${quantity}`)
+                                successCount++
+                            }
+                        } catch (itemError: any) {
+                            console.error(`❌ Lỗi khi xử lý sản phẩm ID ${productId}:`, itemError)
+                            errorCount++
+                            // Tiếp tục xử lý các sản phẩm khác
+                        }
+                    }
+
+
+                    toast.success("Đã cập nhật tồn kho thành công!")
+                } catch (error: any) {
+                    const errorMessage = error?.response?.data?.message ||
+                        error?.response?.data?.error ||
+                        error?.message ||
+                        "Không thể cập nhật tồn kho"
+                    toast.error(`Lỗi cập nhật tồn kho: ${errorMessage}`)
+                    // Không throw error - trạng thái đã cập nhật thành công
+                }
+            }
+
             fetchReceipts()
         } catch (error) {
             console.error("Error updating status:", error)

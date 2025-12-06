@@ -234,8 +234,9 @@ export default function DialogPayment({
                         // Nếu là array, tìm config active
                         activeConfig = configsData.find(c => c.isActive) || configsData[0] || null
                     } else {
-                        // Nếu là object, kiểm tra isActive
-                        activeConfig = configsData.isActive ? configsData : null
+                        // Nếu là object (trường hợp API trả về single object)
+                        const configObj = configsData as unknown as ConfigCustomerPoints
+                        activeConfig = configObj?.isActive ? configObj : null
                     }
                     console.log("📥 Active config:", activeConfig)
 
