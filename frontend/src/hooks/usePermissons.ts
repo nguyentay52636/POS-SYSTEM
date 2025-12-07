@@ -5,10 +5,13 @@ import { getFeatures, type IFeaturePermission } from "@/apis/featuresApi"
 import {
     getPermissionsRoles,
     addPermissionRole,
+    updateRolePermissionsV2,
+    convertPermissionsToFeaturePermissions,
     type IPermissionsRoles,
     type IPermissionsRolesCreate,
 } from "@/apis/rolePermissionsApi"
 import type { FeaturePermission, PermissionType } from "@/apis/rolePermissionsApi"
+
 // Permission code mapping
 const PERMISSION_CODES = {
     view: "VIEW",
@@ -111,20 +114,25 @@ export const usePermissionsData = (roleId: number | null) => {
     }
 }
 
-// Save permissions function
+/**
+ * Lưu permissions cho role sử dụng API mới (updateRolePermissionsV2)
+ * API: PUT /api/RolePermissions/role/{roleId}/update
+ * @param roleId - ID của role cần cập nhật
+ * @param featurePermissions - Mảng các feature permissions với format { featureId, permissions: { view, create, edit, ... } }
+ * @returns Promise<void>
+ */
 export const savePermissions = async (roleId: number, featurePermissions: FeaturePermission[]): Promise<void> => {
-    const permissionsToCreate: IPermissionsRolesCreate[] = []
-
-    featurePermissions.forEach((feature) => {
-        Object.entries(feature.permissions).forEach(([permission, isAllowed]) => {
-            permissionsToCreate.push({
-                roleId,
-                featureId: feature.featureId,
-                isAllowed,
-            })
-        })
-    })
-
-    // Send all permission updates
-    await Promise.all(permissionsToCreate.map((permission) => addPermissionRole(roleId, permission)))
+    try {
+        console.log("💾 Saving permissions for role:", roleId);
+        console.log("📋 Feature permissions count:", featurePermissions.length);
+        
+        // Sử dụng API mới updateRolePermissionsV2
+        // API này nhận trực tiếp FeaturePermission[] và convert sang format backend
+        await updateRolePermissionsV2(roleId, featurePermissions);
+        
+        console.log("✅ Permissions saved successfully");
+    } catch (error) {
+        console.error("❌ Error saving permissions:", error);
+        throw error;
+    }
 }

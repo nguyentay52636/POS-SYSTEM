@@ -103,7 +103,7 @@ const mockPromotions: IPromotion[] = [
 
 export default function SellsContent() {
     const dispatch = useDispatch<AppDispatch>()
-    const { inventories, loading } = useInventory()
+    const { inventories, loading, fetchInventories } = useInventory()
     const { categories, loading: categoryLoading } = useCategory()
 
     // Redux state
@@ -208,6 +208,13 @@ export default function SellsContent() {
     }
 
     const handleChoiceSkip = () => {
+        // Reset customer info when skipping
+        dispatch(setCustomerInfo({
+            fullName: "",
+            phone: "",
+            email: "",
+        }))
+        dispatch(setSelectedCustomerId(null))
         setIsChoiceDialogOpen(false)
         dispatch(setIsPaymentOpen(true))
     }
@@ -236,7 +243,7 @@ export default function SellsContent() {
     }
 
     // Complete transaction
-    const completeTransaction = () => {
+    const completeTransaction = async () => {
         const transaction: Transaction = {
             transaction_id: `TXN${Date.now()}`,
             items: cart,
@@ -265,6 +272,15 @@ export default function SellsContent() {
         // Clear cart and reset payment state
         dispatch(clearCart())
         dispatch(resetPaymentState())
+
+        // Reload inventory data after successful payment
+        try {
+            await fetchInventories()
+            console.log("✅ Đã cập nhật lại danh sách tồn kho sau khi thanh toán")
+        } catch (error) {
+            console.error("❌ Lỗi khi tải lại danh sách tồn kho:", error)
+            // Không hiển thị toast error vì thanh toán đã thành công
+        }
     }
 
     // Apply promotion code

@@ -27,8 +27,13 @@ public class RbacMappings : Profile
 
         // RolePermission Mappings
         CreateMap<RolePermission, RolePermissionResponseDto>()
-            .ForMember(dest => dest.FeatureName, opt => opt.MapFrom(src => src.Feature.FeatureName))
-            .ForMember(dest => dest.PermissionName, opt => opt.MapFrom(src => src.PermissionType.PermissionName))
-            .ForMember(dest => dest.PermissionCode, opt => opt.MapFrom(src => src.PermissionType.PermissionName));
+            .ForMember(dest => dest.RolePermissionId, opt => opt.MapFrom(src => 0)) // Composite key, no single ID
+            .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => src.RoleId))
+            .ForMember(dest => dest.FeatureId, opt => opt.MapFrom(src => src.FeatureId))
+            .ForMember(dest => dest.FeatureName, opt => opt.MapFrom(src => src.Feature != null ? src.Feature.FeatureName : string.Empty))
+            .ForMember(dest => dest.PermissionTypeId, opt => opt.MapFrom(src => src.PermissionTypeId))
+            .ForMember(dest => dest.PermissionName, opt => opt.MapFrom(src => src.PermissionType != null ? src.PermissionType.PermissionName : string.Empty))
+            .ForMember(dest => dest.PermissionCode, opt => opt.MapFrom(src => src.PermissionType != null ? src.PermissionType.PermissionName : string.Empty))
+            .ForMember(dest => dest.IsAllowed, opt => opt.MapFrom(src => src.IsAllowed ?? false));
     }
 }

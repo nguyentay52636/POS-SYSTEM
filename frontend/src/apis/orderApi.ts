@@ -62,7 +62,7 @@ export interface CreateOrderItemDto {
 }
 
 export interface CreateOrderDto {
-  customerId: number;
+  customerId: number | null; // null means no customer (guest order)
   userId: number;
   promoId: number | null;
   promoCode: string | null;

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Shield, TrendingUp, Award, Loader2 } from "lucide-react"
 import { useRoles, usePermissionsData, savePermissions } from "@/hooks/usePermissons"
@@ -33,15 +33,21 @@ export default function PermissionType() {
     }, [roles, selectedRole])
 
     // Sync features state with featurePermissions when they change
+    // Reset features when role changes
     useEffect(() => {
-        if (featurePermissions.length > 0) {
-            setFeatures(featurePermissions)
+        if (selectedRole && featurePermissions.length > 0) {
+            // Deep copy để tránh reference issues
+            setFeatures(featurePermissions.map(fp => ({
+                featureId: fp.featureId,
+                featureName: fp.featureName,
+                permissions: { ...fp.permissions }
+            })))
         } else {
             setFeatures([])
         }
-    }, [featurePermissions])
+    }, [featurePermissions, selectedRole?.roleId])
 
-    const handlePermissionChange = (featureId: number, permission: PermissionType, value: boolean) => {
+    const handlePermissionChange = useCallback((featureId: number, permission: PermissionType, value: boolean) => {
         setFeatures((prev) =>
             prev.map((feature) =>
                 feature.featureId === featureId
@@ -52,18 +58,18 @@ export default function PermissionType() {
                     : feature,
             ),
         )
-    }
+    }, [])
 
-    const handleSelectAll = (permission: PermissionType, value: boolean) => {
+    const handleSelectAll = useCallback((permission: PermissionType, value: boolean) => {
         setFeatures((prev) =>
             prev.map((feature) => ({
                 ...feature,
                 permissions: { ...feature.permissions, [permission]: value },
             })),
         )
-    }
+    }, [])
 
-    const handleFeatureSelectAll = (featureId: number, value: boolean) => {
+    const handleFeatureSelectAll = useCallback((featureId: number, value: boolean) => {
         setFeatures((prev) =>
             prev.map((feature) =>
                 feature.featureId === featureId
@@ -76,7 +82,7 @@ export default function PermissionType() {
                     : feature,
             ),
         )
-    }
+    }, [])
 
     const handleSaveChanges = async () => {
         if (!selectedRole) {
@@ -84,20 +90,51 @@ export default function PermissionType() {
             return
         }
 
+        if (features.length === 0) {
+            toast.error("Không có dữ liệu phân quyền để lưu")
+            return
+        }
+
+        // Validate features có đầy đủ thông tin
+        const invalidFeatures = features.filter(f => !f.featureId || !f.featureName)
+        if (invalidFeatures.length > 0) {
+            console.error("Invalid features:", invalidFeatures)
+            toast.error("Dữ liệu phân quyền không hợp lệ. Vui lòng tải lại trang.")
+            return
+        }
+
         setIsSaving(true)
         try {
+            console.log("💾 Saving permissions for role:", selectedRole.roleId)
+            console.log("📋 Features to save:", features.length)
+
+            // Gọi API save permissions
             await savePermissions(selectedRole.roleId, features)
-            await mutate() // Refresh data from API
+
+            // Refresh data từ API sau khi save thành công
+            await mutate()
+
+            // Sync lại features state với data mới từ API
+            // mutate() sẽ trigger useEffect để update featurePermissions
+            // và useEffect sẽ sync lại features state
+
             toast.success("Đã lưu thay đổi phân quyền thành công!")
-        } catch (error) {
-            console.error(" Error saving permissions:", error)
-            toast.error("Không thể lưu thay đổi. Vui lòng thử lại.")
+        } catch (error: any) {
+            console.error("❌ Error saving permissions:", error)
+
+            // Hiển thị thông báo lỗi chi tiết hơn
+            const errorMessage = error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.message ||
+                "Không thể lưu thay đổi. Vui lòng thử lại."
+
+            toast.error(`Lỗi: ${errorMessage}`)
         } finally {
             setIsSaving(false)
         }
     }
 
-    const handleResetPermissions = () => {
+    const handleResetPermissions = useCallback(() => {
         setFeatures((prev) =>
             prev.map((feature) => ({
                 ...feature,
@@ -106,20 +143,26 @@ export default function PermissionType() {
                 },
             })),
         )
-    }
+    }, [])
 
-    const handleRoleChange = (role: IRole | null) => {
+    const handleRoleChange = useCallback((role: IRole | null) => {
         setSelectedRole(role)
-    }
+        // Reset features khi đổi role
+        setFeatures([])
+    }, [])
 
     const handleAddRole = async (roleData: Omit<IRole, "roleId"> | IRole) => {
         try {
             await addRole(roleData as IRole)
             await mutateRoles()
             toast.success("Đã thêm vai trò mới thành công!")
-        } catch (error) {
+        } catch (error: any) {
             console.error("[v0] Error adding role:", error)
-            toast.error("Không thể thêm vai trò. Vui lòng thử lại.")
+            const errorMessage = error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.message ||
+                "Không thể thêm vai trò. Vui lòng thử lại."
+            toast.error(errorMessage)
         }
     }
 
@@ -130,9 +173,13 @@ export default function PermissionType() {
                 await mutateRoles()
                 toast.success("Đã cập nhật vai trò thành công!")
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("[v0] Error updating role:", error)
-            toast.error("Không thể cập nhật vai trò. Vui lòng thử lại.")
+            const errorMessage = error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.message ||
+                "Không thể cập nhật vai trò. Vui lòng thử lại."
+            toast.error(errorMessage)
         }
     }
 
@@ -143,10 +190,15 @@ export default function PermissionType() {
             await deleteRole(selectedRole.roleId)
             await mutateRoles()
             setSelectedRole(null)
+            setFeatures([])
             toast.success("Đã xóa vai trò thành công!")
-        } catch (error) {
+        } catch (error: any) {
             console.error("[v0] Error deleting role:", error)
-            toast.error("Không thể xóa vai trò. Vui lòng thử lại.")
+            const errorMessage = error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.message ||
+                "Không thể xóa vai trò. Vui lòng thử lại."
+            toast.error(errorMessage)
         }
     }
 

@@ -61,10 +61,10 @@ public class RolesController : ControllerBase
         }
 
         try
-        {
-            var role = await _service.CreateAsync(dto);
+    {
+        var role = await _service.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = role.RoleId }, role);
-        }
+    }
         catch (System.ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });
@@ -86,11 +86,11 @@ public class RolesController : ControllerBase
         }
 
         try
-        {
-            var role = await _service.UpdateAsync(id, dto);
-            if (role == null) return NotFound();
-            return Ok(role);
-        }
+    {
+        var role = await _service.UpdateAsync(id, dto);
+        if (role == null) return NotFound();
+        return Ok(role);
+    }
         catch (System.ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });

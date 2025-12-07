@@ -138,7 +138,7 @@ export default function DialogPayment({
             }
 
             const orderData: CreateOrderDto = {
-                customerId: selectedCustomerId || 0, // 0 means no customer (guest)
+                customerId: selectedCustomerId || null, // null means no customer (guest order)
                 userId: userId,
                 promoId: promoId, // null if no promotion (to avoid FK constraint violation)
                 promoCode: promoCode, // null if no promotion

@@ -29,3 +29,25 @@ public class BulkUpdateRolePermissionDto
 {
     public List<CreateRolePermissionDto> Permissions { get; set; } = new List<CreateRolePermissionDto>();
 }
+
+/// <summary>
+/// DTO để admin cập nhật permissions cho role với format đơn giản
+/// </summary>
+public class UpdateRolePermissionsDto
+{
+    /// <summary>
+    /// Danh sách permissions theo format: { featureId, permissionTypeIds[] }
+    /// </summary>
+    public List<FeaturePermissionDto> FeaturePermissions { get; set; } = new List<FeaturePermissionDto>();
+}
+
+public class FeaturePermissionDto
+{
+    [Required(ErrorMessage = "FeatureId is required")]
+    public int FeatureId { get; set; }
+    
+    /// <summary>
+    /// Danh sách PermissionTypeId được phép (1=View, 2=Create, 3=Update, 4=Delete, 5=Print, 6=Export)
+    /// </summary>
+    public List<int> PermissionTypeIds { get; set; } = new List<int>();
+}
