@@ -16,7 +16,9 @@ import DialogPayment from "./DialogPayment"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import ChoiceCustomerPayment from "./ChoiceCustomerPayment/ChoiceCustomerPayment"
 import CustomerPoints from "./CustomerPoints/CustomerPoints"
+import FormNewCustomerPayment from "./CustomerPoints/FormNewCustomerPayment"
 import { CustomerInfo } from "./CustomerForm"
+import { createCustomer } from "@/apis/customerApi"
 import {
     addToCart,
     updateQuantity,
@@ -126,6 +128,7 @@ export default function SellsContent() {
     const [selectedCategory, setSelectedCategory] = useState<number | "all">("all")
     const [isChoiceDialogOpen, setIsChoiceDialogOpen] = useState(false)
     const [isCustomerPointsOpen, setIsCustomerPointsOpen] = useState(false)
+    const [isNewCustomerDialogOpen, setIsNewCustomerDialogOpen] = useState(false)
     const [configPoints, setConfigPoints] = useState<{ pointsPerUnit: number; moneyPerUnit: number; isActive: boolean } | null>(null)
 
     // Load config customer points
@@ -227,6 +230,23 @@ export default function SellsContent() {
         }
         dispatch(setCustomerInfo(info))
         dispatch(setSelectedCustomerId(customer.customerId))
+        setIsCustomerPointsOpen(false)
+        dispatch(setShowCustomerForm(true))
+    }
+
+    const handleAddNewCustomer = () => {
+        setIsNewCustomerDialogOpen(true)
+    }
+
+    const handleCustomerCreated = (customer: { customerId: number; name: string; phone: string; email: string }) => {
+        const info: CustomerInfo = {
+            fullName: customer.name,
+            phone: customer.phone || "",
+            email: customer.email || "",
+        }
+        dispatch(setCustomerInfo(info))
+        dispatch(setSelectedCustomerId(customer.customerId))
+        setIsNewCustomerDialogOpen(false)
         setIsCustomerPointsOpen(false)
         dispatch(setShowCustomerForm(true))
     }
@@ -395,7 +415,23 @@ export default function SellsContent() {
                     <DialogHeader>
                         <DialogTitle>Danh sách khách hàng tích điểm</DialogTitle>
                     </DialogHeader>
-                    <CustomerPoints onSelectCustomer={handleSelectCustomerFromPoints} />
+                    <CustomerPoints
+                        onSelectCustomer={handleSelectCustomerFromPoints}
+                        onAddNewCustomer={handleAddNewCustomer}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            {/* New Customer Dialog */}
+            <Dialog open={isNewCustomerDialogOpen} onOpenChange={setIsNewCustomerDialogOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Thêm khách hàng mới</DialogTitle>
+                    </DialogHeader>
+                    <FormNewCustomerPayment
+                        onCustomerCreated={handleCustomerCreated}
+                        onCancel={() => setIsNewCustomerDialogOpen(false)}
+                    />
                 </DialogContent>
             </Dialog>
 

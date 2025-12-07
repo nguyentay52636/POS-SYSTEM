@@ -5,14 +5,17 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCustomer } from '@/hooks/useCustomer'
 import { ICustomer } from '@/types/types'
+import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 type PointsFilter = 'all' | 'gt0' | 'gte100' | 'gte1000'
 
 interface CustomerPointsProps {
     onSelectCustomer?: (customer: ICustomer) => void
+    onAddNewCustomer?: () => void
 }
 
-export default function CustomerPoints({ onSelectCustomer }: CustomerPointsProps) {
+export default function CustomerPoints({ onSelectCustomer, onAddNewCustomer }: CustomerPointsProps) {
     const { customers, loading, searchTerm, setSearchTerm } = useCustomer()
     const [pointsFilter, setPointsFilter] = useState<PointsFilter>('all')
 
@@ -47,7 +50,19 @@ export default function CustomerPoints({ onSelectCustomer }: CustomerPointsProps
                 <CardTitle className="text-base">Khách hàng tích điểm</CardTitle>
             </CardHeader>
             <CardContent className="pt-2 space-y-3">
-                {/* Thanh tìm kiếm & lọc */}
+                {onAddNewCustomer && (
+                    <div className="flex justify-end">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-green-700 text-white hover:bg-green-800 hover:text-white cursor-pointer"
+                            onClick={onAddNewCustomer}
+                        >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Thêm khách hàng
+                        </Button>
+                    </div>
+                )}
                 <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
                     <Input
                         placeholder="Tìm khách theo tên, SĐT, email, mã KH..."
