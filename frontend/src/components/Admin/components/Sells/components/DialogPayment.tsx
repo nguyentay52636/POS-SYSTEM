@@ -367,7 +367,7 @@ export default function DialogPayment({
                         paymentMethods={paymentMethods}
                         amount={total}
                         orderId={`TXN${Date.now()}`}
-                        onPayment={onPaymentComplete}
+                        onPayment={handlePaymentComplete}
                         customerInfo={customerInfo}
                     />
 
