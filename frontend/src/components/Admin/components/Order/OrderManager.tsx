@@ -5,7 +5,7 @@ import DialogViewDetails from "./components/Dialog/DialogViewDetails";
 import { toast } from "sonner";
 import ActionOrder from "./components/TableManagerOrder/OrderActions";
 import { getOrderById } from "@/apis/orderApi";
-import { buildInvoiceHtml } from "@/lib/invoice";
+import { buildInvoiceHtml } from "@/lib/Invoice";
 import PaginationManagerOrder from "./components/PaginationManagerOrder";
 import { useOrder, calculateGross, calculateNet } from "@/hooks/useOrder";
 

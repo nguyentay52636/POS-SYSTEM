@@ -11,7 +11,7 @@ import { getConfigCustomerPoints, ConfigCustomerPoints } from '@/apis/configCust
 import { addPointsToCustomer } from '@/apis/customerApi';
 import { createOrder, getOrderById, type Order, type OrderItem, type CreateOrderDto } from '@/apis/orderApi';
 import { create as createPayment, type IPayment } from '@/apis/paymentApi';
-import { buildInvoiceHtml } from '@/lib/invoice';
+import { buildInvoiceHtml } from '@/lib/Invoice';
 import { updateInventoryQuantity } from '@/apis/inventoryApi';
 import { getAllInventory } from '@/apis/inventoryApi';
 import { IInventory } from '@/types/types';
