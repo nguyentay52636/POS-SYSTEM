@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { getProducts, createProduct, updateProduct, deleteProduct } from "@/apis/productApi"
+import { getProducts, createProduct, updateProduct, deleteProduct, updateProductStatus } from "@/apis/productApi"
 import { IProduct } from "@/types/types"
 import { toast } from "sonner"
 import { calculateProductStats } from "@/utils/productUtils"
@@ -79,6 +79,29 @@ export const useProduct = () => {
         []
     )
 
+    const handleToggleStatus = useCallback(
+        async (productId: string) => {
+            try {
+                const idNum = parseInt(productId)
+                await updateProductStatus(idNum)
+                setProducts((prev) =>
+                    prev.map((p) => {
+                        if (p.productId === idNum) {
+                            const nextStatus = (p.status === "inactive" || p.status === "locked") ? "active" : "inactive"
+                            return { ...p, status: nextStatus }
+                        }
+                        return p
+                    })
+                )
+                toast.success("Đã cập nhật trạng thái sản phẩm")
+            } catch (error) {
+                console.error("Lỗi cập nhật trạng thái sản phẩm:", error)
+                toast.error("Không thể cập nhật trạng thái sản phẩm")
+            }
+        },
+        []
+    )
+
     const handleFormSubmit = useCallback(
         async (product: IProduct) => {
             try {
@@ -134,6 +157,7 @@ export const useProduct = () => {
         handleOpenAddDialog,
         handleEditProduct,
         handleDeleteProduct,
+        handleToggleStatus,
         handleFormSubmit,
     }
 }

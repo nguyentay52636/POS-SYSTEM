@@ -174,6 +174,20 @@ public class ProductController : ControllerBase
     }
 
     /// <summary>
+    /// Toggle product status (active <-> inactive).
+    /// </summary>
+    /// <param name="id">Product id</param>
+    [HttpPatch("{id:int}/toggle-status")]
+    [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProductResponseDto>> ToggleStatus(int id)
+    {
+        var updated = await _service.ToggleStatusAsync(id);
+        if (updated == null) return NotFound();
+        return Ok(updated);
+    }
+
+    /// <summary>
     /// Delete a product by id.
     /// </summary>
     /// <param name="id">Product id to delete</param>

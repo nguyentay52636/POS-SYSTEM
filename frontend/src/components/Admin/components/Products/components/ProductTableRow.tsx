@@ -1,6 +1,6 @@
 import { TableCell, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Eye, Edit, Trash2 } from "lucide-react"
+import { Eye, Edit, Trash2, Lock } from "lucide-react"
 import { IProduct } from "@/types/types"
 import { formatPrice, getCategoryName, getSupplierName } from "@/utils/productUtils"
 import ProductStatusBadge from "./ProductStatusBadge"
@@ -9,14 +9,14 @@ interface ProductTableRowProps {
     product: IProduct
     onView: (product: IProduct) => void
     onEdit: (product: IProduct) => void
-    onDelete: (productId: string) => void
+    onToggleStatus: (productId: string) => void
 }
 
 export default function ProductTableRow({
     product,
     onView,
     onEdit,
-    onDelete,
+    onToggleStatus,
 }: ProductTableRowProps) {
     return (
         <TableRow key={product.productId} className="hover:bg-gray-50/60 dark:hover:bg-gray-900/50">
@@ -81,7 +81,7 @@ export default function ProductTableRow({
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 hover:bg-blue-50 dark:hover:bg-blue-900/40"
+                        className="h-8 w-8 p-0 cursor-pointer! hover:bg-blue-50 dark:hover:bg-blue-900/40"
                         onClick={() => onView(product)}
                     >
                         <Eye className="h-4 w-4 text-blue-600" />
@@ -89,7 +89,7 @@ export default function ProductTableRow({
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 hover:bg-green-50 dark:hover:bg-green-900/40"
+                        className="h-8 w-8 p-0 cursor-pointer! hover:bg-green-50 dark:hover:bg-green-900/40"
                         onClick={() => onEdit(product)}
                     >
                         <Edit className="h-4 w-4 text-green-600" />
@@ -97,10 +97,11 @@ export default function ProductTableRow({
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40"
-                        onClick={() => onDelete(product.productId?.toString() ?? "")}
+                        className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40 cursor-pointer!"
+                        onClick={() => onToggleStatus(product.productId?.toString() ?? "")}
+                        title="Khóa / mở khóa sản phẩm"
                     >
-                        <Trash2 className="h-4 w-4" />
+                        <Lock className="h-4 w-4 text-red-600" />
                     </Button>
                 </div>
             </TableCell>

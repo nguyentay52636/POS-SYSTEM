@@ -73,6 +73,7 @@ CREATE TABLE products (
     unit NVARCHAR(20) DEFAULT 'pcs',
     image_url NVARCHAR(255),
     created_at DATETIME DEFAULT GETDATE()
+    status NVARCHAR(20) NOT NULL CHECK (status IN ('active','inactive')) DEFAULT 'active'
 );
 GO
 

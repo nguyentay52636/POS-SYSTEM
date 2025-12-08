@@ -37,6 +37,7 @@ export default function ManagerProductContent() {
         handleEditProduct,
         handleDeleteProduct,
         handleFormSubmit,
+        handleToggleStatus: handleToggleStatusProduct,
     } = useProduct()
 
     const categories = useMemo(
@@ -103,7 +104,7 @@ export default function ManagerProductContent() {
                                     products={paginatedProducts}
                                     onView={handleViewDetails}
                                     onEdit={handleEditProduct}
-                                    onDelete={confirmDelete}
+                                    onToggleStatus={handleToggleStatusProduct}
                                 />
                                 <PaginationManagerProduct totalItems={filteredProducts.length} />
                             </>

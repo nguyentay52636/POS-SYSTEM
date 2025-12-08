@@ -20,6 +20,7 @@ public interface IProductService
     Task<int> ImportAsync(IEnumerable<CreateProductDto> products);
     Task<ProductResponseDto[]> ListAllAsync();
     Task<ProductResponseDto[]> GetBySupplierIdAsync(int supplierId);
+    Task<ProductResponseDto?> ToggleStatusAsync(int id);
 }
 
 public class ProductService : IProductService
@@ -58,6 +59,7 @@ public class ProductService : IProductService
         }
 
         var product = _mapper.Map<Product>(dto);
+        product.Status = product.Status ?? "active";
         product = await _repo.CreateAsync(product);
         return _mapper.Map<ProductResponseDto>(product);
     }
@@ -176,5 +178,11 @@ public class ProductService : IProductService
     {
         var items = await _repo.GetBySupplierIdAsync(supplierId);
         return _mapper.Map<ProductResponseDto[]>(items);
+    }
+
+    public async Task<ProductResponseDto?> ToggleStatusAsync(int id)
+    {
+        var updated = await _repo.ToggleStatusAsync(id);
+        return updated == null ? null : _mapper.Map<ProductResponseDto>(updated);
     }
 }

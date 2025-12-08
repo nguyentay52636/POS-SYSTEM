@@ -22,6 +22,7 @@ public interface IProductRepository
     Task<bool> CategoryExistsAsync(int categoryId);
     Task<bool> SupplierExistsAsync(int supplierId);
     Task<IReadOnlyList<Product>> GetBySupplierIdAsync(int supplierId);
+    Task<Product?> ToggleStatusAsync(int id);
 }
 
 public class ProductRepository : IProductRepository
@@ -143,5 +144,21 @@ public class ProductRepository : IProductRepository
             .Where(p => p.SupplierId == supplierId)
             .OrderBy(p => p.ProductName)
             .ToListAsync();
+    }
+
+    public async Task<Product?> ToggleStatusAsync(int id)
+    {
+        var product = await _db.Products.FindAsync(id);
+        if (product == null) return null;
+
+        var current = product.Status ?? "inactive";
+        product.Status = string.Equals(current, "active", StringComparison.OrdinalIgnoreCase)
+            ? "inactive"
+            : "active";
+
+        await _db.SaveChangesAsync();
+
+        // Return with related data
+        return await GetByIdAsync(id);
     }
 }

@@ -6,7 +6,7 @@ import ProductTableEmpty from "./ProductTableEmpty"
 interface ManagerTableProductsProps {
     products: IProduct[]
     onEdit: (product: IProduct) => void
-    onDelete: (productId: string) => void
+    onToggleStatus: (productId: string) => void
     onView: (product: IProduct) => void
 }
 
@@ -25,7 +25,7 @@ const TABLE_HEADERS = [
 export default function ManagerTableProducts({
     products,
     onEdit,
-    onDelete,
+    onToggleStatus,
     onView,
 }: ManagerTableProductsProps) {
     return (
@@ -55,7 +55,7 @@ export default function ManagerTableProducts({
                                 product={product}
                                 onView={onView}
                                 onEdit={onEdit}
-                                onDelete={onDelete}
+                                onToggleStatus={onToggleStatus}
                             />
                         ))
                     )}

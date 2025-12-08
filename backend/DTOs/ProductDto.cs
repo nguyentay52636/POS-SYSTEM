@@ -21,7 +21,7 @@ public class CreateProductDto
 
     [StringLength(255, ErrorMessage = "Image URL cannot exceed 255 characters")]
     public string? ImageUrl { get; set; }
-    
+
 
     [Required(ErrorMessage = "Category ID is required")]
     public int CategoryId { get; set; }
@@ -66,6 +66,7 @@ public class ProductResponseDto
     public string? Unit { get; set; }
     public int? CategoryId { get; set; }
     public int? SupplierId { get; set; }
+    public string? Status { get; set; }
     public CategoryResponseDto? Category { get; set; }
     public SupplierResponseDto? Supplier { get; set; }
     public DateTime? CreatedAt { get; set; }

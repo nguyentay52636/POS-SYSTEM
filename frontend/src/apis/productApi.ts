@@ -52,4 +52,13 @@ export const deleteProduct = async (productId: number): Promise<void> => {
     }
 }
 
+export const updateProductStatus = async (productId: number): Promise<void> => { 
+    try {
+        const { data } = await baseApi.patch(`/Product/${productId}/status`);
+        return data
+    }catch (error) { 
+        console.error('Error updating product status:', error)  
+        throw error
+    } 
 
+} 

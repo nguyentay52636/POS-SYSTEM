@@ -15,6 +15,8 @@ public partial class Product
 
     public string? Barcode { get; set; }
 
+    public string Status { get; set; } = "active"; // trạng thái sản phẩm: đang bán hoặc huỷ bán
+
     public decimal Price { get; set; }
 
     public string? Unit { get; set; }
