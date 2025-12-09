@@ -15,6 +15,7 @@ import { Edit, User, Settings, LogOut } from 'lucide-react'
 import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { TooltipContent } from '@/components/ui/tooltip'
+import { useRouter } from 'next/navigation'
 
 interface CurrentUser {
     fullName?: string
@@ -28,6 +29,7 @@ interface CurrentUser {
 
 export default function UserProfileAppSider({ isCollapsed, isMobile, setIsProfileDialogOpen }: { isCollapsed: any, isMobile: any, setIsProfileDialogOpen: any }) {
     const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
+    const router = useRouter()
 
     // Get current user from localStorage
     useEffect(() => {
@@ -97,7 +99,7 @@ export default function UserProfileAppSider({ isCollapsed, isMobile, setIsProfil
                                         </div>
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => setIsProfileDialogOpen(true)}>
+                                    <DropdownMenuItem onClick={() => router.push('/admin/profile')}>
                                         <Edit className="mr-2 h-4 w-4" />
                                         <span>Chỉnh sửa hồ sơ</span>
                                     </DropdownMenuItem>
@@ -158,11 +160,11 @@ export default function UserProfileAppSider({ isCollapsed, isMobile, setIsProfil
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => setIsProfileDialogOpen(true)}>
+                        <DropdownMenuItem onClick={() => router.push('/admin/profile')}>
                             <Edit className="mr-2 h-4 w-4" />
                             <span>Chỉnh sửa hồ sơ</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/admin/users')}>
                             <User className="mr-2 h-4 w-4" />
                             <span>Tài khoản</span>
                         </DropdownMenuItem>

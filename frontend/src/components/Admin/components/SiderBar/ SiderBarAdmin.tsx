@@ -71,7 +71,7 @@ export function SiderBarAdmin() {
                 {/* Header */}
                 <HeaderAppSider isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} isMobile={isMobile} />
                 {/* Back to Homepage */}
-                {!isCollapsed && (
+                {(!isCollapsed || isMobile) && (
                     <div className="px-4 py-2">
                         <Link
                             href="/"

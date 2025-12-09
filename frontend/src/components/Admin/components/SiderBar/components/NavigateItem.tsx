@@ -20,8 +20,8 @@ export const NavigateItem = ({ item, isCollapsed, isMobile, setIsMobileOpen }: {
           ${isCollapsed && !isMobile ? "justify-center px-2" : ""}
         `}
         >
-            <item.icon className={`${isCollapsed && !isMobile ? "h-5 w-5" : "h-5 w-5"} flex-shrink-0`} />
-            {!isCollapsed && (
+            <item.icon className="h-5 w-5 flex-shrink-0" />
+            {(!isCollapsed || isMobile) && (
                 <>
                     <span className="font-medium">{item.name}</span>
                     {item.badge && (
@@ -31,7 +31,7 @@ export const NavigateItem = ({ item, isCollapsed, isMobile, setIsMobileOpen }: {
                     )}
                 </>
             )}
-            {item.current && !isCollapsed && (
+            {item.current && (!isCollapsed || isMobile) && (
                 <div className="absolute right-2">
                     <ChevronRight className="h-4 w-4 text-sidebar-primary" />
                 </div>
