@@ -102,4 +102,23 @@ public class RegisterResponseDto
     public string Message { get; set; } = "Registration successful";
 }
 
+public class ChangePasswordDto
+{
+    [Required(ErrorMessage = "Old password is required")]
+    public string OldPassword { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "New password is required")]
+    [StringLength(255, MinimumLength = 6, ErrorMessage = "New password must be at least 6 characters")]
+    public string NewPassword { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Confirm password is required")]
+    [Compare("NewPassword", ErrorMessage = "New password and confirmation password do not match")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+}
+
+public class ChangePasswordResponseDto
+{
+    public bool Success { get; set; }
+    public string Message { get; set; } = string.Empty;
+}
 

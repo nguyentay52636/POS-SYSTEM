@@ -1,4 +1,4 @@
-import { login, register } from "@/apis/authApi";
+import { login, register, changePassword } from "@/apis/authApi";
 import { IUser } from "@/types/types";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
@@ -10,6 +10,9 @@ isAuthenticated : boolean
 isLoading : boolean
 error : string | null
 registrationSuccess : boolean
+changePasswordLoading : boolean
+changePasswordSuccess : boolean
+changePasswordError : string | null
 }
 // Safe localStorage access for SSR
 const getFromLocalStorage = (key: string, defaultValue: string) => {
@@ -46,7 +49,10 @@ const initialState : AuthState =  {
     isAuthenticated: isAuthenticated && !!currentUser && !!token, 
     isLoading : false,
     error : null,
-    registrationSuccess : false
+    registrationSuccess : false,
+    changePasswordLoading : false,
+    changePasswordSuccess : false,
+    changePasswordError : null
 }
 export const loginThunk = createAsyncThunk(
     'auth/login',
@@ -67,6 +73,20 @@ export const loginThunk = createAsyncThunk(
         return rejectWithValue((error as Error).message || 'Register failed');
     }
   })    
+
+  export const changePasswordThunk = createAsyncThunk(
+    'auth/changePassword',
+    async ({oldPassword, newPassword, confirmPassword}: {oldPassword: string, newPassword: string, confirmPassword: string}, {rejectWithValue}) => {
+      try {
+        const response = await changePassword({oldPassword, newPassword, confirmPassword})
+        return response
+      } catch (error: any) {
+        const errorMessage = error?.response?.data?.message || error?.message || 'Đổi mật khẩu thất bại';
+        return rejectWithValue(errorMessage);
+      }
+    }
+  )
+
   const authSlice = createSlice({
     name: 'auth',
     initialState,
@@ -92,6 +112,11 @@ export const loginThunk = createAsyncThunk(
       },
       resetRegistrationSuccess: (state) => {
         state.registrationSuccess = false;
+      },
+      resetChangePasswordState: (state) => {
+        state.changePasswordLoading = false;
+        state.changePasswordSuccess = false;
+        state.changePasswordError = null;
       },
     },
     extraReducers: (builder) => {
@@ -189,10 +214,28 @@ export const loginThunk = createAsyncThunk(
           state.error = action.payload as string;
           state.registrationSuccess = false;
         });
+
+      // Change Password cases
+      builder
+        .addCase(changePasswordThunk.pending, (state) => {
+          state.changePasswordLoading = true;
+          state.changePasswordError = null;
+          state.changePasswordSuccess = false;
+        })
+        .addCase(changePasswordThunk.fulfilled, (state) => {
+          state.changePasswordLoading = false;
+          state.changePasswordError = null;
+          state.changePasswordSuccess = true;
+        })
+        .addCase(changePasswordThunk.rejected, (state, action) => {
+          state.changePasswordLoading = false;
+          state.changePasswordError = action.payload as string;
+          state.changePasswordSuccess = false;
+        });
     },
   });
   
-  export const { logout, setCredentials, clearError, resetRegistrationSuccess } = authSlice.actions;
+  export const { logout, setCredentials, clearError, resetRegistrationSuccess, resetChangePasswordState } = authSlice.actions;
   export { register }; 
   export default authSlice.reducer;
   export const selectAuth = (state: RootState) => state.auth;

@@ -12,6 +12,7 @@ namespace backend.Services
     {
         Task<LoginResponseDto?> LoginAsync(LoginDto loginDto);
         Task<RegisterResponseDto?> RegisterAsync(RegisterDto registerDto);
+        Task<ChangePasswordResponseDto> ChangePasswordAsync(int userId, ChangePasswordDto changePasswordDto);
     }
 
     public class AuthService : IAuthService
@@ -125,6 +126,74 @@ namespace backend.Services
                 User = userResponse,
                 ExpiresAt = expiresAt,
                 Message = "Registration successful"
+            };
+        }
+
+        public async Task<ChangePasswordResponseDto> ChangePasswordAsync(int userId, ChangePasswordDto changePasswordDto)
+        {
+            // Find user by ID from JWT token
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                return new ChangePasswordResponseDto
+                {
+                    Success = false,
+                    Message = "User not found"
+                };
+            }
+
+            // Verify old password
+            if (string.IsNullOrEmpty(user.Password))
+            {
+                return new ChangePasswordResponseDto
+                {
+                    Success = false,
+                    Message = "Invalid old password"
+                };
+            }
+
+            try
+            {
+                if (!BCrypt.Net.BCrypt.Verify(changePasswordDto.OldPassword, user.Password))
+                {
+                    return new ChangePasswordResponseDto
+                    {
+                        Success = false,
+                        Message = "Old password is incorrect"
+                    };
+                }
+            }
+            catch (BCrypt.Net.SaltParseException)
+            {
+                return new ChangePasswordResponseDto
+                {
+                    Success = false,
+                    Message = "Invalid old password format"
+                };
+            }
+
+            // Check if new password is the same as old password
+            if (changePasswordDto.OldPassword == changePasswordDto.NewPassword)
+            {
+                return new ChangePasswordResponseDto
+                {
+                    Success = false,
+                    Message = "New password must be different from old password"
+                };
+            }
+
+            // Hash new password
+            var hashedNewPassword = BCrypt.Net.BCrypt.HashPassword(changePasswordDto.NewPassword);
+
+            // Update password
+            user.Password = hashedNewPassword;
+            await _userRepository.UpdateAsync(user);
+
+            return new ChangePasswordResponseDto
+            {
+                Success = true,
+                Message = "Password changed successfully"
             };
         }
     }

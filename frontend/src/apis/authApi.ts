@@ -30,3 +30,17 @@ export const register = async ({username, password, full_name}: registerDto) => 
         throw error
     }
  } 
+ interface changePasswordDto { 
+    oldPassword: string
+    newPassword: string
+    confirmPassword: string
+ } 
+ export const changePassword = async ({oldPassword, newPassword, confirmPassword}: changePasswordDto)=> { 
+ try {
+    const {data} = await baseApi.post('/Auth/change-password', { oldPassword, newPassword, confirmPassword })
+        return data
+    } catch (error: any) {
+        console.error('Error changing password:', error)
+        throw error
+    }
+}
