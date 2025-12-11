@@ -57,7 +57,7 @@ import { useInventory } from "@/hooks/useInventory"
 import { useCategory } from "@/hooks/useCategory"
 import { getConfigCustomerPoints } from "@/apis/configCustomerPoints"
 import { mockPaymentMethods } from "@/utils/MethodPayment"
-import { usePromotion, usePromotions } from "@/hooks/usePromotions"
+import { usePromotions } from "@/hooks/usePromotions"
 import type { Promotion } from "@/apis/promotionsApi"
 
 export interface Transaction {

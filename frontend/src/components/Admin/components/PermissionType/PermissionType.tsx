@@ -10,9 +10,9 @@ import { RoleDialog } from "./components/Dialog/RoleDialog"
 import { DeleteRoleDialog } from "./components/Dialog/DeleteRoleDialog"
 import { FeaturePermission, type PermissionType } from "@/apis/rolePermissionsApi"
 import { PermissionsTab } from "./components/Tabs/PermissionsTab"
-import { ProfitTab } from "./components/Tabs/ProfitTab"
-import { PointsTab } from "./components/Tabs/PointsTab"
+import { ProfitTab } from "./components/Tabs/components/ProfitTab/ProfitTab"
 import PermissionHeader from "./components/PermissionHeader"
+import { PreviewTab } from "./components/Tabs/components/ProfitTab/components/PreviewTab"
 
 export default function PermissionType() {
     const { roles, isLoading: rolesLoading, mutate: mutateRoles } = useRoles()
@@ -276,7 +276,7 @@ export default function PermissionType() {
                     </TabsContent>
 
                     <TabsContent value="points">
-                        <PointsTab />
+                        <PreviewTab />
                     </TabsContent>
                 </Tabs>
             </div>
