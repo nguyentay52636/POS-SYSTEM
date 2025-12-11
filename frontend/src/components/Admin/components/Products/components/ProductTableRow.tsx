@@ -60,7 +60,7 @@ export default function ProductTableRow({
                 <p className="font-semibold text-gray-900 dark:text-white">{formatPrice(product.price)}</p>
             </TableCell>
 
-            <TableCell>
+            {/* <TableCell>
                 <span
                     className={
                         product.unit > 0
@@ -70,7 +70,7 @@ export default function ProductTableRow({
                 >
                     {product.unit}
                 </span>
-            </TableCell>
+            </TableCell> */}
 
             <TableCell>
                 <ProductStatusBadge status={product.status || ""} />

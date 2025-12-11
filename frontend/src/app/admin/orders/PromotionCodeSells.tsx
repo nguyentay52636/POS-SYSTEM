@@ -5,16 +5,16 @@ import { Badge } from "@/components/ui/badge"
 import { X } from "lucide-react"
 import SelectPromotion from '@/components/Admin/components/Sells/components/SelectPromotion/SelectPromotion'
 import type { Promotion } from '@/apis/promotionsApi'
-import type { IPromotion } from "@/redux/Slice/cartSlice"
 
 interface PromotionCodeSellsProps {
     promoCode: string
     setPromoCode: (code: string) => void
     promoError: string
     setPromoError: (error: string) => void
-    appliedPromotions: IPromotion[]
+    appliedPromotions: Promotion[]
     applyPromoCode: () => void
     removePromotion: (promoId?: number) => void
+    onSelectPromotion?: (promo: Promotion) => void
 }
 
 export default function PromotionCodeSells({
@@ -24,7 +24,8 @@ export default function PromotionCodeSells({
     setPromoError,
     appliedPromotions,
     applyPromoCode,
-    removePromotion
+    removePromotion,
+    onSelectPromotion
 }: PromotionCodeSellsProps) {
     return (
         <>
@@ -50,10 +51,15 @@ export default function PromotionCodeSells({
                     <SelectPromotion
                         onSelect={(promo: Promotion) => {
                             if (promo.promoCode) {
-                                setPromoCode(promo.promoCode)
                                 setPromoError("")
-                                // Áp dụng ngay khi chọn từ danh sách
-                                applyPromoCode()
+                                // Gọi handler trực tiếp với dữ liệu promotion
+                                if (onSelectPromotion) {
+                                    onSelectPromotion(promo)
+                                } else {
+                                    // Fallback: set promo code và apply
+                                    setPromoCode(promo.promoCode)
+                                    applyPromoCode()
+                                }
                             }
                         }}
                     />
@@ -82,28 +88,35 @@ export default function PromotionCodeSells({
                             </Button>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            {appliedPromotions.map((p) => (
-                                <div
-                                    key={p.promo_id}
-                                    className="flex items-center gap-2 border border-green-200 rounded-full px-3 py-1 bg-green-50"
-                                >
-                                    <Badge className="bg-green-600 text-white font-semibold px-2 py-0.5">
-                                        {p.promo_code}
-                                    </Badge>
-                                    <span className="text-xs text-green-700">
-                                        {p.discount_type === "percentage"
-                                            ? `Giảm ${p.discount_value}%`
-                                            : `Giảm ${p.discount_value?.toLocaleString("vi-VN")}đ`}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={() => removePromotion(p.promo_id)}
-                                        className="text-red-500 hover:text-red-700"
+                            {appliedPromotions.map((p) => {
+                                const id = p.promoId
+                                const code = p.promoCode
+                                const discountType = p.discountType
+                                const discountValue = p.discountValue
+                                return (
+                                    <div
+                                        key={id ?? code ?? Math.random()}
+                                        className="flex items-center gap-2 border border-green-200 rounded-full px-3 py-1 bg-green-50"
                                     >
-                                        <X className="h-3 w-3" />
-                                    </button>
-                                </div>
-                            ))}
+                                        <Badge className="bg-green-600 text-white font-semibold px-2 py-0.5">
+                                            {code}
+                                        </Badge>
+                                        <span className="text-xs text-green-700">
+                                            {discountType === "percentage"
+                                                ? `Giảm ${discountValue}%`
+                                                : `Giảm ${(discountValue ?? 0).toLocaleString("vi-VN")}đ`}
+                                        </span>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => removePromotion(id)}
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 px-2"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </Button>
+                                    </div>
+                                )
+                            })}
                         </div>
                     </div>
                 )}

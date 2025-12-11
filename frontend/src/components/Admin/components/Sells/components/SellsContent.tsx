@@ -28,7 +28,6 @@ import {
     applyPromotion,
     removePromotion,
     setPromoError,
-    setSelectedEWallet,
     setSelectedPaymentMethod,
     setReceivedAmount,
     updateCustomerInfo,
@@ -57,9 +56,9 @@ import type { AppDispatch } from "@/redux/store"
 import { useInventory } from "@/hooks/useInventory"
 import { useCategory } from "@/hooks/useCategory"
 import { getConfigCustomerPoints } from "@/apis/configCustomerPoints"
-import { addPointsToCustomer } from "@/apis/customerApi"
-import { toast } from "sonner"
 import { mockPaymentMethods } from "@/utils/MethodPayment"
+import { usePromotion, usePromotions } from "@/hooks/usePromotions"
+import type { Promotion } from "@/apis/promotionsApi"
 
 export interface Transaction {
     transaction_id: string
@@ -77,29 +76,6 @@ export interface Transaction {
     customerInfo?: CustomerInfo
 }
 
-const mockPromotions: IPromotion[] = [
-    {
-        promo_id: 1,
-        promo_code: "SUMMER2024",
-        description: "Giảm 10% cho đơn hàng mùa hè",
-        discount_type: "percentage",
-        discount_value: 10,
-    },
-    {
-        promo_id: 2,
-        promo_code: "NEWYEAR",
-        description: "Giảm 50.000đ cho đơn hàng năm mới",
-        discount_type: "fixed",
-        discount_value: 50000,
-    },
-    {
-        promo_id: 3,
-        promo_code: "VIP20",
-        description: "Giảm 20% cho khách hàng VIP",
-        discount_type: "percentage",
-        discount_value: 20,
-    },
-]
 
 
 
@@ -107,6 +83,8 @@ export default function SellsContent() {
     const dispatch = useDispatch<AppDispatch>()
     const { inventories, loading, fetchInventories } = useInventory()
     const { categories, loading: categoryLoading } = useCategory()
+    // khuyen mai 
+    const { promotions, loading: promotionLoading, fetchPromotions } = usePromotions()
 
     // Redux state
     const cart = useSelector(selectCartItems)
@@ -310,9 +288,46 @@ export default function SellsContent() {
     // Apply promotion code
     const handleApplyPromoCode = () => {
         dispatch(setPromoError(""))
-        const promotion = mockPromotions.find((p) => p.promo_code.toUpperCase() === promoCode.toUpperCase())
+        const promotion = promotions.find((p) => p.promoCode?.toUpperCase() === promoCode.toUpperCase())
         if (promotion) {
-            dispatch(applyPromotion(promotion))
+            // Chỉ áp dụng khuyến mãi đang active
+            if (promotion.status !== "active") {
+                dispatch(setPromoError("Mã khuyến mãi không còn hoạt động"))
+                return
+            }
+            // Kiểm tra đã hết hạn chưa
+            const now = new Date()
+            const endDate = new Date(promotion.endDate)
+            if (endDate < now) {
+                dispatch(setPromoError("Mã khuyến mãi đã hết hạn"))
+                return
+            }
+            // Kiểm tra chưa đến thời gian bắt đầu
+            const startDate = new Date(promotion.startDate)
+            if (startDate > now) {
+                dispatch(setPromoError("Mã khuyến mãi chưa có hiệu lực"))
+                return
+            }
+            // Kiểm tra đơn hàng tối thiểu
+            if (promotion.minOrderAmount && subtotal < promotion.minOrderAmount) {
+                dispatch(setPromoError(`Đơn hàng tối thiểu ${promotion.minOrderAmount.toLocaleString("vi-VN")}đ để áp dụng mã này`))
+                return
+            }
+            // Kiểm tra đã đạt giới hạn sử dụng chưa
+            if (promotion.usageLimit && promotion.usedCount >= promotion.usageLimit) {
+                dispatch(setPromoError("Mã khuyến mãi đã hết lượt sử dụng"))
+                return
+            }
+            // Chuyển đổi từ API Promotion sang Redux IPromotion
+            const promoToApply: IPromotion = {
+                promo_id: promotion.promoId!,
+                promo_code: promotion.promoCode || "",
+                description: promotion.description,
+                discount_type: promotion.discountType,
+                discount_value: promotion.discountValue,
+            }
+            dispatch(applyPromotion(promoToApply))
+            dispatch(setPromoCode("")) // Clear input sau khi áp dụng thành công
         } else {
             dispatch(setPromoError("Mã khuyến mãi không hợp lệ"))
         }
@@ -321,6 +336,48 @@ export default function SellsContent() {
     // Remove promotion handler
     const handleRemovePromotion = (promoId?: number) => {
         dispatch(removePromotion(promoId))
+    }
+
+    // Handle select promotion from dialog directly
+    const handleSelectPromotion = (promotion: Promotion) => {
+        dispatch(setPromoError(""))
+        // Chỉ áp dụng khuyến mãi đang active
+        if (promotion.status !== "active") {
+            dispatch(setPromoError("Mã khuyến mãi không còn hoạt động"))
+            return
+        }
+        // Kiểm tra đã hết hạn chưa
+        const now = new Date()
+        const endDate = new Date(promotion.endDate)
+        if (endDate < now) {
+            dispatch(setPromoError("Mã khuyến mãi đã hết hạn"))
+            return
+        }
+        // Kiểm tra chưa đến thời gian bắt đầu
+        const startDate = new Date(promotion.startDate)
+        if (startDate > now) {
+            dispatch(setPromoError("Mã khuyến mãi chưa có hiệu lực"))
+            return
+        }
+        // Kiểm tra đơn hàng tối thiểu
+        if (promotion.minOrderAmount && subtotal < promotion.minOrderAmount) {
+            dispatch(setPromoError(`Đơn hàng tối thiểu ${promotion.minOrderAmount.toLocaleString("vi-VN")}đ để áp dụng mã này`))
+            return
+        }
+        // Kiểm tra đã đạt giới hạn sử dụng chưa
+        if (promotion.usageLimit && promotion.usedCount >= promotion.usageLimit) {
+            dispatch(setPromoError("Mã khuyến mãi đã hết lượt sử dụng"))
+            return
+        }
+        // Chuyển đổi từ API Promotion sang Redux IPromotion
+        const promoToApply: IPromotion = {
+            promo_id: promotion.promoId!,
+            promo_code: promotion.promoCode || "",
+            description: promotion.description,
+            discount_type: promotion.discountType,
+            discount_value: promotion.discountValue,
+        }
+        dispatch(applyPromotion(promoToApply))
     }
 
     // Stats (already computed from Redux selectors)
@@ -366,6 +423,7 @@ export default function SellsContent() {
                             appliedPromotions={appliedPromotions}
                             applyPromoCode={handleApplyPromoCode}
                             removePromotion={handleRemovePromotion}
+                            onSelectPromotion={handleSelectPromotion}
                         />
 
                         <div className="space-y-3 mb-6 bg-white p-5 rounded-xl border border-green-200 shadow-sm">

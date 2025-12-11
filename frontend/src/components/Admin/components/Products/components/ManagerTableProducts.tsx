@@ -17,7 +17,6 @@ const TABLE_HEADERS = [
     "Danh mục",
     "Nhà cung cấp",
     "Giá bán",
-    "Tồn kho",
     "Trạng thái",
     "Thao tác",
 ] as const

@@ -2,14 +2,9 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { RootState } from "../store"
 import { IProduct } from "@/types/types"
 import { CustomerInfo } from "@/components/Admin/components/Sells/components/CustomerForm"
+import type { Promotion } from "@/apis/promotionsApi"
 
-export interface IPromotion {
-    promo_id: number
-    promo_code: string
-    description: string
-    discount_type: string // "percentage" or "fixed"
-    discount_value?: number
-}
+
 
 export interface CartItem {
     product: IProduct
@@ -19,7 +14,7 @@ export interface CartItem {
 
 interface CartState {
     items: CartItem[]
-    appliedPromotions: IPromotion[]
+    appliedPromotions: Promotion[]
     promoCode: string
     promoError: string
     selectedEWallet: string
@@ -104,10 +99,13 @@ const cartSlice = createSlice({
             state.promoCode = action.payload
             state.promoError = ""
         },
-        applyPromotion: (state, action: PayloadAction<IPromotion>) => {
-            const exists = state.appliedPromotions.some(
-                (p) => p.promo_id === action.payload.promo_id
-            )
+        applyPromotion: (state, action: PayloadAction<Promotion>) => {
+            // allow apply only when user clicks "Áp dụng"
+            const incomingId = action.payload.promoId ?? (action.payload as any).promo_id
+            const exists = state.appliedPromotions.some((p) => {
+                const id = p.promoId ?? (p as any).promo_id
+                return id != null && incomingId != null ? id === incomingId : false
+            })
             if (!exists) {
                 state.appliedPromotions.push(action.payload)
             }
@@ -116,9 +114,10 @@ const cartSlice = createSlice({
         removePromotion: (state, action: PayloadAction<number | undefined>) => {
             const promoId = action.payload
             if (promoId != null) {
-                state.appliedPromotions = state.appliedPromotions.filter(
-                    (p) => p.promo_id !== promoId
-                )
+                state.appliedPromotions = state.appliedPromotions.filter((p) => {
+                    const id = p.promoId ?? (p as any).promo_id
+                    return id !== promoId
+                })
             } else {
                 state.appliedPromotions = []
                 state.promoCode = ""
@@ -198,10 +197,13 @@ export const selectCartTotal = (state: RootState) => {
         let fixedTotal = 0
 
         state.cart.appliedPromotions.forEach((promo) => {
-            if (promo.discount_type === "percentage") {
-                percentTotal += promo.discount_value || 0
-            } else if (promo.discount_type === "fixed") {
-                fixedTotal += promo.discount_value || 0
+            const discountType = (promo as any).discount_type ?? promo.discountType
+            const discountValue = (promo as any).discount_value ?? promo.discountValue ?? 0
+
+            if (discountType === "percentage") {
+                percentTotal += discountValue
+            } else if (discountType === "fixed") {
+                fixedTotal += discountValue
             }
         })
 
