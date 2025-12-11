@@ -1,12 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Filter, Users, Search, Shield } from 'lucide-react'
+import { Filter, Users, Search, Shield, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { IUser } from '@/types/types'
 import ActionTableUser from './ActionTableUser'
 import type { IRole } from '@/apis/roleApi'
+import { exportToExcel, formatDateVN, ExcelColumn } from '@/utils/Export/ExcelExport'
+import { toast } from 'sonner'
 
 interface TableManagerUserProps {
     users: IUser[];
@@ -31,6 +33,51 @@ const getRoleName = (userRole: string, roles: IRole[]): string => {
 }
 
 export default function TableManagerUser({ users, roles, searchQuery, setSearchQuery, onView, onEdit, onDelete }: TableManagerUserProps) {
+
+    const handleExportExcel = () => {
+        if (users.length === 0) {
+            toast.error('Không có dữ liệu để xuất!')
+            return
+        }
+
+        const columns: ExcelColumn<IUser>[] = [
+            { header: 'ID', key: 'user_id', width: 10 },
+            { header: 'Tên đăng nhập', key: 'username', width: 20 },
+            { header: 'Họ tên', key: 'full_name', width: 25 },
+            {
+                header: 'Vai trò',
+                key: 'role',
+                width: 15,
+                formatter: (value) => getRoleName(value, roles)
+            },
+            {
+                header: 'Ngày tạo',
+                key: 'createdAt',
+                width: 22,
+                formatter: (value) => formatDateVN(value)
+            },
+            {
+                header: 'Cập nhật',
+                key: 'updatedAt',
+                width: 22,
+                formatter: (value) => formatDateVN(value)
+            },
+        ]
+
+        try {
+            exportToExcel({
+                data: users,
+                columns,
+                fileName: 'danh_sach_tai_khoan',
+                sheetName: 'Tài khoản',
+                title: 'DANH SÁCH TÀI KHOẢN HỆ THỐNG',
+            })
+            toast.success('Xuất Excel thành công!')
+        } catch (error) {
+            console.error('Export error:', error)
+            toast.error('Xuất Excel thất bại!')
+        }
+    }
     return (
         <Card className="shadow-xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
@@ -59,6 +106,15 @@ export default function TableManagerUser({ users, roles, searchQuery, setSearchQ
                         <Button variant="outline" size="sm" className="hover:bg-gray-50 dark:hover:bg-gray-800 bg-transparent">
                             <Filter className="h-4 w-4 mr-2" />
                             Lọc
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleExportExcel}
+                            className="hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 hover:border-green-300 bg-transparent"
+                        >
+                            <Download className="h-4 w-4 mr-2" />
+                            Xuất Excel
                         </Button>
                     </div>
                 </div>
@@ -117,8 +173,8 @@ export default function TableManagerUser({ users, roles, searchQuery, setSearchQ
                                             </span>
                                         </TableCell>
                                         <TableCell>
-                                            <ActionTableUser 
-                                                user={u} 
+                                            <ActionTableUser
+                                                user={u}
                                                 onView={onView}
                                                 onEdit={onEdit}
                                                 onDelete={onDelete}

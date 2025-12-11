@@ -13,6 +13,8 @@ import PaginationManagerProduct from "./components/PaginationManagerProduct"
 import ManagerTableProducts from "./components/ManagerTableProducts"
 import { usePagination } from "@/context/PaginationContext"
 import { useProduct } from "@/hooks/useProduct"
+import { exportToExcel, formatCurrencyVN, formatDateVN, ExcelColumn } from "@/utils/Export/ExcelExport"
+import { toast } from "sonner"
 
 const STATUSES: string[] = ["all", "active", "inactive", "out-of-stock"]
 
@@ -66,6 +68,49 @@ export default function ManagerProductContent() {
         [handleDeleteProduct]
     )
 
+    const handleExportExcel = useCallback(() => {
+        if (filteredProducts.length === 0) {
+            toast.error('Không có dữ liệu để xuất!')
+            return
+        }
+
+        const columns: ExcelColumn<IProduct>[] = [
+            { header: 'Mã SP', key: 'productId', width: 10 },
+            { header: 'Tên sản phẩm', key: 'productName', width: 35 },
+            { header: 'Danh mục', key: 'category.categoryName', width: 20 },
+            { header: 'Nhà cung cấp', key: 'supplier.name', width: 25 },
+            {
+                header: 'Giá bán',
+                key: 'price',
+                width: 18,
+                formatter: (value) => formatCurrencyVN(value)
+            },
+            { header: 'Đơn vị', key: 'unit', width: 10 },
+            { header: 'Barcode', key: 'barcode', width: 15 },
+            { header: 'Trạng thái', key: 'status', width: 12 },
+            {
+                header: 'Ngày tạo',
+                key: 'createdAt',
+                width: 20,
+                formatter: (value) => formatDateVN(value)
+            },
+        ]
+
+        try {
+            exportToExcel({
+                data: filteredProducts,
+                columns,
+                fileName: 'danh_sach_san_pham',
+                sheetName: 'Sản phẩm',
+                title: 'DANH SÁCH SẢN PHẨM',
+            })
+            toast.success('Xuất Excel thành công!')
+        } catch (error) {
+            console.error('Export error:', error)
+            toast.error('Xuất Excel thất bại!')
+        }
+    }, [filteredProducts])
+
     return (
         <div className="min-h-screen mx-2 my-4">
             <ManagerProductHeader />
@@ -80,7 +125,7 @@ export default function ManagerProductContent() {
 
                 <Card className="shadow-sm border-0">
                     <CardHeader className="border-b dark:bg-gray-900/50">
-                        <ActionHeaderTitle handleOpenAddDialog={handleOpenAddDialog} />
+                        <ActionHeaderTitle handleOpenAddDialog={handleOpenAddDialog} onExportExcel={handleExportExcel} />
                     </CardHeader>
                     <CardContent className="p-6">
                         <SearchCategoryProduct

@@ -22,13 +22,13 @@ export default function TableManagerPromotions({
     getStatusBadge
 }: TableManagerPromotionsProps) {
     return (
-        <Card className="bg-white">
+        <Card>
             <CardHeader>
                 <CardTitle>Danh sách khuyến mãi ({filteredPromotions.length})</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="overflow-x-auto bg-white">
-                    <Table className="bg-white">
+                <div className="overflow-x-auto white">
+                    <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Mã KM</TableHead>

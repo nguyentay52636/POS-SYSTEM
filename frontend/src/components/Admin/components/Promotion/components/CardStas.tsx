@@ -20,7 +20,7 @@ export default function CardStas({ searchTerm, setSearchTerm, statusFilter, setS
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 bg-white">
+                <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-blue-800 flex items-center gap-2 text-sm font-medium">
                             <Package className="h-4 w-4" />
@@ -33,7 +33,7 @@ export default function CardStas({ searchTerm, setSearchTerm, statusFilter, setS
                     </CardContent>
                 </Card>
 
-                <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100">
+                <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-green-800 flex items-center gap-2 text-sm font-medium">
                             <TrendingUp className="h-4 w-4" />
@@ -44,9 +44,9 @@ export default function CardStas({ searchTerm, setSearchTerm, statusFilter, setS
                         <div className="text-2xl font-bold text-green-900">{stats.active}</div>
                         <p className="text-green-600 text-sm">Chương trình hiện tại</p>
                     </CardContent>
-                </Card>
+                </Card >
 
-                <Card className="border-red-200 bg-gradient-to-br from-red-50 to-red-100">
+                <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-red-800 flex items-center gap-2 text-sm font-medium">
                             <Calendar className="h-4 w-4" />
@@ -59,7 +59,7 @@ export default function CardStas({ searchTerm, setSearchTerm, statusFilter, setS
                     </CardContent>
                 </Card>
 
-                <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100">
+                <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-purple-800 flex items-center gap-2 text-sm font-medium">
                             <Percent className="h-4 w-4" />
@@ -71,8 +71,8 @@ export default function CardStas({ searchTerm, setSearchTerm, statusFilter, setS
                         <p className="text-purple-600 text-sm">Trung bình</p>
                     </CardContent>
                 </Card>
-            </div>
-            <Card className="bg-white">
+            </div >
+            <Card>
                 <CardContent className="p-6">
                     <div className="flex flex-col sm:flex-row gap-4">
                         <div className="flex-1">

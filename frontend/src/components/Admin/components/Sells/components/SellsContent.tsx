@@ -158,6 +158,10 @@ export default function SellsContent() {
             ""
         const barcode = inventory.product?.barcode ?? ""
         const categoryId = inventory.product?.categoryId
+        const status = inventory.product?.status
+
+        // Chỉ hiển thị sản phẩm có status "active"
+        const isActive = status === "active"
 
         const matchesSearch =
             name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -167,7 +171,7 @@ export default function SellsContent() {
             selectedCategory === "all" ||
             (categoryId !== undefined && categoryId === selectedCategory)
 
-        return matchesSearch && matchesCategory
+        return isActive && matchesSearch && matchesCategory
     })
 
     const handleAddToCart = (inventory: IInventory) => {
