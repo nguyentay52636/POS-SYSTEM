@@ -57,7 +57,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings), typeof(OrderMappings), typeof(InventoryMappings), typeof(PaymentMappings), typeof(ImportReceiptMappings), typeof(RbacMappings), typeof(ExportReceiptMappings), typeof(FeatureMappings), typeof(ConfigCustomerPointMappings));
+builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings), typeof(OrderMappings), typeof(InventoryMappings), typeof(PaymentMappings), typeof(ImportReceiptMappings), typeof(RbacMappings), typeof(ExportReceiptMappings), typeof(FeatureMappings), typeof(ConfigCustomerPointMappings), typeof(DashBoardMappings));
 
 // DI
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -122,6 +122,10 @@ builder.Services.AddScoped<IPermissionTypeService, PermissionTypeService>();
 
 builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
 builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
+
+// Dashboard
+builder.Services.AddScoped<IDashBoardRepository, DashBoardRepository>();
+builder.Services.AddScoped<IDashBoardService, DashBoardService>();
 
 var app = builder.Build();
 

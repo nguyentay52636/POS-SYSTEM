@@ -8,6 +8,7 @@ interface ManagerTableProductsProps {
     onEdit: (product: IProduct) => void
     onToggleStatus: (productId: string) => void
     onView: (product: IProduct) => void
+    onDelete: (productId: string) => void
 }
 
 const TABLE_HEADERS = [
@@ -26,6 +27,7 @@ export default function ManagerTableProducts({
     onEdit,
     onToggleStatus,
     onView,
+    onDelete,
 }: ManagerTableProductsProps) {
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm dark:border-gray-800 dark:bg-gray-900/40">
@@ -55,6 +57,7 @@ export default function ManagerTableProducts({
                                 onView={onView}
                                 onEdit={onEdit}
                                 onToggleStatus={onToggleStatus}
+                                onDelete={onDelete}
                             />
                         ))
                     )}

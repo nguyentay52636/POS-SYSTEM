@@ -10,6 +10,7 @@ interface ProductTableRowProps {
     onView: (product: IProduct) => void
     onEdit: (product: IProduct) => void
     onToggleStatus: (productId: string) => void
+    onDelete: (productId: string) => void
 }
 
 export default function ProductTableRow({
@@ -17,6 +18,7 @@ export default function ProductTableRow({
     onView,
     onEdit,
     onToggleStatus,
+    onDelete,
 }: ProductTableRowProps) {
     return (
         <TableRow key={product.productId} className="hover:bg-gray-50/60 dark:hover:bg-gray-900/50">
@@ -102,6 +104,15 @@ export default function ProductTableRow({
                         title="Khóa / mở khóa sản phẩm"
                     >
                         <Lock className="h-4 w-4 text-red-600" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40 cursor-pointer!"
+                        onClick={() => onDelete(product.productId?.toString() ?? "")}
+                        title="Xóa sản phẩm"
+                    >
+                        <Trash2 className="h-4 w-4 text-red-600" />
                     </Button>
                 </div>
             </TableCell>

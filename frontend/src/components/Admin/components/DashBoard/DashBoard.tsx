@@ -9,8 +9,9 @@ export default function DashBoard() {
     return (
         <div className="flex-1 space-y-6 p-6">
             <HeaderRevenue />
+            {/* <OrdersChart /> */}
             <StatsCardRevenue />
-            <OrdersChart />
+
 
             <div className="grid gap-4 md:grid-cols-2">
                 <CategoryChart />
@@ -39,7 +40,7 @@ export default function DashBoard() {
                 </div>
             </div>
 
-            <OrdersChart />
+            {/* <OrdersChart /> */}
         </div>
     )
 }

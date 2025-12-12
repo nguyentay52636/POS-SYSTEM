@@ -150,6 +150,7 @@ export default function ManagerProductContent() {
                                     onView={handleViewDetails}
                                     onEdit={handleEditProduct}
                                     onToggleStatus={handleToggleStatusProduct}
+                                    onDelete={confirmDelete}
                                 />
                                 <PaginationManagerProduct totalItems={filteredProducts.length} />
                             </>
