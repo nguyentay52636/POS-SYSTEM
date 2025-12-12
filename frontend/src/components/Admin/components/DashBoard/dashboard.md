@@ -26,3 +26,30 @@ quarter: 1-4 (cho thống kê quý)
 topCount: 1-50 (số sản phẩm top, default: 10)
 fromDate: DateTime (custom range)
 toDate: DateTime (custom range)
+
+
+GET /api/dashboard?period=month&year=2025 - Thống kê theo tháng
+GET /api/dashboard?period=week&year=2025&month=12 - Thống kê theo tuần
+GET /api/dashboard?period=quarter&year=2025 - Thống kê theo quý
+GET /api/dashboard/top-products?period=month&topCount=5 - Top 5 s
+
+API Response sẽ trả về như sau:
+1. Revenue Chart (Biểu đồ doanh thu):
+{  "label": "T12",  "periodValue": 12,  "revenue": 38000,  "orderCount": 1,  "customerCount": 0,  "startDate": "2025-12-01",  "endDate": "2025-12-31"}
+
+2. Top Products (Sản phẩm bán chạy):
+{  "productId": 14,  "productName": "sữa Milo",  "categoryName": "Gia vị",  "imageUrl": "http://localhost:5006/uploads/images/...",  "totalQuantitySold": 8,  "totalRevenue": 96000,  "growthRate": 15,  "rank": 1
+}
+
+
+
+
+
+Trường	Giá trị ví dụ	Ý nghĩa
+label	"T12"	Nhãn hiển thị trên biểu đồ. "T12" = Tháng 12. Tùy theo period: "Tuần 1", "Q1", "2025"
+periodValue	12	Giá trị số của kỳ thống kê. Ở đây là tháng 12
+revenue	38000	Tổng doanh thu trong kỳ này (VNĐ). Tính bằng SUM(Order.TotalAmount) của các đơn hàng status = "paid"
+orderCount	1	Số lượng đơn hàng trong kỳ này. Có 1 đơn hàng trong tháng 12
+customerCount	0	Số khách hàng khác nhau đã mua trong kỳ. Bằng 0 vì đơn hàng có customerId = null
+startDate	"2025-12-01"	Ngày bắt đầu của kỳ thống kê (đầu tháng 12)
+endDate	"2025-12-31"	Ngày kết thúc của kỳ thống kê (cuối tháng 12)
