@@ -1,12 +1,12 @@
 "use client"
 
-import { Badge } from '@/components/ui/badge'
 import { ChartContainer, ChartTooltip } from '@/components/ui/chart'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { categoryData, topProducts } from './Data/DataRevenue'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts'
-import { IRevenueChart } from '@/apis/dashboardApi'
+import { IRevenueChart, ITopProduct } from '@/apis/dashboardApi'
 import { useMemo } from 'react'
+import { useTheme } from 'next-themes'
+import StatsBestSeller from './StatsBestSeller'
 
 type PeriodType = "week" | "month" | "year"
 
@@ -14,6 +14,8 @@ interface StatsCardRevenueProps {
     chartData: IRevenueChart[]
     loading: boolean
     selectedPeriod: PeriodType
+    topProducts: ITopProduct[]
+    loadingTopProducts: boolean
 }
 
 const formatRevenue = (value: number) => {
@@ -59,11 +61,18 @@ const getPeriodDescription = (period: PeriodType) => {
     }
 }
 
-export default function ChartsRevenue({ chartData, loading, selectedPeriod }: StatsCardRevenueProps) {
+
+export default function ChartsRevenue({ chartData, loading, selectedPeriod, topProducts, loadingTopProducts }: StatsCardRevenueProps) {
+    const { resolvedTheme } = useTheme()
+    const isDark = resolvedTheme === 'dark'
+
+    // Màu cho dark mode: gray-500 (#6b7280), light mode: primary
+    const chartColor = isDark ? '#6b7280' : 'hsl(var(--primary))'
+
     const chartConfig = {
         revenue: {
             label: "Doanh thu",
-            color: "hsl(var(--primary))",
+            color: chartColor,
         },
         orders: {
             label: "Đơn hàng",
@@ -147,8 +156,8 @@ export default function ChartsRevenue({ chartData, loading, selectedPeriod }: St
                                 />
                                 <defs>
                                     <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+                                        <stop offset="5%" stopColor={chartColor} stopOpacity={0.8} />
+                                        <stop offset="95%" stopColor={chartColor} stopOpacity={0.1} />
                                     </linearGradient>
                                 </defs>
                                 <Area
@@ -156,7 +165,7 @@ export default function ChartsRevenue({ chartData, loading, selectedPeriod }: St
                                     type="natural"
                                     fill="url(#fillRevenue)"
                                     fillOpacity={0.4}
-                                    stroke="hsl(var(--primary))"
+                                    stroke={chartColor}
                                     strokeWidth={2}
                                 />
                             </AreaChart>
@@ -165,31 +174,11 @@ export default function ChartsRevenue({ chartData, loading, selectedPeriod }: St
                 </CardContent>
             </Card>
 
-            <Card className="col-span-3">
-                <CardHeader>
-                    <CardTitle>Top sản phẩm bán chạy</CardTitle>
-                    <CardDescription>Sản phẩm bán chạy nhất trong tháng</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {topProducts.map((product, index) => (
-                            <div key={index} className="flex items-center">
-                                <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: categoryData[index % categoryData.length].color }}></div>
-                                <div className="space-y-1 flex-1">
-                                    <p className="text-sm font-medium leading-none">{product.name}</p>
-                                    <p className="text-sm text-muted-foreground">{product.sales} sản phẩm</p>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-sm font-medium">₫{product.revenue}M</div>
-                                    <Badge variant="secondary" className="text-xs">
-                                        {product.growth}
-                                    </Badge>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
+            <StatsBestSeller
+                topProducts={topProducts}
+                loading={loadingTopProducts}
+                selectedPeriod={selectedPeriod}
+            />
         </div>
     )
 }

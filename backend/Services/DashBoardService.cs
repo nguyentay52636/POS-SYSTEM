@@ -30,9 +30,9 @@ public interface IDashBoardService
     Task<List<TopProductDto>> GetTopProductsAsync(DashBoardQueryParams query);
 
     /// <summary>
-    /// Get revenue by category
+    /// Get revenue by category (all time data for pie chart)
     /// </summary>
-    Task<List<CategoryRevenueDto>> GetCategoryRevenueAsync(DashBoardQueryParams query);
+    Task<List<CategoryRevenueDto>> GetCategoryRevenueAsync();
 
     /// <summary>
     /// Get order status statistics
@@ -75,7 +75,7 @@ public class DashBoardService : IDashBoardService
             Overview = await GetOverviewAsync(query),
             RevenueChart = await GetRevenueChartAsync(query),
             TopProducts = await GetTopProductsAsync(query),
-            CategoryRevenue = await GetCategoryRevenueAsync(query),
+            CategoryRevenue = await GetCategoryRevenueAsync(),
             OrderStatusStats = await GetOrderStatusStatsAsync(query)
         };
 
@@ -130,10 +130,10 @@ public class DashBoardService : IDashBoardService
         return await _dashBoardRepo.GetTopProductsAsync(startDate, endDate, query.TopCount);
     }
 
-    public async Task<List<CategoryRevenueDto>> GetCategoryRevenueAsync(DashBoardQueryParams query)
+    public async Task<List<CategoryRevenueDto>> GetCategoryRevenueAsync()
     {
-        var (startDate, endDate) = GetDateRange(query);
-        return await _dashBoardRepo.GetCategoryRevenueAsync(startDate, endDate);
+        // Get all category revenue (all paid orders)
+        return await _dashBoardRepo.GetCategoryRevenueAsync();
     }
 
     public async Task<List<OrderStatusStatDto>> GetOrderStatusStatsAsync(DashBoardQueryParams query)

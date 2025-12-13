@@ -249,29 +249,22 @@ public class DashBoardController : ControllerBase
     }
 
     /// <summary>
-    /// Get revenue by category
+    /// Get revenue by category for pie chart
     /// </summary>
     /// <remarks>
     /// Returns revenue breakdown by product category.
-    /// Includes:
-    /// - Category details
-    /// - Total revenue per category
-    /// - Total quantity sold
-    /// - Order count
-    /// - Revenue percentage
-    /// - Suggested chart color
+    /// Data format: { categoryId, category, revenue (triệu VND), percentage, color }
     /// </remarks>
-    /// <param name="query">Query parameters for filtering</param>
-    /// <returns>Category revenue breakdown</returns>
+    /// <returns>Category revenue breakdown for pie chart</returns>
     [HttpGet("category-revenue")]
     [SwaggerOperation(
         Summary = "Get revenue by category",
-        Description = "Returns revenue breakdown by product category with percentages"
+        Description = "Returns revenue breakdown by product category for pie chart"
     )]
     [ProducesResponseType(typeof(List<CategoryRevenueDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<CategoryRevenueDto>>> GetCategoryRevenue([FromQuery] DashBoardQueryParams query)
+    public async Task<ActionResult<List<CategoryRevenueDto>>> GetCategoryRevenue()
     {
-        var result = await _service.GetCategoryRevenueAsync(query);
+        var result = await _service.GetCategoryRevenueAsync();
         return Ok(result);
     }
 

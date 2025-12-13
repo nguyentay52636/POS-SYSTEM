@@ -28,11 +28,9 @@ public class DashBoardMappings : Profile
         // Category to CategoryRevenueDto mapping (if needed for future use)
         CreateMap<Category, CategoryRevenueDto>()
             .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.CategoryName))
-            .ForMember(dest => dest.TotalRevenue, opt => opt.Ignore())
-            .ForMember(dest => dest.TotalQuantitySold, opt => opt.Ignore())
-            .ForMember(dest => dest.OrderCount, opt => opt.Ignore())
-            .ForMember(dest => dest.RevenuePercentage, opt => opt.Ignore())
+            .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.CategoryName))
+            .ForMember(dest => dest.Revenue, opt => opt.Ignore())
+            .ForMember(dest => dest.Percentage, opt => opt.Ignore())
             .ForMember(dest => dest.Color, opt => opt.Ignore());
     }
 }

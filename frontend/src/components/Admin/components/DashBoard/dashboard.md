@@ -53,3 +53,40 @@ orderCount	1	Số lượng đơn hàng trong kỳ này. Có 1 đơn hàng trong 
 customerCount	0	Số khách hàng khác nhau đã mua trong kỳ. Bằng 0 vì đơn hàng có customerId = null
 startDate	"2025-12-01"	Ngày bắt đầu của kỳ thống kê (đầu tháng 12)
 endDate	"2025-12-31"	Ngày kết thúc của kỳ thống kê (cuối tháng 12)
+
+
+thống kê sản phẩm bán chạy :
+# Top 10 sản phẩm tuần này
+GET /api/dashboard/top-products/weekly
+
+# Top 5 sản phẩm tuần này
+GET /api/dashboard/top-products/weekly?topCount=5
+
+# Top 10 sản phẩm tháng 12/2025
+GET /api/dashboard/top-products/monthly?year=2025&month=12
+
+# Top 10 sản phẩm năm 2025
+GET /api/dashboard/top-products/yearly?year=2025
+--------===============-----------
+[
+  {
+    "productId": 14,
+    "productName": "sữa Milo",
+    "barcode": "12317223",
+    "categoryName": "Gia vị",
+    "imageUrl": "http://localhost:5006/uploads/images/...",
+    "totalQuantitySold": 1250,
+    "totalRevenue": 45200000,
+    "growthRate": 15.5,
+    "rank": 1
+  },
+  {
+    "productId": 8,
+    "productName": "Bánh mì Kinh Đô",
+    "totalQuantitySold": 980,
+    "totalRevenue": 32800000,
+    "growthRate": 8,
+    "rank": 2
+  }
+  // ...
+]

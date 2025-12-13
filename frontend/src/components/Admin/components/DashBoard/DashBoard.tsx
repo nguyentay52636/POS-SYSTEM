@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react"
 import HeaderRevenue from "./components/HeaderRevenue/HeaderRevenue"
-import StatsCardRevenue from "./components/StatsCardRevenue"
+import StatsCardRevenue from "./components/StatsCardRevenue/StatsCardRevenue"
 import OrdersChart from "./components/OrdersChart"
-import CategoryChart from "./components/CategoryChart"
+import CategoryChart from "./components/CategoryChart/CategoryChart"
 import SelectDashBoardChart from "./components/HeaderRevenue/SelectDashBoardChart"
 import { useDashBoard } from "@/hooks/useDashBoard"
+import TableCategoryChart from "./components/CategoryChart/TableCategoryChart"
 
 type PeriodType = "week" | "month" | "year"
 
@@ -16,10 +17,15 @@ export default function DashBoard() {
         weeklyData,
         monthlyData,
         yearlyData,
+        topProducts,
         loading,
+        loadingTopProducts,
         fetchWeeklyData,
         fetchMonthlyData,
-        fetchYearlyData
+        fetchYearlyData,
+        fetchTopProductsWeekly,
+        fetchTopProductsMonthly,
+        fetchTopProductsYearly,
     } = useDashBoard()
 
     useEffect(() => {
@@ -30,15 +36,18 @@ export default function DashBoard() {
         switch (selectedPeriod) {
             case "week":
                 fetchWeeklyData(year, month)
+                fetchTopProductsWeekly(year, month)
                 break
             case "month":
                 fetchMonthlyData(year)
+                fetchTopProductsMonthly(year, month)
                 break
             case "year":
                 fetchYearlyData()
+                fetchTopProductsYearly(year)
                 break
         }
-    }, [selectedPeriod, fetchWeeklyData, fetchMonthlyData, fetchYearlyData])
+    }, [selectedPeriod, fetchWeeklyData, fetchMonthlyData, fetchYearlyData, fetchTopProductsWeekly, fetchTopProductsMonthly, fetchTopProductsYearly])
 
     const getChartData = () => {
         switch (selectedPeriod) {
@@ -71,34 +80,14 @@ export default function DashBoard() {
                 chartData={getChartData()}
                 loading={loading}
                 selectedPeriod={selectedPeriod}
+                topProducts={topProducts}
+                loadingTopProducts={loadingTopProducts}
             />
 
 
             <div className="grid gap-4 md:grid-cols-2">
                 <CategoryChart />
-                <div className="space-y-4">
-                    <div className="text-center p-8 border rounded-lg">
-                        <h3 className="text-lg font-semibold mb-2">Tổng quan nhanh</h3>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <div className="text-muted-foreground">Đơn hàng trung bình</div>
-                                <div className="font-semibold">₫225K</div>
-                            </div>
-                            <div>
-                                <div className="text-muted-foreground">Tỷ lệ chuyển đổi</div>
-                                <div className="font-semibold">68.5%</div>
-                            </div>
-                            <div>
-                                <div className="text-muted-foreground">Khách hàng quay lại</div>
-                                <div className="font-semibold">45.2%</div>
-                            </div>
-                            <div>
-                                <div className="text-muted-foreground">Đánh giá TB</div>
-                                <div className="font-semibold">4.8/5</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <TableCategoryChart />
             </div>
 
             {/* <OrdersChart /> */}

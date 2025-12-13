@@ -194,7 +194,8 @@ public class TopProductDto
 }
 
 /// <summary>
-/// Revenue by category data
+/// Revenue by category data for pie chart
+/// Matches frontend: { category, revenue, percentage, color }
 /// </summary>
 public class CategoryRevenueDto
 {
@@ -204,29 +205,20 @@ public class CategoryRevenueDto
     public int CategoryId { get; set; }
 
     /// <summary>
-    /// Category name
+    /// Category name (for frontend pie chart: nameKey="category")
     /// </summary>
-    public string CategoryName { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
 
     /// <summary>
-    /// Total revenue from this category
+    /// Total revenue from this category in millions VND (for frontend pie chart: dataKey="revenue")
+    /// Example: 850 means 850 triệu VND
     /// </summary>
-    public decimal TotalRevenue { get; set; }
+    public decimal Revenue { get; set; }
 
     /// <summary>
-    /// Total quantity sold in this category
+    /// Percentage of total revenue (0-100)
     /// </summary>
-    public int TotalQuantitySold { get; set; }
-
-    /// <summary>
-    /// Number of orders containing products from this category
-    /// </summary>
-    public int OrderCount { get; set; }
-
-    /// <summary>
-    /// Percentage of total revenue
-    /// </summary>
-    public decimal RevenuePercentage { get; set; }
+    public decimal Percentage { get; set; }
 
     /// <summary>
     /// Color for chart display (hex color)

@@ -2,8 +2,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartLegend } from '@/components/ui/chart'
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
-import { categoryData } from './Data/DataRevenue'
+import { PieChart, Pie, Cell } from 'recharts'
+import { categoryData } from '../Data/DataRevenue'
 
 export default function CategoryChart() {
     const chartConfig = {
@@ -18,8 +18,8 @@ export default function CategoryChart() {
                 <CardTitle>Phân loại doanh thu theo danh mục</CardTitle>
                 <CardDescription>Doanh thu theo từng danh mục sản phẩm</CardDescription>
             </CardHeader>
-            <CardContent>
-                <ChartContainer config={chartConfig}>
+            <CardContent className="h-[400px]">
+                <ChartContainer config={chartConfig} className="h-full">
                     <PieChart>
                         <Pie
                             data={categoryData}
@@ -27,8 +27,10 @@ export default function CategoryChart() {
                             nameKey="category"
                             cx="50%"
                             cy="50%"
-                            outerRadius={80}
-                            label={({ category, percentage }) => `${category}: ${percentage}%`}
+                            outerRadius={140}
+                            paddingAngle={2}
+                            label={({ name, payload }: any) => `${payload.category}: ${payload.percentage}%`}
+                            labelLine={{ stroke: '#888', strokeWidth: 1 }}
                         >
                             {categoryData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.color} />

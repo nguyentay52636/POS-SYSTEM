@@ -56,9 +56,9 @@ public interface IDashBoardRepository
     Task<List<TopProductDto>> GetTopProductsAsync(DateTime startDate, DateTime endDate, int topCount);
 
     /// <summary>
-    /// Get revenue by category for a date range
+    /// Get revenue by category (all paid orders)
     /// </summary>
-    Task<List<CategoryRevenueDto>> GetCategoryRevenueAsync(DateTime startDate, DateTime endDate);
+    Task<List<CategoryRevenueDto>> GetCategoryRevenueAsync();
 
     /// <summary>
     /// Get order status statistics for a date range
@@ -338,39 +338,45 @@ public class DashBoardRepository : IDashBoardRepository
         return topProducts;
     }
 
-    public async Task<List<CategoryRevenueDto>> GetCategoryRevenueAsync(DateTime startDate, DateTime endDate)
+    public async Task<List<CategoryRevenueDto>> GetCategoryRevenueAsync()
     {
-        var categoryData = await _db.OrderItems
+        // Get category revenue from OrderItems (all paid orders, sum of subtotal grouped by category)
+        var rawData = await _db.OrderItems
             .Include(oi => oi.Order)
             .Include(oi => oi.Product)
                 .ThenInclude(p => p.Category)
-            .Where(oi => oi.Order.OrderDate >= startDate && oi.Order.OrderDate <= endDate && oi.Order.Status == "paid")
+            .Where(oi => oi.Order.Status == "paid")
             .GroupBy(oi => new
             {
                 CategoryId = oi.Product.CategoryId ?? 0,
-                CategoryName = oi.Product.Category != null ? oi.Product.Category.CategoryName : "Không phân loại"
+                Category = oi.Product.Category != null ? oi.Product.Category.CategoryName : "Khác"
             })
-            .Select(g => new CategoryRevenueDto
+            .Select(g => new
             {
                 CategoryId = g.Key.CategoryId,
-                CategoryName = g.Key.CategoryName,
-                TotalRevenue = g.Sum(oi => oi.Subtotal),
-                TotalQuantitySold = g.Sum(oi => oi.Quantity),
-                OrderCount = g.Select(oi => oi.OrderId).Distinct().Count()
+                Category = g.Key.Category,
+                TotalRevenue = g.Sum(oi => oi.Subtotal)  // Sum of orderItems.subtotal in VND
             })
             .OrderByDescending(c => c.TotalRevenue)
             .ToListAsync();
 
-        // Calculate percentages and assign colors
-        var totalRevenue = categoryData.Sum(c => c.TotalRevenue);
+        // Calculate percentages and convert revenue to millions VND
+        var totalRevenue = rawData.Sum(c => c.TotalRevenue);
         string[] colors = { "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#84CC16" };
 
-        for (int i = 0; i < categoryData.Count; i++)
+        var categoryData = new List<CategoryRevenueDto>();
+        for (int i = 0; i < rawData.Count; i++)
         {
-            categoryData[i].RevenuePercentage = totalRevenue > 0
-                ? Math.Round(categoryData[i].TotalRevenue / totalRevenue * 100, 2)
-                : 0;
-            categoryData[i].Color = colors[i % colors.Length];
+            categoryData.Add(new CategoryRevenueDto
+            {
+                CategoryId = rawData[i].CategoryId,
+                Category = rawData[i].Category,
+                Revenue = Math.Round(rawData[i].TotalRevenue / 1000000, 0),  // Convert to millions VND (triệu)
+                Percentage = totalRevenue > 0
+                    ? Math.Round(rawData[i].TotalRevenue / totalRevenue * 100, 0)
+                    : 0,
+                Color = colors[i % colors.Length]
+            });
         }
 
         return categoryData;
