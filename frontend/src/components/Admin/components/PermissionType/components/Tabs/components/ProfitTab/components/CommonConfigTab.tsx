@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,9 +8,12 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Save, TrendingUp } from "lucide-react"
+import PaginationProfit from "./PaginationProfit"
+import { usePagination } from "@/context/PaginationContext"
 
 export function CommonConfigTab() {
   const [globalProfit, setGlobalProfit] = useState("15")
+  const { paginationState } = usePagination()
 
   const categories = [
     { id: 1, name: "Điện tử", currentProfit: "12%", products: 45 },
@@ -19,6 +22,12 @@ export function CommonConfigTab() {
     { id: 4, name: "Thực phẩm", currentProfit: "8%", products: 200 },
     { id: 5, name: "Mỹ phẩm", currentProfit: "25%", products: 56 },
   ]
+
+  const paginatedCategories = useMemo(() => {
+    const startIndex = (paginationState.currentPage - 1) * paginationState.rowsPerPage
+    const endIndex = startIndex + paginationState.rowsPerPage
+    return categories.slice(startIndex, endIndex)
+  }, [paginationState.currentPage, paginationState.rowsPerPage, categories])
 
   const handleApplyGlobal = () => {
 
@@ -74,7 +83,7 @@ export function CommonConfigTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.map((category) => (
+                {paginatedCategories.map((category) => (
                   <TableRow key={category.id} className="hover:bg-muted/30">
                     <TableCell className="font-medium text-foreground">{category.name}</TableCell>
                     <TableCell className="text-muted-foreground">
@@ -92,6 +101,7 @@ export function CommonConfigTab() {
                 ))}
               </TableBody>
             </Table>
+            <PaginationProfit totalItems={categories.length} className="mt-4" />
           </div>
         </div>
       </CardContent>

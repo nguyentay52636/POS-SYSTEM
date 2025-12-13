@@ -1,12 +1,16 @@
 "use client"
 
+import { useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, CheckCircle2, AlertCircle } from "lucide-react"
+import PaginationProfit from "./PaginationProfit"
+import { usePagination } from "@/context/PaginationContext"
 
 export function PreviewTab() {
+    const { paginationState } = usePagination()
 
     const changes = [
         {
@@ -65,6 +69,12 @@ export function PreviewTab() {
             impact: "negative",
         },
     ]
+
+    const paginatedChanges = useMemo(() => {
+        const startIndex = (paginationState.currentPage - 1) * paginationState.rowsPerPage
+        const endIndex = startIndex + paginationState.rowsPerPage
+        return changes.slice(startIndex, endIndex)
+    }, [paginationState.currentPage, paginationState.rowsPerPage, changes])
 
     const handleConfirmUpdate = () => {
 
@@ -135,7 +145,7 @@ export function PreviewTab() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {changes.map((change) => (
+                            {paginatedChanges.map((change) => (
                                 <TableRow key={change.id} className="hover:bg-muted/30">
                                     <TableCell className="font-medium text-foreground">{change.name}</TableCell>
                                     <TableCell className="text-muted-foreground">
@@ -187,6 +197,7 @@ export function PreviewTab() {
                             ))}
                         </TableBody>
                     </Table>
+                    <PaginationProfit totalItems={changes.length} className="mt-4" />
                 </div>
             </CardContent>
         </Card>

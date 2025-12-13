@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Edit2, Save, X } from "lucide-react"
 import { toast } from "sonner"
+import PaginationProfit from "./PaginationProfit"
+import { usePagination } from "@/context/PaginationContext"
 
 interface Product {
     id: number
@@ -24,6 +26,7 @@ export function ProfitConfigTab() {
     const [selectedRows, setSelectedRows] = useState<number[]>([])
     const [editingId, setEditingId] = useState<number | null>(null)
     const [editProfit, setEditProfit] = useState("")
+    const { paginationState } = usePagination()
 
     const [products, setProducts] = useState<Product[]>([
         {
@@ -81,6 +84,12 @@ export function ProfitConfigTab() {
             profit: 26.7,
         },
     ])
+
+    const paginatedProducts = useMemo(() => {
+        const startIndex = (paginationState.currentPage - 1) * paginationState.rowsPerPage
+        const endIndex = startIndex + paginationState.rowsPerPage
+        return products.slice(startIndex, endIndex)
+    }, [paginationState.currentPage, paginationState.rowsPerPage, products])
 
     const handleSelectRow = (id: number) => {
         setSelectedRows((prev) => (prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]))
@@ -169,7 +178,7 @@ export function ProfitConfigTab() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {products.map((product) => (
+                            {paginatedProducts.map((product) => (
                                 <TableRow
                                     key={product.id}
                                     className={`hover:bg-muted/30 ${selectedRows.includes(product.id) ? "bg-emerald-50 dark:bg-emerald-950/20" : ""}`}
@@ -239,6 +248,7 @@ export function ProfitConfigTab() {
                             ))}
                         </TableBody>
                     </Table>
+                    <PaginationProfit totalItems={products.length} className="mt-4" />
                 </div>
             </CardContent>
         </Card>

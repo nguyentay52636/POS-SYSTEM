@@ -4,6 +4,7 @@ import { Settings, Package, Eye } from "lucide-react"
 import { CommonConfigTab } from "./components/CommonConfigTab"
 import { PreviewTab } from "./components/PreviewTab"
 import { ProfitConfigTab } from "./components/ProfitConfigTab"
+import { PaginationProvider } from "@/context/PaginationContext"
 
 export function ProfitTab() {
     return (
@@ -39,15 +40,21 @@ export function ProfitTab() {
                 </TabsList>
 
                 <TabsContent value="general">
-                    <CommonConfigTab />
+                    <PaginationProvider>
+                        <CommonConfigTab />
+                    </PaginationProvider>
                 </TabsContent>
 
                 <TabsContent value="product">
-                    <ProfitConfigTab />
+                    <PaginationProvider>
+                        <ProfitConfigTab />
+                    </PaginationProvider>
                 </TabsContent>
 
                 <TabsContent value="preview">
-                    <PreviewTab />
+                    <PaginationProvider>
+                        <PreviewTab />
+                    </PaginationProvider>
                 </TabsContent>
             </Tabs>
         </div>
