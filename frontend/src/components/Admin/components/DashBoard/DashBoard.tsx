@@ -18,15 +18,23 @@ export default function DashBoard() {
         monthlyData,
         yearlyData,
         topProducts,
+        categoryData,
         loading,
         loadingTopProducts,
+        loadingCategory,
         fetchWeeklyData,
         fetchMonthlyData,
         fetchYearlyData,
         fetchTopProductsWeekly,
         fetchTopProductsMonthly,
         fetchTopProductsYearly,
+        fetchCategoryData,
     } = useDashBoard()
+
+    // Fetch category data on mount
+    useEffect(() => {
+        fetchCategoryData()
+    }, [fetchCategoryData])
 
     useEffect(() => {
         const now = new Date()
@@ -86,7 +94,7 @@ export default function DashBoard() {
 
 
             <div className="grid gap-4 md:grid-cols-2">
-                <CategoryChart />
+                <CategoryChart categoryData={categoryData} loading={loadingCategory} />
                 <TableCategoryChart />
             </div>
 
