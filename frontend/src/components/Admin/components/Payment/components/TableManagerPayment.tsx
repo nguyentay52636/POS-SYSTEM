@@ -79,31 +79,37 @@ export default function TableManagerPayment({
                     <TableCell className="text-left">
                       {orderItems.length > 0 ? (
                         <div className="space-y-2 max-h-32 overflow-y-auto">
-                          {orderItems.map((item, i) => (
-                            <div key={item.orderItemId || i} className="flex items-center gap-2">
-                              {item.product?.imageUrl ? (
-                                <img
-                                  src={item.product.imageUrl}
-                                  alt={item.product.productName || "Sản phẩm"}
-                                  width={36}
-                                  height={36}
-                                  className="rounded object-cover"
-                                />
-                              ) : (
-                                <div className="w-9 h-9 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-                                  N/A
+                          {orderItems.map((item: any, i) => {
+                            const productName = item.productName || item.product?.productName || `SP #${item.productId}`;
+                            const imageUrl = item.product?.imageUrl;
+                            const subtotal = item.subtotal || (item.quantity * item.price);
+
+                            return (
+                              <div key={item.orderItemId || i} className="flex items-center gap-2">
+                                {imageUrl ? (
+                                  <img
+                                    src={imageUrl}
+                                    alt={productName}
+                                    width={36}
+                                    height={36}
+                                    className="rounded object-cover w-9 h-9"
+                                  />
+                                ) : (
+                                  <div className="w-9 h-9 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                                    <span>📦</span>
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium truncate">
+                                    {productName}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {item.quantity} x {formatCurrency(item.price)} = {formatCurrency(subtotal)}
+                                  </p>
                                 </div>
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">
-                                  {item.product?.productName || `SP #${item.productId}`}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {item.quantity} x {formatCurrency(item.price)}
-                                </p>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       ) : (
                         <span className="text-muted-foreground text-sm">Không có sản phẩm</span>

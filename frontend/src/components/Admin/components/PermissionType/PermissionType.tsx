@@ -13,6 +13,7 @@ import { PermissionsTab } from "./components/Tabs/PermissionsTab"
 import { ProfitTab } from "./components/Tabs/components/ProfitTab/ProfitTab"
 import PermissionHeader from "./components/PermissionHeader"
 import { PreviewTab } from "./components/Tabs/components/ProfitTab/components/PreviewTab"
+import { PointsConversion } from "./components/Tabs/components/PointsConversion/PointsConversion"
 
 export default function PermissionType() {
     const { roles, isLoading: rolesLoading, mutate: mutateRoles } = useRoles()
@@ -240,7 +241,7 @@ export default function PermissionType() {
                             className="gap-2 data-[state=active]:bg-green-700 data-[state=active]:text-white data-[state=active]:shadow-sm"
                         >
                             <Award className="h-4 w-4" />
-                            Quy đổi điểm KH
+                            Quy đổi điểm
                         </TabsTrigger>
                     </TabsList>
 
@@ -276,7 +277,7 @@ export default function PermissionType() {
                     </TabsContent>
 
                     <TabsContent value="points">
-                        <PreviewTab />
+                        <PointsConversion />
                     </TabsContent>
                 </Tabs>
             </div>
