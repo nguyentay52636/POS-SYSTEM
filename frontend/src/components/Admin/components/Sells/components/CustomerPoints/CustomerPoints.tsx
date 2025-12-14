@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCustomer } from '@/hooks/useCustomer'
 import { ICustomer } from '@/types/types'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 type PointsFilter = 'all' | 'gt0' | 'gte100' | 'gte1000'
@@ -13,9 +13,10 @@ type PointsFilter = 'all' | 'gt0' | 'gte100' | 'gte1000'
 interface CustomerPointsProps {
     onSelectCustomer?: (customer: ICustomer) => void
     onAddNewCustomer?: () => void
+    onClose?: () => void
 }
 
-export default function CustomerPoints({ onSelectCustomer, onAddNewCustomer }: CustomerPointsProps) {
+export default function CustomerPoints({ onSelectCustomer, onAddNewCustomer, onClose }: CustomerPointsProps) {
     const { customers, loading, searchTerm, setSearchTerm } = useCustomer()
     const [pointsFilter, setPointsFilter] = useState<PointsFilter>('all')
 
@@ -46,8 +47,18 @@ export default function CustomerPoints({ onSelectCustomer, onAddNewCustomer }: C
 
     return (
         <Card className="shadow-sm">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-base">Khách hàng tích điểm</CardTitle>
+                {onClose && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onClose}
+                        className="h-8 w-8 rounded-full hover:bg-gray-100"
+                    >
+                        <X className="h-4 w-4" />
+                    </Button>
+                )}
             </CardHeader>
             <CardContent className="pt-2 space-y-3">
                 {onAddNewCustomer && (

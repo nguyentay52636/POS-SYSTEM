@@ -29,7 +29,6 @@ import {
     removePromotion,
     setPromoError,
     setSelectedPaymentMethod,
-    setReceivedAmount,
     updateCustomerInfo,
     setShowCustomerForm,
     setIsPaymentOpen,
@@ -49,7 +48,6 @@ import {
     selectSelectedEWallet,
     setCustomerInfo,
     setSelectedCustomerId,
-    type IPromotion,
     type CartItem,
 } from "@/redux/Slice/cartSlice"
 import type { AppDispatch } from "@/redux/store"
@@ -71,7 +69,7 @@ export interface Transaction {
     changeAmount: number
     createdAt: string
     cashier: string
-    appliedPromotions?: IPromotion[]
+    appliedPromotions?: Promotion[]
     selectedEWallet?: string
     customerInfo?: CustomerInfo
 }
@@ -318,15 +316,7 @@ export default function SellsContent() {
                 dispatch(setPromoError("Mã khuyến mãi đã hết lượt sử dụng"))
                 return
             }
-            // Chuyển đổi từ API Promotion sang Redux IPromotion
-            const promoToApply: IPromotion = {
-                promo_id: promotion.promoId!,
-                promo_code: promotion.promoCode || "",
-                description: promotion.description,
-                discount_type: promotion.discountType,
-                discount_value: promotion.discountValue,
-            }
-            dispatch(applyPromotion(promoToApply))
+            dispatch(applyPromotion(promotion))
             dispatch(setPromoCode("")) // Clear input sau khi áp dụng thành công
         } else {
             dispatch(setPromoError("Mã khuyến mãi không hợp lệ"))
@@ -369,15 +359,7 @@ export default function SellsContent() {
             dispatch(setPromoError("Mã khuyến mãi đã hết lượt sử dụng"))
             return
         }
-        // Chuyển đổi từ API Promotion sang Redux IPromotion
-        const promoToApply: IPromotion = {
-            promo_id: promotion.promoId!,
-            promo_code: promotion.promoCode || "",
-            description: promotion.description,
-            discount_type: promotion.discountType,
-            discount_value: promotion.discountValue,
-        }
-        dispatch(applyPromotion(promoToApply))
+        dispatch(applyPromotion(promotion))
     }
 
     // Stats (already computed from Redux selectors)
@@ -480,6 +462,7 @@ export default function SellsContent() {
                     <CustomerPoints
                         onSelectCustomer={handleSelectCustomerFromPoints}
                         onAddNewCustomer={handleAddNewCustomer}
+                        onClose={() => setIsCustomerPointsOpen(false)}
                     />
                 </DialogContent>
             </Dialog>

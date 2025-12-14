@@ -110,11 +110,11 @@ export const navigation = (pathname: string) => [
         current: pathname === "/admin/permissions",
         badge: null,
     },
-    {
-        name: "Cài đặt",
-        href: "/admin/settings",
-        icon: Settings,
-        current: pathname === "/admin/settings",
-        badge: null,
-    },
+    // {
+    //     name: "Cài đặt",
+    //     href: "/admin/settings",
+    //     icon: Settings,
+    //     current: pathname === "/admin/settings",
+    //     badge: null,
+    // },
 ]

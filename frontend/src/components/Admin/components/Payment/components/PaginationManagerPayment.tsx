@@ -3,15 +3,15 @@ import { useEffect } from 'react'
 import Pagination from '@/components/ui/pagination'
 import { usePagination } from '@/context/PaginationContext'
 
-interface PaginationInventoryProps {
+interface PaginationManagerPaymentProps {
     totalItems: number
     className?: string
 }
 
-export default function PaginationInventory({
+export default function PaginationManagerPayment({
     totalItems,
     className = ""
-}: PaginationInventoryProps) {
+}: PaginationManagerPaymentProps) {
     const {
         paginationState,
         setCurrentPage,

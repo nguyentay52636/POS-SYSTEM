@@ -1,7 +1,5 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -12,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import type { IPayment } from "@/apis/paymentApi";
 import ActionTablePayment from "./ActionTablePayment";
+import Image from "next/image";
 
 export default function TableManagerPayment({
   rows,
@@ -35,13 +34,12 @@ export default function TableManagerPayment({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/100 font-semibold">
-            <TableHead className=" text-center">Mã Thanh Toán</TableHead>
-            <TableHead className="text-center">Mã hoá đơn</TableHead>
-            <TableHead className="text-center">Sản phẩm</TableHead>
-            <TableHead className=" text-center">Số tiền</TableHead>
-            <TableHead className=" text-center">Phương thức</TableHead>
-            <TableHead className=" text-center">Tạo lúc</TableHead>
-            <TableHead className=" text-center">Thao tác</TableHead>
+            <TableHead className="text-center">Mã TT</TableHead>
+            <TableHead className="text-center">Mã HĐ</TableHead>
+            <TableHead className="text-left min-w-[280px]">Sản phẩm</TableHead>
+            <TableHead className="text-center">Số tiền</TableHead>
+            <TableHead className="text-center">Phương thức</TableHead>
+            <TableHead className="text-center">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -72,18 +70,51 @@ export default function TableManagerPayment({
                   .replaceAll("_", " ")
                   .trim();
                 const dateText = r.paymentDate ? formatDate(r.paymentDate) : "";
+                const orderItems = r.order?.orderItems || [];
 
                 return (
                   <TableRow key={key}>
                     <TableCell className="text-center">{pid > 0 ? pid : ""}</TableCell>
                     <TableCell className="text-center">{oid > 0 ? oid : ""}</TableCell>
-                    <TableCell className="capitalize text-center">
+                    <TableCell className="text-left">
+                      {orderItems.length > 0 ? (
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {orderItems.map((item, i) => (
+                            <div key={item.orderItemId || i} className="flex items-center gap-2">
+                              {item.product?.imageUrl ? (
+                                <img
+                                  src={item.product.imageUrl}
+                                  alt={item.product.productName || "Sản phẩm"}
+                                  width={36}
+                                  height={36}
+                                  className="rounded object-cover"
+                                />
+                              ) : (
+                                <div className="w-9 h-9 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                                  N/A
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">
+                                  {item.product?.productName || `SP #${item.productId}`}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {item.quantity} x {formatCurrency(item.price)}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">Không có sản phẩm</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center font-medium">
                       {formatCurrency(amountSafe)}
                     </TableCell>
                     <TableCell className="capitalize text-center">
                       {paymentMethod}
                     </TableCell>
-                    <TableCell className="text-center">{dateText}</TableCell>
                     <TableCell className="text-center">
                       <ActionTablePayment
                         onEdit={() => onEdit(r)}
@@ -102,14 +133,13 @@ export default function TableManagerPayment({
               })}
 
               <TableRow className="bg-muted/100 font-semibold">
-                <TableCell colSpan={1} className="capitalize text-right">
+                <TableCell colSpan={3} className="text-right">
                   Tổng Doanh Thu:
                 </TableCell>
-                <TableCell colSpan={1}> </TableCell>
-                <TableCell className="capitalize text-center font-semibold">
+                <TableCell className="text-center font-semibold">
                   {formatCurrency(totalAmount)}
                 </TableCell>
-                <TableCell colSpan={3}></TableCell>
+                <TableCell colSpan={2}></TableCell>
               </TableRow>
 
             </>

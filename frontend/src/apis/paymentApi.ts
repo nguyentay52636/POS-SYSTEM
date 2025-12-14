@@ -4,10 +4,13 @@ import { Order } from "./orderApi";
 export interface IPayment {
   paymentId?: number;         
   orderId: number;
-  order?: Order
-  amount: number;
+    amount: number;
   paymentMethod: string;
-  paymentDate: string;          
+  orderStatus: string;
+  order?: Order
+  orderTotalAmount: number;
+  customerName: string;
+  paymentDate?: string;          
 }
 
 const PREFIX = "/Payment";
