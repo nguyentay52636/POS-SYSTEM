@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { getProducts, createProduct, updateProduct, deleteProduct, updateProductStatus } from "@/apis/productApi"
+import { getProducts, createProduct, updateProduct, deleteProduct, updateStatusProduct } from "@/apis/productApi"
 import { IProduct } from "@/types/types"
 import { toast } from "sonner"
 import { calculateProductStats } from "@/utils/productUtils"
@@ -83,7 +83,7 @@ export const useProduct = () => {
         async (productId: string) => {
             try {
                 const idNum = parseInt(productId)
-                await updateProductStatus(idNum)
+                await updateStatusProduct(idNum)
                 setProducts((prev) =>
                     prev.map((p) => {
                         if (p.productId === idNum) {
