@@ -1,39 +1,17 @@
 using backend.Configurations;
+using backend.Configuration;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
-using backend.Repositories;
-using backend.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using backend.Mappings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using backend.Configuration;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Data.SqlClient;
 
-
-var cs = "Server=localhost\\SQLEXPRESS;Database=bachhoaxanh;User Id=sa;Password=Thanh2004@;TrustServerCertificate=True;Encrypt=False";
-
-try
-{
-    using var conn = new SqlConnection(cs);
-    conn.Open();
-    Console.WriteLine("✅ CONNECT OK");
-}
-catch (Exception ex)
-{
-    Console.WriteLine("❌ CONNECT FAIL");
-    Console.WriteLine(ex.Message);
-}
 
 
 var builder = WebApplication.CreateBuilder(args);
-var runtimeCs = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine("👉 RUNTIME CONNECTION STRING:");
-Console.WriteLine(runtimeCs);
 
 
 // Add services to the container.
@@ -70,99 +48,8 @@ if (jwtConfig != null && !string.IsNullOrEmpty(jwtConfig.Key))
 
 builder.Services.AddAuthorization();
 
-// Database - Use SQL Server for all environments
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-           .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
-});
-
-// AutoMapper
-builder.Services.AddAutoMapper(typeof(UserMappings), typeof(SupplierMappings), typeof(CategoryMappings), typeof(ProductMappings), typeof(CustomerMappings), typeof(PromotionMappings), typeof(OrderMappings), typeof(InventoryMappings), typeof(PaymentMappings), typeof(ImportReceiptMappings), typeof(RbacMappings), typeof(ExportReceiptMappings), typeof(FeatureMappings), typeof(ConfigCustomerPointMappings), typeof(DashBoardMappings));
-
-// DI
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IValidationService, ValidationService>();
-
-// Supplier
-builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
-builder.Services.AddScoped<ISupplierService, SupplierService>();
-
-// Category
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-
-// Product
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IProductService, ProductService>();
-
-// Customer
-builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-builder.Services.AddScoped<ICustomerService, CustomerService>();
-
-// Config Customer Point
-builder.Services.AddScoped<IConfigCustomerPointRepository, ConfigCustomerPointRepository>();
-builder.Services.AddScoped<IConfigCustomerPointService, ConfigCustomerPointService>();
-
-// Promotion
-builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
-builder.Services.AddScoped<IPromotionService, PromotionService>();
-
-// Order
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-
-// Inventory
-builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
-builder.Services.AddScoped<IInventoryService, InventoryService>();
-
-// Product-Inventory Status Sync
-builder.Services.AddScoped<IProductInventoryStatusSyncService, ProductInventoryStatusSyncService>();
-
-// Payment
-builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-builder.Services.AddScoped<IPaymentService, PaymentService>();
-
-// Import Receipt
-builder.Services.AddScoped<IImportReceiptRepository, ImportReceiptRepository>();
-builder.Services.AddScoped<IImportReceiptService, ImportReceiptService>();
-
-// Export Receipt
-builder.Services.AddScoped<IExportReceiptRepository, ExportReceiptRepository>();
-builder.Services.AddScoped<IExportReceiptService, ExportReceiptService>();
-
-// RBAC
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IRoleService, RoleService>();
-
-builder.Services.AddScoped<IFeatureRepository, FeatureRepository>();
-builder.Services.AddScoped<IFeatureService, FeatureService>();
-
-builder.Services.AddScoped<IPermissionTypeRepository, PermissionTypeRepository>();
-builder.Services.AddScoped<IPermissionTypeService, PermissionTypeService>();
-
-builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
-builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
-
-// Employee
-builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-
-// History Services
-builder.Services.AddScoped<ICustomerPointsHistoryService, CustomerPointsHistoryService>();
-builder.Services.AddScoped<IInventoryHistoryService, InventoryHistoryService>();
-builder.Services.AddScoped<IOrderCancellationHistoryService, OrderCancellationHistoryService>();
-
-// Profit Configuration
-builder.Services.AddScoped<IProfitConfigurationService, ProfitConfigurationService>();
-builder.Services.AddScoped<IProfitRuleService, ProfitRuleService>();
-
-// Dashboard
-builder.Services.AddScoped<IDashBoardRepository, DashBoardRepository>();
-builder.Services.AddScoped<IDashBoardService, DashBoardService>();
+// Add application services (DbContext, AutoMapper, Repositories, Services)
+builder.Services.AddApplicationServices(builder.Configuration);
 
 var app = builder.Build();
 
