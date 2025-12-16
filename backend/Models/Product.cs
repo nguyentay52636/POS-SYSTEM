@@ -37,5 +37,9 @@ public partial class Product
 
     public virtual ICollection<PromotionProduct> PromotionProducts { get; set; } = new List<PromotionProduct>();
 
+    public virtual ICollection<InventoryHistory> InventoryHistories { get; set; } = new List<InventoryHistory>();
+
+    public virtual ICollection<ProfitRule> ProfitRules { get; set; } = new List<ProfitRule>();
+
     public virtual Supplier? Supplier { get; set; }
 }

@@ -144,6 +144,19 @@ builder.Services.AddScoped<IPermissionTypeService, PermissionTypeService>();
 builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
 builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
 
+// Employee
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
+// History Services
+builder.Services.AddScoped<ICustomerPointsHistoryService, CustomerPointsHistoryService>();
+builder.Services.AddScoped<IInventoryHistoryService, InventoryHistoryService>();
+builder.Services.AddScoped<IOrderCancellationHistoryService, OrderCancellationHistoryService>();
+
+// Profit Configuration
+builder.Services.AddScoped<IProfitConfigurationService, ProfitConfigurationService>();
+builder.Services.AddScoped<IProfitRuleService, ProfitRuleService>();
+
 // Dashboard
 builder.Services.AddScoped<IDashBoardRepository, DashBoardRepository>();
 builder.Services.AddScoped<IDashBoardService, DashBoardService>();

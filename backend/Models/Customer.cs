@@ -15,15 +15,15 @@ public partial class Customer
 
     public string? Address { get; set; }
 
+    public decimal? CustomerPoint { get; set; }
+
+    public string Status { get; set; } = "active";
+
     public DateTime? CreatedAt { get; set; }
 
-    public decimal? CustomerPoint { get; set; }
+    public virtual ICollection<CustomerPointsHistory> CustomerPointsHistories { get; set; } = new List<CustomerPointsHistory>();
 
     public virtual ICollection<ExportReceipt> ExportReceipts { get; set; } = new List<ExportReceipt>();
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
-
-    [System.ComponentModel.DataAnnotations.Schema.Column("IsDeleted")]
-    [System.ComponentModel.DefaultValue(false)]
-    public bool IsDeleted { get; set; }
 }

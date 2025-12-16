@@ -15,6 +15,8 @@ public partial class Supplier
 
     public string? Address { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual ICollection<ImportReceipt> ImportReceipts { get; set; } = new List<ImportReceipt>();
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();

@@ -16,6 +16,9 @@ public class CreateUserDto
     [StringLength(100, ErrorMessage = "Full name cannot exceed 100 characters")]
     public string? FullName { get; set; }
 
+    [Required(ErrorMessage = "Employee ID is required")]
+    public int EmployeeId { get; set; }
+
     public int? RoleId { get; set; }
     
     [StringLength(10, ErrorMessage = "Role cannot exceed 10 characters")]
@@ -30,8 +33,13 @@ public class UpdateUserDto
     [StringLength(100, ErrorMessage = "Full name cannot exceed 100 characters")]
     public string? FullName { get; set; }
 
+    public int? EmployeeId { get; set; }
+
     [StringLength(10, ErrorMessage = "Role cannot exceed 10 characters")]
     public string? Role { get; set; }
+
+    [StringLength(20, ErrorMessage = "Status cannot exceed 20 characters")]
+    public string? Status { get; set; }
 }
 
 public class UserResponseDto
@@ -39,9 +47,12 @@ public class UserResponseDto
     public int UserId { get; set; }
     public string? Username { get; set; }
     public string? FullName { get; set; }
+    public int EmployeeId { get; set; }
+    public string? EmployeeName { get; set; }
     public int RoleId { get; set; }
     public int Role { get; set; }  // Alias for RoleId (1 = Admin, 2 = Staff, 0 = Customer)
     public string RoleName { get; set; } = string.Empty;  // "admin", "staff", "customer"
+    public string Status { get; set; } = "active";
     public DateTime? CreatedAt { get; set; }
 }
 

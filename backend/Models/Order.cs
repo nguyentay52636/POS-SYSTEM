@@ -27,6 +27,10 @@ public partial class Order
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
+    public virtual ICollection<CustomerPointsHistory> CustomerPointsHistories { get; set; } = new List<CustomerPointsHistory>();
+
+    public virtual ICollection<OrderCancellationHistory> OrderCancellationHistories { get; set; } = new List<OrderCancellationHistory>();
+
     public virtual Promotion? Promo { get; set; }
 
     public virtual User? User { get; set; }

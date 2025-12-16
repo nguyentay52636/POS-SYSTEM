@@ -40,17 +40,17 @@ public class CustomerRepository : ICustomerRepository
 
     public Task<Customer?> GetByIdAsync(int id)
     {
-        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.CustomerId == id && !c.IsDeleted);
+        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.CustomerId == id && c.Status == "active");
     }
 
     public Task<Customer?> GetByNameAsync(string name)
     {
-        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Name == name && !c.IsDeleted);
+        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Name == name && c.Status == "active");
     }
 
     public Task<Customer?> GetByEmailAsync(string email)
     {
-        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Email == email && !c.IsDeleted);
+        return _db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Email == email && c.Status == "active");
     }
 
     public async Task<Customer> UpdateAsync(Customer customer)
@@ -65,16 +65,16 @@ public class CustomerRepository : ICustomerRepository
         var existing = await _db.Customers.FindAsync(id);
         if (existing == null) return false;
 
-        // Soft delete: mark as deleted instead of removing
+        // Soft delete: mark as inactive instead of removing
         _db.Customers.Attach(existing);
-        existing.IsDeleted = true;
+        existing.Status = "inactive";
         await _db.SaveChangesAsync();
         return true;
     }
 
     public async Task<(IReadOnlyList<Customer> Items, int Total)> SearchAsync(CustomerQueryParams query)
     {
-        IQueryable<Customer> q = _db.Customers.AsNoTracking().Where(c => !c.IsDeleted);
+        IQueryable<Customer> q = _db.Customers.AsNoTracking().Where(c => c.Status == "active");
 
         // Apply filters using extension methods
         q = q.WhereIf(!query.Name.IsNullOrWhiteSpace(),
@@ -106,7 +106,7 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task<IReadOnlyList<Customer>> ListAllAsync()
     {
-        IQueryable<Customer> q = _db.Customers.AsNoTracking().Where(c => !c.IsDeleted);
+        IQueryable<Customer> q = _db.Customers.AsNoTracking().Where(c => c.Status == "active");
         q = q.OrderBy(c => c.Name);
         var items = await q.ToListAsync();
         return items;

@@ -48,17 +48,17 @@ public class SupplierRepository : ISupplierRepository
 
     public Task<Supplier?> GetByIdAsync(int id)
     {
-        return _db.Suppliers.AsNoTracking().FirstOrDefaultAsync(s => s.SupplierId == id);
+        return _db.Suppliers.AsNoTracking().FirstOrDefaultAsync(s => s.SupplierId == id && s.Status == "active");
     }
 
     public Task<Supplier?> GetByNameAsync(string name)
     {
-        return _db.Suppliers.AsNoTracking().FirstOrDefaultAsync(s => s.Name == name);
+        return _db.Suppliers.AsNoTracking().FirstOrDefaultAsync(s => s.Name == name && s.Status == "active");
     }
 
     public Task<Supplier?> GetByEmailAsync(string email)
     {
-        return _db.Suppliers.AsNoTracking().FirstOrDefaultAsync(s => s.Email == email);
+        return _db.Suppliers.AsNoTracking().FirstOrDefaultAsync(s => s.Email == email && s.Status == "active");
     }
 
     public async Task<Supplier> UpdateAsync(Supplier supplier)
@@ -72,14 +72,17 @@ public class SupplierRepository : ISupplierRepository
     {
         var existing = await _db.Suppliers.FindAsync(id);
         if (existing == null) return false;
-        _db.Suppliers.Remove(existing);
+        
+        // Soft delete: mark as inactive
+        _db.Suppliers.Attach(existing);
+        existing.Status = "inactive";
         await _db.SaveChangesAsync();
         return true;
     }
 
     public async Task<(IReadOnlyList<Supplier> Items, int Total)> SearchAsync(SupplierQueryParams query)
     {
-        IQueryable<Supplier> q = _db.Suppliers.AsNoTracking();
+        IQueryable<Supplier> q = _db.Suppliers.AsNoTracking().Where(s => s.Status == "active");
 
         // Apply filters using extension methods
         q = q.WhereIf(!query.Name.IsNullOrWhiteSpace(),
@@ -108,7 +111,7 @@ public class SupplierRepository : ISupplierRepository
 
     public async Task<IReadOnlyList<Supplier>> ListAllAsync()
     {
-        IQueryable<Supplier> q = _db.Suppliers.AsNoTracking();
+        IQueryable<Supplier> q = _db.Suppliers.AsNoTracking().Where(s => s.Status == "active");
         q = q.OrderBy(s => s.Name);
         var items = await q.ToListAsync();
         return items;

@@ -13,9 +13,15 @@ public partial class User
 
     public string? FullName { get; set; }
 
+    public int EmployeeId { get; set; }
+
     public int RoleId { get; set; }
 
+    public string Status { get; set; } = "active";
+
     public DateTime? CreatedAt { get; set; }
+
+    public virtual Employee Employee { get; set; } = null!;
 
     public virtual ICollection<ExportReceipt> ExportReceipts { get; set; } = new List<ExportReceipt>();
 

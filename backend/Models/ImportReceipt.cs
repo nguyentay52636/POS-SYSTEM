@@ -17,6 +17,8 @@ public partial class ImportReceipt
 
     public string Status { get; set; } = null!;
 
+    public string? CancellationReason { get; set; }
+
     public string? Note { get; set; }
 
     public virtual ICollection<ImportItem> ImportItems { get; set; } = new List<ImportItem>();

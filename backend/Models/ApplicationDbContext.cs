@@ -21,6 +21,10 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Customer> Customers { get; set; }
 
+    public virtual DbSet<CustomerPointsHistory> CustomerPointsHistories { get; set; }
+
+    public virtual DbSet<Employee> Employees { get; set; }
+
     public virtual DbSet<ExportItem> ExportItems { get; set; }
 
     public virtual DbSet<ExportReceipt> ExportReceipts { get; set; }
@@ -33,7 +37,11 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Inventory> Inventories { get; set; }
 
+    public virtual DbSet<InventoryHistory> InventoryHistories { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
+
+    public virtual DbSet<OrderCancellationHistory> OrderCancellationHistories { get; set; }
 
     public virtual DbSet<OrderItem> OrderItems { get; set; }
 
@@ -42,6 +50,10 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<PermissionType> PermissionTypes { get; set; }
 
     public virtual DbSet<Product> Products { get; set; }
+
+    public virtual DbSet<ProfitConfiguration> ProfitConfigurations { get; set; }
+
+    public virtual DbSet<ProfitRule> ProfitRules { get; set; }
 
     public virtual DbSet<Promotion> Promotions { get; set; }
 
@@ -118,7 +130,192 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Phone)
                 .HasMaxLength(20)
                 .HasColumnName("phone");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValue("active")
+                .HasColumnName("status");
         });
+
+        modelBuilder.Entity<CustomerPointsHistory>(entity =>
+        {
+            entity.HasKey(e => e.HistoryId).HasName("PK__customer_points_history");
+
+            entity.ToTable("customer_points_history");
+
+            entity.Property(e => e.HistoryId).HasColumnName("history_id");
+            entity.Property(e => e.CustomerId).HasColumnName("customer_id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.PointsEarned).HasColumnName("points_earned");
+            entity.Property(e => e.PointsUsed).HasColumnName("points_used");
+            entity.Property(e => e.PointsBalance).HasColumnName("points_balance");
+            entity.Property(e => e.TransactionType)
+                .HasMaxLength(50)
+                .HasColumnName("transaction_type");
+            entity.Property(e => e.Description)
+                .HasMaxLength(255)
+                .HasColumnName("description");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.CustomerPointsHistories)
+                .HasForeignKey(d => d.CustomerId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Order).WithMany(p => p.CustomerPointsHistories)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<Employee>(entity =>
+        {
+            entity.HasKey(e => e.EmployeeId).HasName("PK__employee");
+
+            entity.ToTable("employees");
+
+            entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+            entity.Property(e => e.FullName)
+                .HasMaxLength(100)
+                .HasColumnName("full_name");
+            entity.Property(e => e.Gender)
+                .HasMaxLength(10)
+                .HasColumnName("gender");
+            entity.Property(e => e.BirthDate).HasColumnName("birth_date");
+            entity.Property(e => e.Phone)
+                .HasMaxLength(20)
+                .HasColumnName("phone");
+            entity.Property(e => e.RolePosition)
+                .HasMaxLength(50)
+                .HasColumnName("role_position");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValue("active")
+                .HasColumnName("status");
+        });
+
+        modelBuilder.Entity<InventoryHistory>(entity =>
+        {
+            entity.HasKey(e => e.HistoryId).HasName("PK__inventory_history");
+
+            entity.ToTable("inventory_history");
+
+            entity.Property(e => e.HistoryId).HasColumnName("history_id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.OldQuantity).HasColumnName("old_quantity");
+            entity.Property(e => e.NewQuantity).HasColumnName("new_quantity");
+            entity.Property(e => e.Difference).HasColumnName("difference");
+            entity.Property(e => e.ChangeType)
+                .HasMaxLength(50)
+                .HasColumnName("change_type");
+            entity.Property(e => e.Reason)
+                .HasMaxLength(255)
+                .HasColumnName("reason");
+            entity.Property(e => e.Note)
+                .HasMaxLength(255)
+                .HasColumnName("note");
+            entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+            entity.Property(e => e.ChangeDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("change_date");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.InventoryHistories)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.InventoryHistories)
+                .HasForeignKey(d => d.EmployeeId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<OrderCancellationHistory>(entity =>
+        {
+            entity.HasKey(e => e.CancellationId).HasName("PK__order_cancellation_history");
+
+            entity.ToTable("order_cancellation_history");
+
+            entity.Property(e => e.CancellationId).HasColumnName("cancellation_id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.CancellationReason).HasColumnName("cancellation_reason");
+            entity.Property(e => e.CanceledByEmployeeId).HasColumnName("canceled_by_employee_id");
+            entity.Property(e => e.CancellationDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("cancellation_date");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderCancellationHistories)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.CanceledByEmployee).WithMany(p => p.OrderCancellationHistories)
+                .HasForeignKey(d => d.CanceledByEmployeeId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<ProfitConfiguration>(entity =>
+        {
+            entity.HasKey(e => e.ConfigId).HasName("PK__profit_configuration");
+
+            entity.ToTable("profit_configuration");
+
+            entity.Property(e => e.ConfigId).HasColumnName("config_id");
+            entity.Property(e => e.DefaultProfitPercentage)
+                .HasColumnType("decimal(5, 2)")
+                .HasDefaultValue(10.00m)
+                .HasColumnName("default_profit_percentage");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedByEmployeeId).HasColumnName("updated_by_employee_id");
+
+            entity.HasOne(d => d.UpdatedByEmployee).WithMany(p => p.ProfitConfigurations)
+                .HasForeignKey(d => d.UpdatedByEmployeeId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<ProfitRule>(entity =>
+        {
+            entity.HasKey(e => e.RuleId).HasName("PK__profit_rules");
+
+            entity.ToTable("profit_rules");
+
+            entity.Property(e => e.RuleId).HasColumnName("rule_id");
+            entity.Property(e => e.RuleType)
+                .HasMaxLength(50)
+                .HasDefaultValue("by_product")
+                .HasColumnName("rule_type");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.ProfitPercentage)
+                .HasColumnType("decimal(5, 2)")
+                .HasColumnName("profit_percentage");
+            entity.Property(e => e.Priority)
+                .HasDefaultValue(1)
+                .HasColumnName("priority");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValue("active")
+                .HasColumnName("status");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.ProfitRules)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.ProfitRules)
+                .HasForeignKey(d => d.EmployeeId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
 
         modelBuilder.Entity<ExportItem>(entity =>
         {
@@ -188,7 +385,29 @@ public partial class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.FeatureId).HasName("PK__Features__82230BC9AB5F5A55");
 
-            entity.Property(e => e.FeatureName).HasMaxLength(255);
+            entity.ToTable("features");
+
+            entity.Property(e => e.FeatureId).HasColumnName("feature_id");
+            entity.Property(e => e.FeatureName)
+                .HasMaxLength(255)
+                .HasColumnName("feature_name");
+            entity.Property(e => e.ParentId).HasColumnName("parent_id");
+            entity.Property(e => e.RoutePath)
+                .HasMaxLength(255)
+                .HasColumnName("route_path");
+            entity.Property(e => e.Icon)
+                .HasMaxLength(50)
+                .HasColumnName("icon");
+            entity.Property(e => e.DisplayOrder)
+                .HasDefaultValue(0)
+                .HasColumnName("display_order");
+            entity.Property(e => e.Description)
+                .HasMaxLength(255)
+                .HasColumnName("description");
+
+            entity.HasOne(d => d.Parent).WithMany(p => p.Children)
+                .HasForeignKey(d => d.ParentId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<ImportItem>(entity =>
@@ -237,6 +456,8 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValue("pending")
                 .HasColumnName("status");
+            entity.Property(e => e.CancellationReason)
+                .HasColumnName("cancellation_reason");
             entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
             entity.Property(e => e.TotalAmount)
                 .HasDefaultValue(0m)
@@ -501,11 +722,19 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<RolePermission>(entity =>
         {
-            entity.HasNoKey();
+            entity.HasKey(e => e.RolePermissionId).HasName("PK__role_permissions");
+
+            entity.ToTable("role_permissions");
 
             entity.HasIndex(e => new { e.RoleId, e.FeatureId, e.PermissionTypeId }, "UQ_RolePermissions").IsUnique();
 
-            entity.Property(e => e.IsAllowed).HasDefaultValue(false);
+            entity.Property(e => e.RolePermissionId).HasColumnName("role_permission_id");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.FeatureId).HasColumnName("feature_id");
+            entity.Property(e => e.PermissionTypeId).HasColumnName("permission_type_id");
+            entity.Property(e => e.IsAllowed)
+                .HasDefaultValue(false)
+                .HasColumnName("is_allowed");
 
             entity.HasOne(d => d.Feature).WithMany()
                 .HasForeignKey(d => d.FeatureId)
@@ -540,6 +769,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Phone)
                 .HasMaxLength(20)
                 .HasColumnName("phone");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValue("active")
+                .HasColumnName("status");
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -557,6 +790,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
+            entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
             entity.Property(e => e.FullName)
                 .HasMaxLength(100)
                 .HasColumnName("full_name");
@@ -566,9 +800,17 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.RoleId)
                 .HasDefaultValue(2)
                 .HasColumnName("role_id");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValue("active")
+                .HasColumnName("status");
             entity.Property(e => e.Username)
                 .HasMaxLength(50)
                 .HasColumnName("username");
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.Users)
+                .HasForeignKey(d => d.EmployeeId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
