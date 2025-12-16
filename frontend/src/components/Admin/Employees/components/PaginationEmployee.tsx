@@ -2,15 +2,15 @@ import { useEffect } from 'react';
 import Pagination from '@/components/ui/pagination';
 import { usePagination } from '@/context/PaginationContext';
 
-interface PaginationManagerCustomerProps {
+interface PaginationManagerEmployeeProps {
     totalItems: number;
     className?: string;
 }
 
-export default function PaginationManagerCustomer({
+export default function PaginationManagerEmployee({
     totalItems,
     className = ""
-}: PaginationManagerCustomerProps) {
+}: PaginationManagerEmployeeProps) {
     const {
         paginationState,
         setCurrentPage,
