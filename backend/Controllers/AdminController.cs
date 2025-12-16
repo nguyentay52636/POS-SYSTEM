@@ -29,8 +29,9 @@ public class AdminController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> UpdateStaffPermissions()
     {
-        string connectionString = _configuration.GetConnectionString("DefaultConnection") 
-            ?? "Server=localhost,1433;Database=bachhoaxanh;User Id=sa;Password=Tay52636@;TrustServerCertificate=True;Encrypt=False;Connection Timeout=30;";
+        string connectionString =
+    _configuration.GetConnectionString("DefaultConnection")
+    ?? throw new Exception("❌ Missing DefaultConnection in appsettings.json");
 
         try
         {

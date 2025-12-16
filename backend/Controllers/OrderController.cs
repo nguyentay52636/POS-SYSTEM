@@ -66,6 +66,12 @@ public class OrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<OrderResponseDto>> Create([FromBody] CreateOrderDto dto)
     {
+        // 🔍 DEBUG: Log request data
+        Console.WriteLine($"🔍 CREATE ORDER REQUEST:");
+        Console.WriteLine($"   CustomerId: {dto.CustomerId}");
+        Console.WriteLine($"   UserId: {dto.UserId}");
+        Console.WriteLine($"   OrderItems count: {dto.OrderItems?.Count ?? 0}");
+        
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -78,6 +84,7 @@ public class OrderController : ControllerBase
         }
         catch (ArgumentException ex)
         {
+            Console.WriteLine($"❌ ORDER CREATE FAILED: {ex.Message}");
             return BadRequest(new { message = ex.Message });
         }
     }

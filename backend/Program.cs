@@ -12,8 +12,29 @@ using System.Text;
 using backend.Configuration;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Data.SqlClient;
+
+
+var cs = "Server=localhost\\SQLEXPRESS;Database=bachhoaxanh;User Id=sa;Password=Thanh2004@;TrustServerCertificate=True;Encrypt=False";
+
+try
+{
+    using var conn = new SqlConnection(cs);
+    conn.Open();
+    Console.WriteLine("✅ CONNECT OK");
+}
+catch (Exception ex)
+{
+    Console.WriteLine("❌ CONNECT FAIL");
+    Console.WriteLine(ex.Message);
+}
+
 
 var builder = WebApplication.CreateBuilder(args);
+var runtimeCs = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine("👉 RUNTIME CONNECTION STRING:");
+Console.WriteLine(runtimeCs);
+
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
@@ -164,6 +185,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();
 
