@@ -66,7 +66,20 @@ public class OrderRepository : IOrderRepository
 
     public async Task<Order> UpdateAsync(Order order)
     {
-        _db.Orders.Update(order);
+        // Check if entity is already being tracked
+        var trackedEntity = _db.Orders.Local.FirstOrDefault(o => o.OrderId == order.OrderId);
+        
+        if (trackedEntity != null)
+        {
+            // Update the tracked entity instead
+            _db.Entry(trackedEntity).CurrentValues.SetValues(order);
+        }
+        else
+        {
+            // Update if not tracked
+            _db.Orders.Update(order);
+        }
+        
         await _db.SaveChangesAsync();
         return order;
     }

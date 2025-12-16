@@ -116,19 +116,24 @@ public class OrderController : ControllerBase
     }
 
     /// <summary>
-    /// Cancel an order (only pending orders can be canceled).
+    /// Cancel a paid order with reason (refunds points and restores inventory).
     /// </summary>
-    [HttpPatch("{id:int}/cancel")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [HttpPut("{id:int}/cancel")]
+    [ProducesResponseType(typeof(OrderResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Cancel(int id)
+    public async Task<ActionResult<OrderResponseDto>> Cancel(int id, [FromBody] CancelOrderDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         try
         {
-            var ok = await _service.CancelOrderAsync(id);
-            if (!ok) return NotFound();
-            return NoContent();
+            var canceled = await _service.CancelOrderAsync(id, dto);
+            if (canceled == null) return NotFound();
+            return Ok(canceled);
         }
         catch (ArgumentException ex)
         {
