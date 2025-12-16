@@ -102,6 +102,7 @@ CREATE TABLE inventory (
     inventory_id INT IDENTITY(1,1) PRIMARY KEY,
     product_id INT NOT NULL,
     quantity INT DEFAULT 0,
+    status NVARCHAR(20) NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'unavailable')),
     updated_at DATETIME DEFAULT GETDATE()
 );
 GO
@@ -143,7 +144,7 @@ CREATE TABLE orders (
     user_id INT NOT NULL,
     promo_id INT,
     order_date DATETIME DEFAULT GETDATE(),
-    status NVARCHAR(20) NOT NULL CHECK (status IN ('pending','paid','canceled')) DEFAULT 'pending',
+    status NVARCHAR(20) NOT NULL CHECK (status IN ('paid','canceled')) DEFAULT 'paid',
     total_amount DECIMAL(10,2) DEFAULT 0,
     discount_amount DECIMAL(10,2) DEFAULT 0
 );
