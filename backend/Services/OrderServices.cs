@@ -332,9 +332,13 @@ public class OrderService : IOrderService
             }
         }
 
-        // Update order status to canceled
-        order.Status = "canceled";
-        await _orderRepo.UpdateAsync(order);
+        // Update order status to canceled (update directly to avoid tracking conflicts)
+        var orderToUpdate = await _db.Orders.FindAsync(id);
+        if (orderToUpdate != null)
+        {
+            orderToUpdate.Status = "canceled";
+            await _db.SaveChangesAsync();
+        }
 
         // Create cancellation history record using EF Core
         var cancellationHistory = new OrderCancellationHistory

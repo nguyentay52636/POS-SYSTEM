@@ -55,7 +55,20 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task<Customer> UpdateAsync(Customer customer)
     {
-        _db.Customers.Update(customer);
+        // Check if entity is already being tracked
+        var trackedEntity = _db.Customers.Local.FirstOrDefault(c => c.CustomerId == customer.CustomerId);
+        
+        if (trackedEntity != null)
+        {
+            // Update the tracked entity instead
+            _db.Entry(trackedEntity).CurrentValues.SetValues(customer);
+        }
+        else
+        {
+            // Update if not tracked
+            _db.Customers.Update(customer);
+        }
+        
         await _db.SaveChangesAsync();
         return customer;
     }

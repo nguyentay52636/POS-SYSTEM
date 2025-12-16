@@ -64,9 +64,25 @@ public class InventoryRepository : IInventoryRepository
     public async Task<Inventory> UpdateAsync(Inventory inventory)
     {
         inventory.UpdatedAt = DateTime.UtcNow;
-        _db.Inventories.Attach(inventory);
-        _db.Entry(inventory).Property(x => x.Quantity).IsModified = true;
-        _db.Entry(inventory).Property(x => x.UpdatedAt).IsModified = true;
+        
+        // Check if entity is already being tracked
+        var trackedEntity = _db.Inventories.Local.FirstOrDefault(i => i.InventoryId == inventory.InventoryId);
+        
+        if (trackedEntity != null)
+        {
+            // Update the tracked entity instead
+            trackedEntity.Quantity = inventory.Quantity;
+            trackedEntity.UpdatedAt = inventory.UpdatedAt;
+            trackedEntity.Status = inventory.Status;
+        }
+        else
+        {
+            // Attach and mark properties as modified
+            _db.Inventories.Attach(inventory);
+            _db.Entry(inventory).Property(x => x.Quantity).IsModified = true;
+            _db.Entry(inventory).Property(x => x.UpdatedAt).IsModified = true;
+        }
+        
         await _db.SaveChangesAsync();
         return inventory;
     }
