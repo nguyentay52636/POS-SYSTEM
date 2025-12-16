@@ -37,6 +37,9 @@ public class UpdateCustomerDto
 
     [StringLength(255, ErrorMessage = "Address cannot exceed 255 characters")]
     public string? Address { get; set; }
+
+    [StringLength(20, ErrorMessage = "Status cannot exceed 20 characters")]
+    public string? Status { get; set; }
 }
 
 public class CustomerResponseDto
@@ -47,6 +50,8 @@ public class CustomerResponseDto
     public string? Email { get; set; }
     public string? Address { get; set; }
     public decimal? CustomerPoint { get; set; }
+    public string Status { get; set; } = "active";
+    public DateTime? CreatedAt { get; set; }
 }
 
 public class CustomerQueryParams
@@ -66,4 +71,11 @@ public class AccumulatePointsDto
     [Required(ErrorMessage = "Amount is required")]
     [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
     public decimal Amount { get; set; }
+}
+
+public class UpdateCustomerStatusDto
+{
+    [Required(ErrorMessage = "Status is required")]
+    [RegularExpression("^(active|inactive)$", ErrorMessage = "Status must be either 'active' or 'inactive'")]
+    public string Status { get; set; } = string.Empty;
 }

@@ -174,7 +174,7 @@ public class ProductController : ControllerBase
     }
 
     /// <summary>
-    /// Toggle product status (active <-> inactive).
+    /// Toggle product status between active and inactive.
     /// </summary>
     /// <param name="id">Product id</param>
     [HttpPatch("{id:int}/toggle-status")]

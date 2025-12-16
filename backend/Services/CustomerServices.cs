@@ -110,7 +110,16 @@ public class CustomerService : ICustomerService
         return _mapper.Map<CustomerResponseDto>(updated);
     }
 
-    public Task<bool> DeleteAsync(int id) => _repo.DeleteAsync(id);
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var customer = await _repo.GetByIdAsync(id);
+        if (customer == null) return false;
+
+        // Soft delete: Set status to inactive instead of deleting
+        customer.Status = "inactive";
+        await _repo.UpdateAsync(customer);
+        return true;
+    }
 
     public async Task<PagedResponse<CustomerResponseDto>> SearchAsync(CustomerQueryParams query)
     {
