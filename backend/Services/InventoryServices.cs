@@ -14,6 +14,7 @@ public interface IInventoryService
     Task<InventoryResponseDto[]> ListAllAsync();
     Task<InventoryResponseDto?> GetByProductIdAsync(int productId);
     Task<InventoryResponseDto?> UpdateAsync(int inventoryId, UpdateInventoryDto dto);
+    Task<InventoryResponseDto?> UpdateStatusAsync(int productId, string status);
     Task<InventoryResponseDto?> CreateAsync(CreateInventoryDto dto);
     Task<bool> DeleteAsync(int productId);
 }
@@ -22,11 +23,13 @@ public class InventoryService : IInventoryService
 {
     private readonly IInventoryRepository _repo;
     private readonly IMapper _mapper;
+    private readonly IProductInventoryStatusSyncService _syncService;
 
-    public InventoryService(IInventoryRepository repo, IMapper mapper)
+    public InventoryService(IInventoryRepository repo, IMapper mapper, IProductInventoryStatusSyncService syncService)
     {
         _repo = repo;
         _mapper = mapper;
+        _syncService = syncService;
     }
 
     public async Task<InventoryResponseDto[]> ListAllAsync()
@@ -60,6 +63,7 @@ public class InventoryService : IInventoryService
         var updated = await _repo.UpdateAsync(existing);
         return _mapper.Map<InventoryResponseDto>(updated);
     }
+    
     public async Task<InventoryResponseDto?> CreateAsync(CreateInventoryDto dto)
     {
         // Validate product exists
@@ -78,6 +82,21 @@ public class InventoryService : IInventoryService
         var resultDto = await GetByProductIdAsync(created.ProductId);
         return resultDto;
     }
+    
+    public async Task<InventoryResponseDto?> UpdateStatusAsync(int productId, string status)
+    {
+        var inventory = await _repo.GetByProductIdAsync(productId);
+        if (inventory == null) return null;
+
+        inventory.Status = status;
+        var updated = await _repo.UpdateAsync(inventory);
+        
+        // Sync to Product
+        await _syncService.SyncInventoryToProductAsync(productId, status);
+        
+        return _mapper.Map<InventoryResponseDto>(updated);
+    }
+    
     public async Task<bool> DeleteAsync(int productId)
     {
         var existing = await _repo.GetByProductIdAsync(productId);
@@ -85,7 +104,12 @@ public class InventoryService : IInventoryService
         {
             return false;
         }
+        
         await _repo.DeleteAsync(existing.InventoryId);
+        
+        // Sync to Product: Inventory unavailable → Product inactive
+        await _syncService.SyncInventoryToProductAsync(productId, "unavailable");
+        
         return true;
     }
 }

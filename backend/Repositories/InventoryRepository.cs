@@ -100,14 +100,11 @@ public class InventoryRepository : IInventoryRepository
     /// </summary>
     public async Task DeleteAsync(int inventoryId)
     {
-        // Tạo một đối tượng Inventory "giả" (stub) chỉ với ID.
-        // Đây là cách hiệu quả để xóa mà không cần SELECT trước.
-        var inventoryToDelete = new Inventory { InventoryId = inventoryId };
-
-        // Đính kèm nó vào DbContext và đánh dấu là đã xóa
-        _db.Inventories.Remove(inventoryToDelete);
-
-        // Lưu thay đổi để thực thi lệnh DELETE
+        var inventory = await _db.Inventories.FindAsync(inventoryId);
+        if (inventory == null) return;
+        
+        // Soft delete: set status to unavailable
+        inventory.Status = "unavailable";
         await _db.SaveChangesAsync();
     }
     

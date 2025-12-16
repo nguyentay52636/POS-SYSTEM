@@ -9,9 +9,11 @@ public class InventoryResponseDto
     public int ProductId { get; set; }
     public string? ProductName { get; set; }
     public int Quantity { get; set; }
+    public string Status { get; set; } = "available";
     public DateTime? UpdatedAt { get; set; }
     public ProductResponseDto? Product { get; set; }
 }
+
 public class CreateInventoryDto
 {
     [Required(ErrorMessage = "ProductId is required")]
@@ -20,6 +22,7 @@ public class CreateInventoryDto
     [Required(ErrorMessage = "Quantity is required")]
     public int Quantity { get; set; }
 }
+
 public class UpdateInventoryDto
 {
     [Required(ErrorMessage = "ProductId is required")]
@@ -27,4 +30,11 @@ public class UpdateInventoryDto
 
     [Required(ErrorMessage = "Quantity is required")]
     public int Quantity { get; set; }
+}
+
+public class UpdateInventoryStatusDto
+{
+    [Required(ErrorMessage = "Status is required")]
+    [RegularExpression("^(available|unavailable)$", ErrorMessage = "Status must be either 'available' or 'unavailable'")]
+    public string Status { get; set; } = string.Empty;
 }
