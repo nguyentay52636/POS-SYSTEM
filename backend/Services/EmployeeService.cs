@@ -14,6 +14,8 @@ public interface IEmployeeService
     Task<EmployeeDTO> UpdateAsync(int id, UpdateEmployeeDTO dto);
     Task<bool> DeleteAsync(int id);
     Task<IReadOnlyList<EmployeeDTO>> ListAllAsync(string? status = null);
+    Task<IReadOnlyList<EmployeeDTO>> ListAllAsync();
+    Task<EmployeeDTO> ToggleStatusAsync(int id);
 }
 
 public class EmployeeService : IEmployeeService
@@ -23,6 +25,18 @@ public class EmployeeService : IEmployeeService
     public EmployeeService(IEmployeeRepository repo)
     {
         _repo = repo;
+    }
+
+    public async Task<EmployeeDTO> ToggleStatusAsync(int id)
+    {
+        var employee = await _repo.GetByIdAsync(id);
+        if (employee == null)
+            throw new KeyNotFoundException($"Employee with ID {id} not found");
+
+        employee.Status = employee.Status == "active" ? "inactive" : "active";
+
+        var updated = await _repo.UpdateAsync(employee);
+        return MapToDTO(updated);
     }
 
     public async Task<EmployeeDTO> CreateAsync(CreateEmployeeDTO dto)
@@ -79,6 +93,11 @@ public class EmployeeService : IEmployeeService
     {
         var employees = await _repo.ListAllAsync(status);
         return employees.Select(MapToDTO).ToList();
+    }
+
+    public async Task<IReadOnlyList<EmployeeDTO>> ListAllAsync()
+    {
+        return await ListAllAsync(null);
     }
 
     private static EmployeeDTO MapToDTO(Employee employee)

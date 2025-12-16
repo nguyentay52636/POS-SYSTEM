@@ -2,19 +2,19 @@
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Filter, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IUser } from "@/types/types";
+import { IEmployee } from "@/apis/employeeApi";
 import ActionsEmployee from "./ActionsEmployee";
 
 type Props = {
-    employees: IUser[];
+    employees: IEmployee[];
     searchQuery: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-    onEdit: (user: IUser) => void;
-    onDelete: (user: IUser) => void;
+    onEdit: (employee: IEmployee) => void;
+    onDelete: (employee: IEmployee) => void;
     busy?: boolean;
 };
 
@@ -58,57 +58,70 @@ export default function TableEmployees({
                         <Table>
                             <TableHeader className="sticky top-0 bg-gray-50 dark:bg-gray-800/50 z-10">
                                 <TableRow>
-                                    <TableHead className="font-semibold">Nhân viên</TableHead>
-                                    <TableHead className="font-semibold">Vai trò</TableHead>
-                                    <TableHead className="font-semibold">Username</TableHead>
-                                    <TableHead className="font-semibold">Ngày tạo</TableHead>
+                                    <TableHead className="font-semibold">ID</TableHead>
+                                    <TableHead className="font-semibold">Tên nhân viên</TableHead>
+                                    <TableHead className="font-semibold">Chức vụ</TableHead>
+                                    <TableHead className="font-semibold">Giới tính</TableHead>
+                                    <TableHead className="font-semibold">Ngày sinh</TableHead>
+                                    <TableHead className="font-semibold">Điện thoại</TableHead>
+                                    <TableHead className="font-semibold">Trạng thái</TableHead>
                                     <TableHead className="font-semibold">Thao tác</TableHead>
                                 </TableRow>
                             </TableHeader>
 
                             <TableBody>
                                 {employees.map((emp, index) => (
-                                    <TableRow key={emp.user_id ?? `${emp.full_name}-${index}`}>
+                                    <TableRow key={emp.employeeId ?? `${emp.fullName}-${index}`}>
+                                        <TableCell className="font-medium text-gray-900 dark:text-gray-100">
+                                            {emp.employeeId ?? "-"}
+                                        </TableCell>
+
                                         <TableCell>
-                                            <div className="flex items-center space-x-4">
-                                                <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-700">
-                                                    <AvatarImage src={emp.avatar || "/placeholder.svg"} alt={emp.full_name || "Employee"} />
-                                                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-semibold">
-                                                        {(emp.full_name || "?").charAt(0).toUpperCase()}
+                                            <div className="flex items-center space-x-3">
+                                                <Avatar className="h-9 w-9 border border-gray-200 dark:border-gray-700">
+                                                    <AvatarFallback className="bg-blue-100 text-blue-700 font-semibold text-xs">
+                                                        {(emp.fullName || "?").charAt(0).toUpperCase()}
                                                     </AvatarFallback>
                                                 </Avatar>
-                                                <div>
-                                                    <div className="font-semibold text-gray-900 dark:text-gray-100">
-                                                        {emp.full_name ?? "(Chưa có tên)"}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                                        ID: {emp.user_id ?? "-"}
-                                                    </div>
-                                                </div>
+                                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                                    {emp.fullName ?? "(Chưa có tên)"}
+                                                </span>
                                             </div>
                                         </TableCell>
 
                                         <TableCell>
-                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${emp.role === "admin"
-                                                ? "bg-red-100 text-red-700"
-                                                : emp.role === "staff"
-                                                    ? "bg-blue-100 text-blue-700"
-                                                    : "bg-gray-100 text-gray-700"
-                                                }`}>
-                                                {emp.role.toUpperCase()}
+                                            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                                                {emp.rolePosition || emp.role?.roleName || "-"}
                                             </span>
                                         </TableCell>
 
                                         <TableCell>
-                                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                {emp.username}
+                                            <div className="text-sm text-gray-700 dark:text-gray-300">
+                                                {emp.gender || "-"}
                                             </div>
                                         </TableCell>
+
                                         <TableCell>
-                                            <div className="text-sm text-gray-500">
-                                                {emp.createdAt ? new Date(emp.createdAt).toLocaleDateString("vi-VN") : "-"}
+                                            <div className="text-sm text-gray-700 dark:text-gray-300">
+                                                {emp.birthDate ? new Date(emp.birthDate).toLocaleDateString("vi-VN") : "-"}
                                             </div>
                                         </TableCell>
+
+                                        <TableCell>
+                                            <div className="text-sm text-gray-700 dark:text-gray-300 font-mono">
+                                                {emp.phone || "-"}
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell>
+                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${emp.status === "active"
+                                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                                }`}>
+                                                {emp.status === "active" ? "Đang làm việc" : "Đã nghỉ"}
+                                            </span>
+                                        </TableCell>
+
                                         <TableCell>
                                             <ActionsEmployee
                                                 employee={emp}

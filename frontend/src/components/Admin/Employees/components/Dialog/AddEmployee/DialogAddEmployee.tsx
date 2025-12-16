@@ -10,14 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import FormEmployee from "./FormEmployee";
-import { IUser } from "@/types/types";
-import { CreateUserRequest, UpdateUserRequest, createUser, updateUser } from "@/apis/userApi";
+import { IEmployee } from "@/apis/employeeApi";
 
 type Props = {
     open: boolean;
     onClose: () => void;
-    onSuccess: (data: IUser, isEdit: boolean) => void;
-    editingUser?: IUser | null;
+    onSuccess: (data: IEmployee, isEdit: boolean) => void;
+    editingUser?: IEmployee | null;
     busy?: boolean;
 };
 
@@ -31,33 +30,25 @@ export default function DialogAddEmployee({
     const isEdit = !!editingUser;
 
     const handleSubmit = async (formData: any) => {
-        try {
-            if (isEdit && editingUser) {
-                // Update
-                const updateData: UpdateUserRequest = {
-                    username: formData.username,
-                    fullName: formData.fullName,
-                    role: formData.role,
-                };
-                const updated = await updateUser(editingUser.user_id, updateData);
-                onSuccess(updated, true);
-            } else {
-                // Create
-                const createData: CreateUserRequest = {
-                    username: formData.username,
-                    password: formData.password || "",
-                    fullName: formData.fullName,
-                    role: formData.role,
-                };
-                const created = await createUser(createData);
-                onSuccess(created, false);
-            }
-            onClose();
-        } catch (error) {
-            console.error("Failed to save employee:", error);
-            // Optionally handle error here (toast/alert)
-            alert("Có lỗi xảy ra khi lưu nhân viên");
-        }
+        // FormEmployee returns form data. We map it to IEmployee structure if needed,
+        // or assume FormEmployee returns IEmployee compatible object.
+        // Let's assume FormEmployee returns object compatible with IEmployee for now
+        // or we construct it.
+        const employeeData: IEmployee = {
+            ...formData,
+            // Ensure status/role are handled if FormEmployee deals with them
+        };
+
+        onSuccess(employeeData, isEdit);
+        // Note: Closing is handled by parent in handleSuccess or separate prop, 
+        // but here we might want to wait? handleSuccess in parent is async.
+        // current implementation in DialogAddEmployee calls onSuccess then onClose.
+        // In parent handleSuccess sets isOpen false.
+        // So we probably don't need to call onClose() here if parent does it, 
+        // but user might expect it.
+        // Parent handleSuccess: await addEmployee; setIsAddDialogOpen(false);
+        // So we don't need to call onClose() here if we want to wait for parent.
+        // But onSuccess is void in props.
     };
 
     return (

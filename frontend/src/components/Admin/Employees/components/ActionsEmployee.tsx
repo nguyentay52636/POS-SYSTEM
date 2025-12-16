@@ -17,12 +17,12 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { IUser } from "@/types/types";
+import { IEmployee } from "@/apis/employeeApi";
 
 type Props = {
-    employee: IUser;
-    onEdit: (user: IUser) => void;
-    onDelete: (user: IUser) => void;
+    employee: IEmployee;
+    onEdit: (employee: IEmployee) => void;
+    onDelete: (employee: IEmployee) => void;
     busy?: boolean;
 };
 
@@ -83,10 +83,10 @@ export default function ActionsEmployee({
                             </p>
                             <p className="text-sm text-red-700 mt-2 font-medium">
                                 Họ và tên:{" "}
-                                <span className="font-semibold">{employee.full_name || "Không rõ"}</span>
+                                <span className="font-semibold">{employee.fullName || "Không rõ"}</span>
                             </p>
                             <p className="text-sm text-red-700">
-                                Username: <span className="font-semibold">{employee.username || "-"}</span>
+                                Điện thoại: <span className="font-semibold">{employee.phone || "-"}</span>
                             </p>
                         </div>
 

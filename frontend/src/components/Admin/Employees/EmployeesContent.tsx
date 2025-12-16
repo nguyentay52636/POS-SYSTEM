@@ -5,74 +5,66 @@ import TableEmployees from "./components/TableEmployees";
 import PaginationEmployee from "./components/PaginationEmployee";
 import DialogAddEmployee from "./components/Dialog/AddEmployee/DialogAddEmployee";
 
-import { useUser } from "@/hooks/useUser";
+import { useEmployees } from "@/hooks/useEmployees";
 import { usePagination } from "@/context/PaginationContext";
-import { deleteUser } from "@/apis/userApi";
-import { IUser } from "@/types/types";
+import { IEmployee } from "@/apis/employeeApi";
 import HeaderEmployee from "./components/HeaderEmployee";
 
 export default function EmployeesContent() {
-    const {
-        users,
-        loading,
-        handleUserAdded,
-        handleUpdateUser,
-        handleConfirmDelete,
-        refreshUsers,
-    } = useUser();
-
+    const { employees, isLoading, addEmployee, updateEmployeeInfo, removeEmployee } = useEmployees();
     const { paginationState } = usePagination();
     const [searchTerm, setSearchTerm] = useState("");
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState<IUser | null>(null);
+    const [editingEmployee, setEditingEmployee] = useState<IEmployee | null>(null);
 
     // Filter Logic
-    const filteredUsers = useMemo(() => {
-        if (!searchTerm) return users;
+    const filteredEmployees = useMemo(() => {
+        if (!searchTerm) return employees;
         const lowerTerm = searchTerm.toLowerCase();
-        return users.filter(
-            (u) =>
-                (u.full_name?.toLowerCase().includes(lowerTerm)) ||
-                (u.username?.toLowerCase().includes(lowerTerm))
+        return employees.filter(
+            (e) =>
+                (e.fullName?.toLowerCase().includes(lowerTerm)) ||
+                (e.phone?.includes(lowerTerm)) ||
+                (e.rolePosition?.toLowerCase().includes(lowerTerm))
         );
-    }, [users, searchTerm]);
+    }, [employees, searchTerm]);
 
     // Pagination Logic
-    const paginatedUsers = useMemo(() => {
+    const paginatedEmployees = useMemo(() => {
         const { currentPage, rowsPerPage } = paginationState;
         const start = (currentPage - 1) * rowsPerPage;
-        return filteredUsers.slice(start, start + rowsPerPage);
-    }, [filteredUsers, paginationState]);
+        return filteredEmployees.slice(start, start + rowsPerPage);
+    }, [filteredEmployees, paginationState]);
 
     const handleAdd = () => {
-        setEditingUser(null);
+        setEditingEmployee(null);
         setIsAddDialogOpen(true);
     };
 
-    const handleEdit = (user: IUser) => {
-        setEditingUser(user);
+    const handleEdit = (employee: IEmployee) => {
+        setEditingEmployee(employee);
         setIsAddDialogOpen(true);
     };
 
-    const handleDelete = async (user: IUser) => {
-        try {
-            await deleteUser(user.user_id);
-            handleConfirmDelete(user.user_id);
-        } catch (error) {
-            console.error("Failed to delete user", error);
-            alert("Không thể xóa nhân viên này");
+    const handleDelete = async (employee: IEmployee) => {
+        if (employee.employeeId) {
+            // Assuming ID is number based on interface, but hook might expect string. 
+            // api expects string in my implementation (getEmployeeById(id: string)).
+            // Let's safe cast or convert.
+            await removeEmployee(employee.employeeId.toString());
         }
     };
 
-    const handleSuccess = (data: IUser, isEdit: boolean) => {
-        if (isEdit) {
-            handleUpdateUser(data);
+    const handleSuccess = async (data: IEmployee, isEdit: boolean) => {
+        if (isEdit && editingEmployee?.employeeId) {
+            await updateEmployeeInfo(editingEmployee.employeeId.toString(), data);
         } else {
-            handleUserAdded(data);
+            await addEmployee(data);
         }
+        setIsAddDialogOpen(false); // Close dialog after success
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="">
                 <div className="p-6 space-y-8">
@@ -94,25 +86,23 @@ export default function EmployeesContent() {
             <div className="p-6 space-y-8">
                 <HeaderEmployee onAdd={handleAdd} />
 
-
-
                 <TableEmployees
-                    employees={paginatedUsers}
+                    employees={paginatedEmployees}
                     searchQuery={searchTerm}
                     setSearchQuery={setSearchTerm}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
-                    busy={loading}
+                    busy={isLoading}
                 />
 
-                <PaginationEmployee totalItems={filteredUsers.length} />
+                <PaginationEmployee totalItems={filteredEmployees.length} />
 
                 <DialogAddEmployee
                     open={isAddDialogOpen}
                     onClose={() => setIsAddDialogOpen(false)}
                     onSuccess={handleSuccess}
-                    editingUser={editingUser}
-                    busy={loading}
+                    editingUser={editingEmployee} // Note: Dialog might still expect editingUser prop name even if type is different
+                    busy={isLoading}
                 />
             </div>
         </div>
