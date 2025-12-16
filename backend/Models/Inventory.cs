@@ -11,6 +11,8 @@ public partial class Inventory
 
     public int? Quantity { get; set; }
 
+    public string Status { get; set; } = "available";
+
     public DateTime? UpdatedAt { get; set; }
 
     public virtual Product Product { get; set; } = null!;

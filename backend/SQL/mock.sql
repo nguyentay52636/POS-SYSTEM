@@ -67,12 +67,12 @@ VALUES
 -------------------------------------------------
 -- 7) INVENTORY
 -------------------------------------------------
-INSERT INTO inventory (product_id, quantity)
+INSERT INTO inventory (product_id, quantity, status)
 VALUES
-(1, 100),
-(2, 80),
-(3, 60),
-(4, 50);
+(1, 100, 'available'),
+(2, 80, 'available'),
+(3, 60, 'available'),
+(4, 50, 'available');
 
 -------------------------------------------------
 -- 8) PROMOTIONS

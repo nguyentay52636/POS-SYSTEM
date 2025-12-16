@@ -138,8 +138,32 @@ public class CustomerController : ControllerBase
     }
 
     /// <summary>
-    /// Delete a customer by id.
+    /// Update customer status (active/inactive) - Lock or unlock customer.
     /// </summary>
+    /// <param name="id">Customer id</param>
+    /// <param name="dto">Status update data</param>
+    [HttpPut("{id:int}/status")]
+    [ProducesResponseType(typeof(CustomerResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<CustomerResponseDto>> UpdateStatus(int id, [FromBody] UpdateCustomerStatusDto dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var updateDto = new UpdateCustomerDto { Status = dto.Status };
+        var updated = await _service.UpdateAsync(id, updateDto);
+        
+        if (updated == null) return NotFound();
+        return Ok(updated);
+    }
+
+    /// <summary>
+    /// Deactivate (lock) a customer by setting status to inactive (soft delete).
+    /// </summary>
+    /// <param name="id">Customer id</param>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
