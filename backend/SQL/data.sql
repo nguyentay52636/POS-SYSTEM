@@ -34,7 +34,8 @@ CREATE TABLE customers (
     email NVARCHAR(100),
     address NVARCHAR(MAX),
     customer_point DECIMAL(10,2) DEFAULT 0,
-    created_at DATETIME DEFAULT GETDATE()
+    created_at DATETIME DEFAULT GETDATE(),
+    IsDeleted BIT NOT NULL DEFAULT 0
 );
 GO
 
@@ -72,7 +73,7 @@ CREATE TABLE products (
     price DECIMAL(10,2) NOT NULL,
     unit NVARCHAR(20) DEFAULT 'pcs',
     image_url NVARCHAR(255),
-    created_at DATETIME DEFAULT GETDATE()
+    created_at DATETIME DEFAULT GETDATE(),
     status NVARCHAR(20) NOT NULL CHECK (status IN ('active','inactive')) DEFAULT 'active'
 );
 GO
@@ -119,7 +120,30 @@ GO
 -------------------------------------------------
 -- 🔟 Orders
 -------------------------------------------------
+CREATE TABLE orders (
+    order_id INT IDENTITY(1,1) PRIMARY KEY,
+    customer_id INT NOT NULL,
+    user_id INT NOT NULL,
+    promo_id INT,
+    order_date DATETIME DEFAULT GETDATE(),
+    status NVARCHAR(20) NOT NULL CHECK (status IN ('pending','paid','canceled')) DEFAULT 'pending',
+    total_amount DECIMAL(10,2) DEFAULT 0,
+    discount_amount DECIMAL(10,2) DEFAULT 0
+);
+GO
 
+-------------------------------------------------
+-- 1️⃣1️⃣ Order Items
+-------------------------------------------------
+CREATE TABLE order_items (
+    order_item_id INT IDENTITY(1,1) PRIMARY KEY,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL
+);
+GO
 
 -------------------------------------------------
 -- 1️⃣2️⃣ Payments
