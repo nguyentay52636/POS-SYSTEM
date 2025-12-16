@@ -74,7 +74,9 @@ public class ProductRepository : IProductRepository
     {
         var existing = await _db.Products.FindAsync(id);
         if (existing == null) return false;
-        _db.Products.Remove(existing);
+        
+        // Soft delete: set status to inactive
+        existing.Status = "inactive";
         await _db.SaveChangesAsync();
         return true;
     }

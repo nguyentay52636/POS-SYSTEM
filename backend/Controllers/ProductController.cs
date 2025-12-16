@@ -174,6 +174,27 @@ public class ProductController : ControllerBase
     }
 
     /// <summary>
+    /// Update product status (active/inactive) with automatic inventory sync.
+    /// </summary>
+    /// <param name="id">Product id</param>
+    /// <param name="dto">Status update data</param>
+    [HttpPut("{id:int}/status")]
+    [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ProductResponseDto>> UpdateStatus(int id, [FromBody] UpdateProductStatusDto dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var updated = await _service.UpdateStatusAsync(id, dto.Status);
+        if (updated == null) return NotFound();
+        return Ok(updated);
+    }
+
+    /// <summary>
     /// Toggle product status between active and inactive.
     /// </summary>
     /// <param name="id">Product id</param>

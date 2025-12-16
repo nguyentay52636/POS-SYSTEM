@@ -67,20 +67,22 @@ public class ImportReceiptService : IImportReceiptService
         // Add items if present
         if (dto.Items != null && dto.Items.Any())
         {
-            // Validate all products exist
+            // Validate all products exist and are active
             var productIds = dto.Items.Select(item => item.ProductId).Distinct().ToList();
             foreach (var productId in productIds)
             {
                 var product = await _productRepo.GetByIdAsync(productId);
                 if (product == null)
                 {
-                    // Rollback creation if possible, or throw. 
-                    // Since we already created the receipt, we should probably delete it or use a transaction.
-                    // For simplicity in this context, we'll throw and let the user handle the partial state or 
-                    // ideally we should have validated products before creating the receipt.
-                    // Let's move product validation to before receipt creation.
                     await _importRepo.DeleteAsync(created.ImportId);
                     throw new ArgumentException($"Product with ID {productId} not found");
+                }
+                
+                // Validate product is active
+                if (product.Status == "inactive")
+                {
+                    await _importRepo.DeleteAsync(created.ImportId);
+                    throw new ArgumentException($"Product '{product.ProductName}' (ID: {productId}) is inactive and cannot be imported");
                 }
             }
 
@@ -300,7 +302,7 @@ public class ImportReceiptService : IImportReceiptService
             throw new ArgumentException("Cannot add items to a completed import receipt");
         }
 
-        // Validate all products exist
+        // Validate all products exist and are active
         var productIds = dto.Items.Select(item => item.ProductId).Distinct().ToList();
         foreach (var productId in productIds)
         {
@@ -308,6 +310,12 @@ public class ImportReceiptService : IImportReceiptService
             if (product == null)
             {
                 throw new ArgumentException($"Product with ID {productId} not found");
+            }
+            
+            // Validate product is active
+            if (product.Status == "inactive")
+            {
+                throw new ArgumentException($"Product '{product.ProductName}' (ID: {productId}) is inactive and cannot be imported");
             }
         }
 

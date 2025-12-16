@@ -72,6 +72,13 @@ public class ProductResponseDto
     public DateTime? CreatedAt { get; set; }
 }
 
+public class UpdateProductStatusDto
+{
+    [Required(ErrorMessage = "Status is required")]
+    [RegularExpression("^(active|inactive)$", ErrorMessage = "Status must be either 'active' or 'inactive'")]
+    public string Status { get; set; } = string.Empty;
+}
+
 public class ProductQueryParams
 {
     public string? Keyword { get; set; }

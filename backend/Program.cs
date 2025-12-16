@@ -119,6 +119,9 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 
+// Product-Inventory Status Sync
+builder.Services.AddScoped<IProductInventoryStatusSyncService, ProductInventoryStatusSyncService>();
+
 // Payment
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
