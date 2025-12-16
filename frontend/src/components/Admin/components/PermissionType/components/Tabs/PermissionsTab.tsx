@@ -5,9 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Plus, Trash2, Save, RefreshCw, Loader2, Edit } from "lucide-react"
 import { IRole } from "@/apis/roleApi"
 import { RoleSelector } from "../RoleSelector"
-import { PermisstionTable } from "../PermisstionTable"
 import { FeaturePermission, type PermissionType } from "@/apis/rolePermissionsApi"
 import CardRoleTab from "./components/CardRoleTab"
+import { PermissionsTable } from "../PermisstionTable"
 
 interface PermissionsTabProps {
     roles: IRole[]
@@ -48,8 +48,8 @@ export function PermissionsTab({
                 <div className="space-y-6">
                     <Card className="border-gray-200 shadow-md">
                         <CardHeader className="pb-4 border-b border-gray-100">
-                            <CardTitle className="text-base font-semibold text-gray-900">Vai trò</CardTitle>
-                            <CardDescription className="text-xs text-gray-600">
+                            <CardTitle className="text-base font-semibold dark:text-white">Vai trò</CardTitle>
+                            <CardDescription className="text-xs dark:text-white">
                                 Chọn vai trò để cấu hình phân quyền
                             </CardDescription>
                         </CardHeader>
@@ -59,9 +59,9 @@ export function PermissionsTab({
                             {selectedRole && (
                                 <div className="mt-4 pt-4 border-t border-gray-200">
                                     <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                                        <div className="text-xs font-medium text-green-900 mb-1">Đã chọn</div>
-                                        <div className="text-sm text-green-800 font-semibold">{selectedRole.roleName}</div>
-                                        <div className="text-xs text-green-700 mt-1">{selectedRole.description}</div>
+                                        <div className="text-xs font-medium dark:text-green-900 mb-1">Đã chọn</div>
+                                        <div className="text-sm dark:text-green-800 font-semibold">{selectedRole.roleName}</div>
+                                        <div className="text-xs dark:text-green-700 mt-1">{selectedRole.description}</div>
                                     </div>
                                 </div>
                             )}
@@ -82,10 +82,10 @@ export function PermissionsTab({
                         <CardHeader className="pb-4 border-b border-gray-100">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-lg font-semibold text-gray-900">
+                                    <CardTitle className="text-lg font-semibold dark:text-white">
                                         Chi tiết phân quyền - {selectedRole?.roleName || "Chưa chọn"}
                                     </CardTitle>
-                                    <CardDescription className="text-xs text-gray-600 mt-1">
+                                    <CardDescription className="text-sm dark:text-white ">
                                         Cấu hình chi tiết quyền truy cập cho từng chức năng trong hệ thống
                                     </CardDescription>
                                 </div>
@@ -115,7 +115,7 @@ export function PermissionsTab({
                                     <p className="text-gray-600">Đang tải phân quyền...</p>
                                 </div>
                             ) : (
-                                <PermisstionTable
+                                <PermissionsTable
                                     features={features}
                                     onPermissionChange={onPermissionChange}
                                     onSelectAll={onSelectAll}
