@@ -112,20 +112,5 @@ public class EmployeeController : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        try
-        {
-            var result = await _service.DeleteAsync(id);
-            if (!result)
-                return NotFound(new { success = false, message = $"Employee with ID {id} not found" });
 
-            return Ok(new { success = true, message = "Employee deleted successfully" });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { success = false, message = ex.Message });
-        }
-    }
 }

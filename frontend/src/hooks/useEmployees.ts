@@ -1,18 +1,33 @@
 import useSWR from 'swr';
+import { useState } from 'react';
 import {
     getAllEmployee,
+    getAllEmployeeStatus,
     createEmployee,
     updateEmployee,
-    deleteEmployee,
+    changeStatusEmployee,
     IEmployee
 } from '../apis/employeeApi';
 import { toast } from 'sonner';
 
 export const useEmployees = () => {
-    const { data: employees, error, isLoading, mutate } = useSWR<IEmployee[]>('/employees', getAllEmployee, {
-        revalidateOnFocus: false,
-        shouldRetryOnError: false
-    });
+    const [filterStatus, setFilterStatus] = useState<string>('all');
+
+    const fetcher = async () => {
+        if (filterStatus && filterStatus !== 'all') {
+            return await getAllEmployeeStatus(filterStatus);
+        }
+        return await getAllEmployee();
+    };
+
+    const { data: employees, error, isLoading, mutate } = useSWR<IEmployee[]>(
+        ['/employees', filterStatus],
+        fetcher,
+        {
+            revalidateOnFocus: false,
+            shouldRetryOnError: false
+        }
+    );
 
     const addEmployee = async (employee: IEmployee) => {
         try {
@@ -26,7 +41,7 @@ export const useEmployees = () => {
         }
     };
 
-    const updateEmployeeInfo = async (id: string, employee: IEmployee) => {
+    const updateEmployeeInfo = async (id: number, employee: IEmployee) => {
         try {
             await updateEmployee(id, employee);
             mutate(); // Refresh the list
@@ -38,14 +53,15 @@ export const useEmployees = () => {
         }
     };
 
-    const removeEmployee = async (id: string) => {
+
+    const updateStatus = async (id: number, status: string) => {
         try {
-            await deleteEmployee(id);
+            await changeStatusEmployee(id, status);
             mutate(); // Refresh the list
-            toast.success('Xóa nhân viên thành công');
+            toast.success('Cập nhật trạng thái thành công');
             return true;
         } catch (error: any) {
-            toast.error(error?.response?.data?.message || 'Xóa nhân viên thất bại');
+            toast.error(error?.response?.data?.message || 'Cập nhật trạng thái thất bại');
             return false;
         }
     };
@@ -56,7 +72,9 @@ export const useEmployees = () => {
         isError: error,
         addEmployee,
         updateEmployeeInfo,
-        removeEmployee,
+        updateStatus,
+        filterStatus,
+        setFilterStatus,
         mutate
     };
 };

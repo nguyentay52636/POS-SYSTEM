@@ -6,15 +6,19 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Filter, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { IEmployee } from "@/apis/employeeApi";
 import ActionsEmployee from "./ActionsEmployee";
+import FilterEmployees from "./FilterEmployees";
 
 type Props = {
     employees: IEmployee[];
     searchQuery: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
     onEdit: (employee: IEmployee) => void;
-    onDelete: (employee: IEmployee) => void;
+    onStatusChange: (id: number, checked: boolean) => void;
+    filterStatus: string;
+    setFilterStatus: (status: string) => void;
     busy?: boolean;
 };
 
@@ -23,34 +27,20 @@ export default function TableEmployees({
     searchQuery,
     setSearchQuery,
     onEdit,
-    onDelete,
+    onStatusChange,
+    filterStatus,
+    setFilterStatus,
     busy = false,
 }: Props) {
+
     return (
         <Card className="shadow-xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <div className="flex items-center space-x-3">
-                        <div className="relative w-64!">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                                placeholder="Tìm kiếm nhân viên..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 w-64 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400"
-                            />
-                        </div>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="hover:bg-gray-50 dark:hover:bg-gray-800 bg-transparent"
-                        >
-                            <Filter className="h-4 w-4 mr-2" />
-                            Lọc
-                        </Button>
-                    </div>
-                </div>
-            </CardHeader>
+            <FilterEmployees
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filterStatus={filterStatus}
+                setFilterStatus={setFilterStatus}
+            />
 
             <CardContent>
                 <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -114,19 +104,29 @@ export default function TableEmployees({
                                         </TableCell>
 
                                         <TableCell>
-                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${emp.status === "active"
-                                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                                }`}>
-                                                {emp.status === "active" ? "Đang làm việc" : "Đã nghỉ"}
-                                            </span>
+                                            <div className="flex items-center space-x-2">
+                                                <Switch
+                                                    checked={emp.status === "active"}
+                                                    onCheckedChange={(checked) => {
+                                                        if (emp.employeeId) {
+                                                            onStatusChange(emp.employeeId, checked);
+                                                        }
+                                                    }}
+                                                    disabled={busy}
+                                                />
+                                                <span className={`text-sm ${emp.status === "active"
+                                                    ? "text-green-600 dark:text-green-400"
+                                                    : "text-gray-500 dark:text-gray-400"
+                                                    }`}>
+                                                    {emp.status === "active" ? "Đang làm việc" : "Đã nghỉ"}
+                                                </span>
+                                            </div>
                                         </TableCell>
 
                                         <TableCell>
                                             <ActionsEmployee
                                                 employee={emp}
                                                 onEdit={onEdit}
-                                                onDelete={onDelete}
                                                 busy={busy}
                                             />
                                         </TableCell>
