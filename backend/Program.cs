@@ -115,6 +115,9 @@ builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
+// Customer Points History
+builder.Services.AddScoped<ICustomerPointsHistoryService, CustomerPointsHistoryService>();
+
 // Inventory
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();

@@ -6,6 +6,7 @@ using backend.DTOs;
 using backend.Models;
 using backend.Repositories;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
@@ -14,7 +15,7 @@ public interface IOrderService
     Task<OrderResponseDto> CreateAsync(CreateOrderDto dto);
     Task<OrderDetailResponseDto?> GetByIdAsync(int id);
     Task<OrderResponseDto?> UpdateStatusAsync(int id, UpdateOrderStatusDto dto);
-    Task<bool> CancelOrderAsync(int id);
+    Task<OrderResponseDto?> CancelOrderAsync(int id, CancelOrderDto dto);
     Task<PagedResponse<OrderResponseDto>> SearchAsync(OrderQueryParams query);
     Task<OrderResponseDto[]> ListAllAsync();
     Task<OrderItemResponseDto[]> GetOrderItemsAsync(int orderId);
@@ -28,6 +29,9 @@ public class OrderService : IOrderService
     private readonly IPromotionRepository _promotionRepo;
     private readonly ICustomerRepository _customerRepo;
     private readonly IUserRepository _userRepo;
+    private readonly IInventoryRepository _inventoryRepo;
+    private readonly ApplicationDbContext _db;
+    private readonly ICustomerPointsHistoryService _pointsHistoryService;
     private readonly IMapper _mapper;
 
     public OrderService(
@@ -36,6 +40,9 @@ public class OrderService : IOrderService
         IPromotionRepository promotionRepo,
         ICustomerRepository customerRepo,
         IUserRepository userRepo,
+        IInventoryRepository inventoryRepo,
+        ApplicationDbContext db,
+        ICustomerPointsHistoryService pointsHistoryService,
         IMapper mapper)
     {
         _orderRepo = orderRepo;
@@ -43,6 +50,9 @@ public class OrderService : IOrderService
         _promotionRepo = promotionRepo;
         _customerRepo = customerRepo;
         _userRepo = userRepo;
+        _inventoryRepo = inventoryRepo;
+        _db = db;
+        _pointsHistoryService = pointsHistoryService;
         _mapper = mapper;
     }
 
@@ -162,6 +172,23 @@ public class OrderService : IOrderService
         }
         await _orderRepo.AddOrderItemsAsync(orderItems);
 
+        // Accumulate customer points based on product quantity (1 product = 1 point)
+        if (order.CustomerId.HasValue)
+        {
+            // Calculate total quantity of products purchased
+            int totalQuantity = orderItems.Sum(item => item.Quantity);
+            
+            // Create points history record (1 product = 1 point)
+            await _pointsHistoryService.CreateHistoryAsync(
+                customerId: order.CustomerId.Value,
+                orderId: order.OrderId,
+                pointsEarned: totalQuantity,
+                pointsUsed: 0,
+                transactionType: "earn",
+                description: $"Earned {totalQuantity} points from order #{order.OrderId}"
+            );
+        }
+
         // Get and return full order details
         return await GetOrderResponseDtoAsync(order.OrderId);
     }
@@ -258,7 +285,7 @@ public class OrderService : IOrderService
         return await GetOrderResponseDtoAsync(id);
     }
 
-    public async Task<bool> CancelOrderAsync(int id)
+    public async Task<OrderResponseDto?> CancelOrderAsync(int id, CancelOrderDto dto)
     {
         var order = await _orderRepo.GetByIdAsync(id);
         if (order == null)
@@ -266,12 +293,61 @@ public class OrderService : IOrderService
             throw new ArgumentException($"Order with ID {id} not found");
         }
 
-        if (order.Status != "pending")
+        // Only paid orders can be canceled
+        if (order.Status != "paid")
         {
-            throw new ArgumentException("Only pending orders can be canceled");
+            throw new ArgumentException("Only paid orders can be canceled");
         }
 
-        return await _orderRepo.CancelOrderAsync(id);
+        // Get order items to restore inventory
+        var orderItems = await _orderRepo.GetOrderItemsByOrderIdAsync(id);
+        
+        // Restore inventory for each item
+        foreach (var item in orderItems)
+        {
+            var inventory = await _inventoryRepo.GetByProductIdAsync(item.ProductId);
+            if (inventory != null)
+            {
+                inventory.Quantity = (inventory.Quantity ?? 0) + item.Quantity;
+                await _inventoryRepo.UpdateAsync(inventory);
+            }
+        }
+
+        // Refund customer points if any were earned
+        if (order.CustomerId.HasValue)
+        {
+            // Find points history for this order using EF Core
+            var pointsHistory = await _db.CustomerPointsHistories
+                .FirstOrDefaultAsync(h => h.OrderId == id && h.PointsEarned > 0);
+                
+            if (pointsHistory != null)
+            {
+                var customer = await _customerRepo.GetByIdAsync(order.CustomerId.Value);
+                if (customer != null)
+                {
+                    // Deduct the points that were earned (use CustomerPoint property)
+                    customer.CustomerPoint = (customer.CustomerPoint ?? 0) - pointsHistory.PointsEarned;
+                    await _customerRepo.UpdateAsync(customer);
+                }
+            }
+        }
+
+        // Update order status to canceled
+        order.Status = "canceled";
+        await _orderRepo.UpdateAsync(order);
+
+        // Create cancellation history record using EF Core
+        var cancellationHistory = new OrderCancellationHistory
+        {
+            OrderId = id,
+            CancellationReason = dto.CancellationReason,
+            CanceledByEmployeeId = 1, // TODO: Get from current user context
+            CancellationDate = DateTime.UtcNow
+        };
+        _db.OrderCancellationHistories.Add(cancellationHistory);
+        await _db.SaveChangesAsync();
+
+        return await GetOrderResponseDtoAsync(id);
     }
 
     public async Task<PagedResponse<OrderResponseDto>> SearchAsync(OrderQueryParams query)

@@ -48,15 +48,22 @@ public class CreateOrderDto
     [MinLength(1, ErrorMessage = "At least one order item is required")]
     public List<CreateOrderItemDto> OrderItems { get; set; } = new List<CreateOrderItemDto>();
 
-    [RegularExpression("^(pending|paid|canceled)$", ErrorMessage = "Status must be 'pending', 'paid', or 'canceled'")]
-    public string Status { get; set; } = "pending";
+    [RegularExpression("^(paid|canceled)$", ErrorMessage = "Status must be 'paid' or 'canceled'")]
+    public string Status { get; set; } = "paid";
 }
 
 public class UpdateOrderStatusDto
 {
     [Required(ErrorMessage = "Status is required")]
-    [RegularExpression("^(pending|paid|canceled)$", ErrorMessage = "Status must be 'pending', 'paid', or 'canceled'")]
+    [RegularExpression("^(paid|canceled)$", ErrorMessage = "Status must be 'paid' or 'canceled'")]
     public string Status { get; set; } = string.Empty;
+}
+
+public class CancelOrderDto
+{
+    [Required(ErrorMessage = "Cancellation reason is required")]
+    [StringLength(500, MinimumLength = 5, ErrorMessage = "Cancellation reason must be between 5 and 500 characters")]
+    public string CancellationReason { get; set; } = string.Empty;
 }
 
 public class OrderResponseDto
@@ -99,7 +106,7 @@ public class OrderQueryParams
 {
     public int? CustomerId { get; set; }
     public int? UserId { get; set; }
-    public string? Status { get; set; } // pending | paid | canceled
+    public string? Status { get; set; } // paid | canceled
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
     public int Page { get; set; } = 1;
