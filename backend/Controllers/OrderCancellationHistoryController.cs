@@ -16,7 +16,7 @@ public class OrderCancellationHistoryController : ControllerBase
     }
 
     [HttpGet("order/{orderId}")]
-    [RequirePermission("Order", "VIEW")]
+    [Permission("Order", "VIEW")]
     public async Task<IActionResult> GetByOrderId(int orderId)
     {
         try

@@ -16,7 +16,7 @@ public class CustomerPointsHistoryController : ControllerBase
     }
 
     [HttpGet("customer/{customerId}")]
-    [RequirePermission("Customer", "VIEW")]
+    [Permission("Customer", "VIEW")]
     public async Task<IActionResult> GetByCustomerId(int customerId)
     {
         try
@@ -31,7 +31,7 @@ public class CustomerPointsHistoryController : ControllerBase
     }
 
     [HttpGet("order/{orderId}")]
-    [RequirePermission("Order", "VIEW")]
+    [Permission("Order", "VIEW")]
     public async Task<IActionResult> GetByOrderId(int orderId)
     {
         try
@@ -58,7 +58,7 @@ public class InventoryHistoryController : ControllerBase
     }
 
     [HttpGet("product/{productId}")]
-    [RequirePermission("Inventory", "VIEW")]
+    [Permission("Inventory", "VIEW")]
     public async Task<IActionResult> GetByProductId(int productId)
     {
         try
@@ -85,7 +85,7 @@ public class ProfitConfigurationController : ControllerBase
     }
 
     [HttpGet]
-    [RequirePermission("Configuration", "VIEW")]
+    [Permission("Configuration", "VIEW")]
     public async Task<IActionResult> GetCurrent()
     {
         try
@@ -103,7 +103,7 @@ public class ProfitConfigurationController : ControllerBase
     }
 
     [HttpPut]
-    [RequirePermission("Configuration", "UPDATE")]
+    [Permission("Configuration", "UPDATE")]
     public async Task<IActionResult> Update([FromBody] backend.DTOs.UpdateProfitConfigurationDTO dto)
     {
         try
@@ -130,7 +130,7 @@ public class ProfitRuleController : ControllerBase
     }
 
     [HttpGet]
-    [RequirePermission("Configuration", "VIEW")]
+    [Permission("Configuration", "VIEW")]
     public async Task<IActionResult> GetAll([FromQuery] string? status = null)
     {
         try
@@ -145,7 +145,7 @@ public class ProfitRuleController : ControllerBase
     }
 
     [HttpGet("product/{productId}")]
-    [RequirePermission("Configuration", "VIEW")]
+    [Permission("Configuration", "VIEW")]
     public async Task<IActionResult> GetByProductId(int productId)
     {
         try
@@ -163,7 +163,7 @@ public class ProfitRuleController : ControllerBase
     }
 
     [HttpPost]
-    [RequirePermission("Configuration", "CREATE")]
+    [Permission("Configuration", "CREATE")]
     public async Task<IActionResult> Create([FromBody] backend.DTOs.CreateProfitRuleDTO dto)
     {
         try
@@ -179,7 +179,7 @@ public class ProfitRuleController : ControllerBase
     }
 
     [HttpPut("{ruleId}")]
-    [RequirePermission("Configuration", "UPDATE")]
+    [Permission("Configuration", "UPDATE")]
     public async Task<IActionResult> Update(int ruleId, [FromBody] backend.DTOs.UpdateProfitRuleDTO dto)
     {
         try
@@ -198,7 +198,7 @@ public class ProfitRuleController : ControllerBase
     }
 
     [HttpDelete("{ruleId}")]
-    [RequirePermission("Configuration", "DELETE")]
+    [Permission("Configuration", "DELETE")]
     public async Task<IActionResult> Delete(int ruleId)
     {
         try

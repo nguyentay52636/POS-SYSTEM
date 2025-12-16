@@ -17,7 +17,7 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpGet]
-    [RequirePermission("Employee", "VIEW")]
+    [Permission("Employee", "VIEW")]
     public async Task<IActionResult> List([FromQuery] string? status = null)
     {
         try
@@ -32,7 +32,7 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [RequirePermission("Employee", "VIEW")]
+    [Permission("Employee", "VIEW")]
     public async Task<IActionResult> GetById(int id)
     {
         try
@@ -50,7 +50,7 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpPost]
-    [RequirePermission("Employee", "CREATE")]
+    [Permission("Employee", "CREATE")]
     public async Task<IActionResult> Create([FromBody] CreateEmployeeDTO dto)
     {
         try
@@ -66,7 +66,7 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [RequirePermission("Employee", "UPDATE")]
+    [Permission("Employee", "UPDATE")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateEmployeeDTO dto)
     {
         try
@@ -85,7 +85,7 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [RequirePermission("Employee", "DELETE")]
+    [Permission("Employee", "DELETE")]
     public async Task<IActionResult> Delete(int id)
     {
         try
