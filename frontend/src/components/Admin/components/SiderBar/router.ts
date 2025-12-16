@@ -95,6 +95,13 @@ export const navigation = (pathname: string) => [
         current: pathname === "/admin/customers",
         badge: null,
     },
+    {
+        name: "Nhân viên",
+        href: "/admin/employees",
+        icon: Users,
+        current: pathname === "/admin/employees",
+        badge: null,
+    },
 
     {
         name: "Tài khoản",
