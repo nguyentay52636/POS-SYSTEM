@@ -15,7 +15,7 @@ public partial class Employee
 
     public string? Phone { get; set; }
 
-    public string? RolePosition { get; set; }
+    public string? RolePosition { get; set; }   
 
     public string Status { get; set; } = "active";
 

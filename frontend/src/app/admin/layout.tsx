@@ -10,17 +10,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const { isAuthenticated } = useSelector(selectAuth)
     const [isLoading, setIsLoading] = useState(true)
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            router.push("/auth/login")
-        } else {
-            setIsLoading(false)
-        }
-    }, [isAuthenticated, router])
+    // useEffect(() => {
+    //     if (!isAuthenticated) {
+    //         router.push("/auth/login")
+    //     } else {
+    //         setIsLoading(false)
+    //     }
+    // }, [isAuthenticated, router])
 
-    if (isLoading) {
-        return null
-    }
+    // if (isLoading) {
+    //     return null
+    // }
 
     return <>{children}</>
 }

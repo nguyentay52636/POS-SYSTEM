@@ -30,6 +30,20 @@ public class EmployeeController : ControllerBase
         }
     }
 
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll()
+    {
+        try
+        {
+            var employees = await _service.ListAllAsync();
+            return Ok(new { success = true, data = employees });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { success = false, message = ex.Message });
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -69,6 +83,24 @@ public class EmployeeController : ControllerBase
         {
             var employee = await _service.UpdateAsync(id, dto);
             return Ok(new { success = true, data = employee });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { success = false, message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> ToggleStatus(int id)
+    {
+        try
+        {
+            var employee = await _service.ToggleStatusAsync(id);
+            return Ok(new { success = true, data = employee, message = "Employee status updated successfully" });
         }
         catch (KeyNotFoundException ex)
         {
