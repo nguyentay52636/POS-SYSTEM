@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type React from "react"
 
 import {
@@ -29,6 +29,22 @@ export function RoleDialog({ open, onOpenChange, onSave, role, mode }: RoleDialo
         roleName: role?.roleName || "",
         description: role?.description || "",
     })
+
+    useEffect(() => {
+        if (open) {
+            if (mode === "edit" && role) {
+                setFormData({
+                    roleName: role.roleName,
+                    description: role.description,
+                })
+            } else {
+                setFormData({
+                    roleName: "",
+                    description: "",
+                })
+            }
+        }
+    }, [open, role, mode])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()

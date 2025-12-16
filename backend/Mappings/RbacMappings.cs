@@ -11,7 +11,7 @@ public class RbacMappings : Profile
     {
         // Role Mappings
         CreateMap<Role, RoleResponseDto>()
-            .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => UserRoleHelper.GetRoleName(src.RoleId)));
+            .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.Description) ? src.Description : UserRoleHelper.GetRoleName(src.RoleId)));
         CreateMap<CreateRoleDto, Role>()
             .ForMember(dest => dest.RoleId, opt => opt.Ignore())
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.RoleName));

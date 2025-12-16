@@ -39,10 +39,10 @@ export default function ManagerTableSuppliers({ suppliers, filteredSuppliers, se
                             </TableHeader>
                             <TableBody>
                                 {filteredSuppliers.map((supplier) => (
-                                    <TableRow key={supplier.supplier_id} className="hover:bg-gray-50">
+                                    <TableRow key={supplier.supplierId} className="hover:bg-gray-50">
                                         <TableCell className="font-medium">
                                             <span className="px-2 py-1 dark:text-white text-gray-800 rounded text-sm">
-                                                {supplier.supplier_id}
+                                                {supplier.supplierId}
                                             </span>
                                         </TableCell>
                                         <TableCell>
@@ -112,7 +112,7 @@ export default function ManagerTableSuppliers({ suppliers, filteredSuppliers, se
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    onClick={() => handleDeleteSupplier(supplier.supplier_id)}
+                                                    onClick={() => handleDeleteSupplier(supplier.supplierId as number)}
                                                     className="dark:text-red-600 dark:hover:text-red-700 dark:hover:bg-red-50 text-red-600 hover:text-red-700 hover:bg-red-50"
                                                 >
                                                     <Trash2 className="h-4 w-4" />

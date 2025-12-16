@@ -12,7 +12,6 @@ import { FeaturePermission, type PermissionType } from "@/apis/rolePermissionsAp
 import { PermissionsTab } from "./components/Tabs/PermissionsTab"
 import { ProfitTab } from "./components/Tabs/components/ProfitTab/ProfitTab"
 import PermissionHeader from "./components/PermissionHeader"
-import { PreviewTab } from "./components/Tabs/components/ProfitTab/components/PreviewTab"
 import { PointsConversion } from "./components/Tabs/components/PointsConversion/PointsConversion"
 
 export default function PermissionType() {
