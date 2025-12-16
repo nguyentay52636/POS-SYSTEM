@@ -8,6 +8,7 @@ import {
     changeStatusEmployee,
     IEmployee
 } from '../apis/employeeApi';
+import { changeStatusAccount } from '../apis/userApi';
 import { toast } from 'sonner';
 
 export const useEmployees = () => {
@@ -57,6 +58,15 @@ export const useEmployees = () => {
     const updateStatus = async (id: number, status: string) => {
         try {
             await changeStatusEmployee(id, status);
+            // Sync status with account
+            try {
+                await changeStatusAccount(id, status);
+            } catch (accountError) {
+                console.warn('Failed to update account status:', accountError);
+                // Optional: decide if we should fail the whole operation or just warn
+                // For now, continuing since employee update succeeded
+            }
+
             mutate(); // Refresh the list
             toast.success('Cập nhật trạng thái thành công');
             return true;

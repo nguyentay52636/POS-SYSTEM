@@ -19,7 +19,8 @@ public interface IUserService
     Task<bool> DeleteAsync(int id);
     Task<PagedResponse<UserResponseDto>> SearchAsync(UserQueryParams query);
     Task<int> ImportAsync(IEnumerable<CreateUserDto> users);
-    Task<UserResponseDto[]> ListAllAsync();
+    Task<UserResponseDto[]> ListAllAsync(string? status = null);
+    Task<UserResponseDto> ToggleStatusAsync(int id);
 }
 
 public class UserService : IUserService
@@ -33,6 +34,27 @@ public class UserService : IUserService
         _repo = repo;
         _mapper = mapper;
         _validationService = validationService;
+    }
+
+    public async Task<UserResponseDto[]> ListAllAsync(string? status = null)
+    {
+        var items = await _repo.ListAllAsync(status);
+        return _mapper.Map<UserResponseDto[]>(items);
+    }
+
+    public async Task<UserResponseDto> ToggleStatusAsync(int id)
+    {
+        var user = await _repo.GetByIdAsync(id);
+        if (user == null)
+            throw new KeyNotFoundException($"User with ID {id} not found");
+
+        user.Status = user.Status == "active" ? "inactive" : "active";
+        
+        var updated = await _repo.UpdateAsync(user);
+        
+        // Reload to get Role if needed
+        var reloaded = await _repo.GetByIdAsync(id); 
+        return _mapper.Map<UserResponseDto>(reloaded ?? updated);
     }
 
     public async Task<UserResponseDto> CreateAsync(CreateUserDto dto)
@@ -134,11 +156,7 @@ public class UserService : IUserService
         return validUsers.Count;
     }
 
-    public async Task<UserResponseDto[]> ListAllAsync()
-    {
-        var items = await _repo.ListAllAsync();
-        return _mapper.Map<UserResponseDto[]>(items);
-    }
+
 }
 
 

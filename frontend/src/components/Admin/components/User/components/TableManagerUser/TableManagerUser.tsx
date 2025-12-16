@@ -9,6 +9,7 @@ import ActionTableUser from './ActionTableUser'
 import type { IRole } from '@/apis/roleApi'
 import { exportToExcel, formatDateVN, ExcelColumn } from '@/utils/Export/ExcelExport'
 import { toast } from 'sonner'
+import { Switch } from '@/components/ui/switch'
 
 interface TableManagerUserProps {
     users: IUser[];
@@ -18,6 +19,7 @@ interface TableManagerUserProps {
     onView: (user: IUser) => void;
     onEdit: (user: IUser) => void;
     onDelete: (user: IUser) => void;
+    onStatusChange: (id: number, checked: boolean) => void;
 }
 
 const getRoleName = (userRole: string, roles: IRole[]): string => {
@@ -32,7 +34,7 @@ const getRoleName = (userRole: string, roles: IRole[]): string => {
     return userRole
 }
 
-export default function TableManagerUser({ users, roles, searchQuery, setSearchQuery, onView, onEdit, onDelete }: TableManagerUserProps) {
+export default function TableManagerUser({ users, roles, searchQuery, setSearchQuery, onView, onEdit, onDelete, onStatusChange }: TableManagerUserProps) {
 
     const handleExportExcel = () => {
         if (users.length === 0) {
@@ -41,14 +43,14 @@ export default function TableManagerUser({ users, roles, searchQuery, setSearchQ
         }
 
         const columns: ExcelColumn<IUser>[] = [
-            { header: 'ID', key: 'user_id', width: 10 },
+            { header: 'ID', key: 'userId', width: 10 },
             { header: 'Tên đăng nhập', key: 'username', width: 20 },
-            { header: 'Họ tên', key: 'full_name', width: 25 },
+            { header: 'Họ tên', key: 'fullName', width: 25 },
             {
                 header: 'Vai trò',
-                key: 'role',
+                key: 'roleName',
                 width: 15,
-                formatter: (value) => getRoleName(value, roles)
+                // formatter: (value) => value // Just use roleName directly if possible, or keep formatter if key is different
             },
             {
                 header: 'Ngày tạo',
@@ -128,13 +130,14 @@ export default function TableManagerUser({ users, roles, searchQuery, setSearchQ
                                     <TableHead className="font-semibold bg-gray-50 dark:bg-gray-800/50">Tài khoản</TableHead>
                                     <TableHead className="font-semibold bg-gray-50 dark:bg-gray-800/50">Họ tên</TableHead>
                                     <TableHead className="font-semibold bg-gray-50 dark:bg-gray-800/50">Vai trò</TableHead>
+                                    <TableHead className="font-semibold bg-gray-50 dark:bg-gray-800/50">Trạng thái</TableHead>
                                     <TableHead className="font-semibold bg-gray-50 dark:bg-gray-800/50">Tạo lúc</TableHead>
                                     <TableHead className="font-semibold bg-gray-50 dark:bg-gray-800/50">Thao tác</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {users.map((u) => (
-                                    <TableRow key={u.user_id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                    <TableRow key={u.userId} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                                         <TableCell>
                                             <div className="flex items-center space-x-4">
                                                 <Avatar className="h-10 w-10 border-2 border-gray-200 dark:border-gray-700">
@@ -145,18 +148,34 @@ export default function TableManagerUser({ users, roles, searchQuery, setSearchQ
                                                 </Avatar>
                                                 <div>
                                                     <div className="font-semibold text-gray-900 dark:text-gray-100">{u.username}</div>
-                                                    <div className="text-sm text-gray-500 dark:text-gray-400">ID: {u.user_id}</div>
+                                                    <div className="text-sm text-gray-500 dark:text-gray-400">ID: {u.userId}</div>
                                                 </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="text-gray-900 dark:text-gray-100 font-medium">{u.full_name}</div>
+                                            <div className="text-gray-900 dark:text-gray-100 font-medium">{u.fullName}</div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="inline-flex items-center px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800">
                                                 <Shield className="h-3 w-3 mr-2 text-blue-600" />
                                                 <span className="font-medium">
-                                                    {getRoleName(u.role, roles)}
+                                                    {u.roleName || getRoleName(String(u.role), roles)}
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center space-x-2">
+                                                <Switch
+                                                    checked={u.status === "active"}
+                                                    onCheckedChange={(checked) => {
+                                                        onStatusChange(u.userId, checked);
+                                                    }}
+                                                />
+                                                <span className={`text-sm ${u.status === "active"
+                                                    ? "text-green-600 dark:text-green-400"
+                                                    : "text-gray-500 dark:text-gray-400"
+                                                    }`}>
+                                                    {u.status === "active" ? "Đang làm việc" : "Đã nghỉ"}
                                                 </span>
                                             </div>
                                         </TableCell>

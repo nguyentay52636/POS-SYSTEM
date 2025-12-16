@@ -27,10 +27,53 @@ public class UserController : ControllerBase
     /// <returns>Array of users.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(UserResponseDto[]), StatusCodes.Status200OK)]
-    public async Task<ActionResult<UserResponseDto[]>> List()
+    [HttpGet]
+    [ProducesResponseType(typeof(UserResponseDto[]), StatusCodes.Status200OK)]
+    public async Task<ActionResult<UserResponseDto[]>> List([FromQuery] string? status = null)
+    {
+        var result = await _service.ListAllAsync(status);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// List all users (no filters).
+    /// </summary>
+    [HttpGet("all")]
+    [ProducesResponseType(typeof(UserResponseDto[]), StatusCodes.Status200OK)]
+    public async Task<ActionResult<UserResponseDto[]>> GetAll()
     {
         var result = await _service.ListAllAsync();
         return Ok(result);
+    }
+
+    /// <summary>
+    /// Get users by status.
+    /// </summary>
+    [HttpGet("status/{status}")]
+    [ProducesResponseType(typeof(UserResponseDto[]), StatusCodes.Status200OK)]
+    public async Task<ActionResult<UserResponseDto[]>> GetByStatus(string status)
+    {
+        var result = await _service.ListAllAsync(status);
+        return Ok(result);
+    }
+    
+    /// <summary>
+    /// Toggle user status (active/inactive)
+    /// </summary>
+    [HttpPut("{id:int}/status")]
+    [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserResponseDto>> ToggleStatus(int id)
+    {
+        try
+        {
+            var updated = await _service.ToggleStatusAsync(id);
+            return Ok(updated);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
     }
 
     /// <summary>

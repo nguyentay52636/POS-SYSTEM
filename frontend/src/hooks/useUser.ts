@@ -1,78 +1,99 @@
-import { useState, useCallback, useEffect } from 'react'
-import { getAllUsers } from '@/apis/userApi'
-import { IUser } from '@/types/types'
+import useSWR from 'swr';
+import { useState } from 'react';
+import {
+    getAllUser,
+    getAllUserStatus,
+    createUser,
+    updateUser,
+    changeStatusUser,
+} from '@/apis/userApi';
+import { IUser } from '@/types/types';
+import { toast } from 'sonner';
 
 export const useUser = () => {
-    const [users, setUsers] = useState<IUser[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [filterStatus, setFilterStatus] = useState<string>('all');
 
     // Dialog states
-    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-    const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-    const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-    const fetchUsers = useCallback(async () => {
-        try {
-            setLoading(true)
-            const usersData = await getAllUsers()
-            setUsers(usersData)
-            setError(null)
-        } catch (e: any) {
-            setError("Không thể tải dữ liệu")
-        } finally {
-            setLoading(false)
+    const fetcher = async () => {
+        if (filterStatus && filterStatus !== 'all') {
+            return await getAllUserStatus(filterStatus);
         }
-    }, [])
+        return await getAllUser();
+    };
 
-    useEffect(() => {
-        fetchUsers()
-    }, [fetchUsers])
+    const { data: usersData, error, isLoading, mutate } = useSWR<IUser[]>(
+        ['/users', filterStatus],
+        fetcher,
+        {
+            revalidateOnFocus: false,
+            shouldRetryOnError: false
+        }
+    );
 
-    const handleOpenAddDialog = () => {
-        setIsAddDialogOpen(true)
-    }
+    const users = usersData || [];
+
+    const addUser = async (user: IUser) => {
+        try {
+            await createUser(user);
+            mutate();
+            toast.success('Thêm tài khoản thành công');
+            return true;
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || 'Thêm tài khoản thất bại');
+            return false;
+        }
+    };
+
+    const updateUserInfo = async (id: number, user: IUser) => {
+        try {
+            await updateUser(id, user);
+            mutate();
+            toast.success('Cập nhật tài khoản thành công');
+            return true;
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || 'Cập nhật tài khoản thất bại');
+            return false;
+        }
+    };
+
+    const updateStatus = async (id: number, status: string) => {
+        try {
+            await changeStatusUser(id, status);
+            mutate();
+            toast.success('Cập nhật trạng thái thành công');
+            return true;
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || 'Cập nhật trạng thái thất bại');
+            return false;
+        }
+    };
+
+    const handleOpenAddDialog = () => setIsAddDialogOpen(true);
 
     const handleView = (user: IUser) => {
-        setSelectedUser(user)
-        setIsViewDialogOpen(true)
-    }
+        setSelectedUser(user);
+        setIsViewDialogOpen(true);
+    };
 
     const handleEdit = (user: IUser) => {
-        setSelectedUser(user)
-        setIsEditDialogOpen(true)
-    }
+        setSelectedUser(user);
+        setIsEditDialogOpen(true);
+    };
 
     const handleDelete = (user: IUser) => {
-        setSelectedUser(user)
-        setIsDeleteDialogOpen(true)
-    }
-
-    const handleUserAdded = (newUser: IUser) => {
-        setUsers((prev) => [newUser, ...prev])
-    }
-
-    const handleUpdateUser = (updatedUser: IUser) => {
-        setUsers((prev) =>
-            prev.map((user) => (user.user_id === updatedUser.user_id ? updatedUser : user))
-        )
-        setSelectedUser((prev) =>
-            prev && prev.user_id === updatedUser.user_id ? updatedUser : prev
-        )
-    }
-
-    const handleConfirmDelete = (deletedUserId: number) => {
-        setUsers((prev) => prev.filter((user) => user.user_id !== deletedUserId))
-        setSelectedUser((prev) =>
-            prev && prev.user_id === deletedUserId ? null : prev
-        )
-    }
+        setSelectedUser(user);
+        setIsDeleteDialogOpen(true);
+    };
 
     return {
         users,
-        loading,
+        loading: isLoading,
         error,
         isAddDialogOpen,
         setIsAddDialogOpen,
@@ -88,9 +109,11 @@ export const useUser = () => {
         handleView,
         handleEdit,
         handleDelete,
-        handleUserAdded,
-        handleUpdateUser,
-        handleConfirmDelete,
-        refreshUsers: fetchUsers
-    }
-}
+        addUser,
+        updateUserInfo,
+        updateStatus,
+        filterStatus,
+        setFilterStatus,
+        refreshUsers: mutate
+    };
+};

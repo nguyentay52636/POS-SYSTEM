@@ -21,10 +21,12 @@ public interface IEmployeeService
 public class EmployeeService : IEmployeeService
 {
     private readonly IEmployeeRepository _repo;
+    private readonly IUserRepository _userRepo;
 
-    public EmployeeService(IEmployeeRepository repo)
+    public EmployeeService(IEmployeeRepository repo, IUserRepository userRepo)
     {
         _repo = repo;
+        _userRepo = userRepo;
     }
 
     public async Task<EmployeeDTO> ToggleStatusAsync(int id)
@@ -33,7 +35,17 @@ public class EmployeeService : IEmployeeService
         if (employee == null)
             throw new KeyNotFoundException($"Employee with ID {id} not found");
 
-        employee.Status = employee.Status == "active" ? "inactive" : "active";
+        // Toggle Employee Status
+        var newStatus = employee.Status == "active" ? "inactive" : "active";
+        employee.Status = newStatus;
+
+        // Sync User Status
+        var users = await _userRepo.GetByEmployeeIdAsync(id);
+        foreach (var user in users)
+        {
+            user.Status = newStatus;
+            await _userRepo.UpdateAsync(user);
+        }
 
         var updated = await _repo.UpdateAsync(employee);
         return MapToDTO(updated);

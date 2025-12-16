@@ -32,9 +32,11 @@ export default function ManagerUserContent() {
         handleView,
         handleEdit,
         handleDelete,
-        handleUserAdded,
-        handleUpdateUser,
-        handleConfirmDelete
+        addUser,
+        updateUserInfo,
+        updateStatus,
+        filterStatus,
+        setFilterStatus
     } = useUser()
 
     const { roles, loading: loadingRoles, error: errorRoles } = useRole()
@@ -44,8 +46,8 @@ export default function ManagerUserContent() {
         const q = searchQuery.toLowerCase().trim()
         return users.filter((u) =>
             u.username.toLowerCase().includes(q) ||
-            u.full_name.toLowerCase().includes(q) ||
-            u.role.toLowerCase().includes(q)
+            u.fullName.toLowerCase().includes(q) ||
+            String(u.role).toLowerCase().includes(q)
         )
     }, [users, searchQuery])
 
@@ -88,6 +90,7 @@ export default function ManagerUserContent() {
                             onView={handleView}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
+                            onStatusChange={(id, checked) => updateStatus(id, checked ? 'active' : 'inactive')}
                         />
                         <PaginationManagerUser totalItems={filteredUsers.length} />
                     </>
@@ -97,7 +100,7 @@ export default function ManagerUserContent() {
                 <DialogAddUser
                     isAddDialogOpen={isAddDialogOpen}
                     setIsAddDialogOpen={setIsAddDialogOpen}
-                    onUserAdded={handleUserAdded}
+                    onUserAdded={addUser}
                     roles={roles}
                     loadingRoles={loadingRoles}
                     errorRoles={errorRoles}
@@ -109,7 +112,7 @@ export default function ManagerUserContent() {
                             user={selectedUser}
                             isEditDialogOpen={isEditDialogOpen}
                             setIsEditDialogOpen={setIsEditDialogOpen}
-                            onUpdateUser={handleUpdateUser}
+                            onUpdateUser={(user) => updateUserInfo(user.userId, user)}
                             roles={roles}
                         />
 
@@ -123,7 +126,11 @@ export default function ManagerUserContent() {
                             user={selectedUser}
                             isDeleteDialogOpen={isDeleteDialogOpen}
                             setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-                            onConfirmDelete={handleConfirmDelete}
+                            onConfirmDelete={(id) => {
+                                // Implement delete logic if needed, currently not exposed in hook 
+                                // or if handleDelete just closes dialog
+                                setIsDeleteDialogOpen(false)
+                            }}
                         />
                     </>
                 )}

@@ -18,7 +18,8 @@ public interface IUserRepository
     Task<User> UpdateAsync(User user);
     Task<bool> DeleteAsync(int id);
     Task<(IReadOnlyList<User> Items, int Total)> SearchAsync(UserQueryParams query);
-    Task<IReadOnlyList<User>> ListAllAsync();
+    Task<IReadOnlyList<User>> ListAllAsync(string? status = null);
+    Task<List<User>> GetByEmployeeIdAsync(int employeeId);
 }
 
 public class UserRepository : IUserRepository
@@ -99,14 +100,27 @@ public class UserRepository : IUserRepository
         return (items, total);
     }
 
-    public async Task<IReadOnlyList<User>> ListAllAsync()
+    public async Task<IReadOnlyList<User>> ListAllAsync(string? status = null)
     {
         IQueryable<User> q = _db.Users
             .AsNoTracking()
-            .Include(u => u.Role)
-            .OrderByDescending(u => u.CreatedAt);
+            .Include(u => u.Role);
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            q = q.Where(u => u.Status == status);
+        }
+
+        q = q.OrderByDescending(u => u.CreatedAt);
         var items = await q.ToListAsync();
         return items;
+    }
+
+    public Task<List<User>> GetByEmployeeIdAsync(int employeeId)
+    {
+        return _db.Users
+            .Where(u => u.EmployeeId == employeeId)
+            .ToListAsync();
     }
 }
 

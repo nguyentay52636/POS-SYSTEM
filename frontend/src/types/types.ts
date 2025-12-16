@@ -72,14 +72,22 @@ export interface IPromotion {
   discount_type: string;
 }
 export interface IUser {
-  user_id: number;
+  userId: number; // Changed from user_id to match API
   username: string;
   password?: string;
-  full_name: string;
-  role: role;
+  fullName: string; // Changed from full_name to match API
+  employeeId?: number;
+  employeeName?: string;
+  roleId?: number;
+  role: string | number; // API returns number 1
+  roleName?: string; // API returns "admin"
+  status: string;
   createdAt: string;
   updatedAt: string;
   avatar?: string;
+  // Legacy support or alias if needed, but better to migrate
+  // user_id?: number; 
+  // full_name?: string;
 }
 export enum role {
   ADMIN = "admin",
