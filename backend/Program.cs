@@ -1,14 +1,17 @@
 using backend.Configurations;
 using backend.Configuration;
 using backend.Models;
+using backend.Repositories;
+using backend.Services;
+using backend.Mappings;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.FileProviders;
-
 
 
 var builder = WebApplication.CreateBuilder(args);
