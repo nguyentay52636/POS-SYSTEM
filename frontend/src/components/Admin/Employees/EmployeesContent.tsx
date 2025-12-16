@@ -11,8 +11,20 @@ import { IEmployee } from "@/apis/employeeApi";
 import HeaderEmployee from "./components/HeaderEmployee";
 
 export default function EmployeesContent() {
-    const { employees, isLoading, addEmployee, updateEmployeeInfo, removeEmployee } = useEmployees();
+    const {
+        employees,
+        isLoading,
+        addEmployee,
+        updateEmployeeInfo,
+        updateStatus,
+        filterStatus,
+        setFilterStatus
+    } = useEmployees();
+
     const { paginationState } = usePagination();
+    // ...
+
+
     const [searchTerm, setSearchTerm] = useState("");
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [editingEmployee, setEditingEmployee] = useState<IEmployee | null>(null);
@@ -46,18 +58,11 @@ export default function EmployeesContent() {
         setIsAddDialogOpen(true);
     };
 
-    const handleDelete = async (employee: IEmployee) => {
-        if (employee.employeeId) {
-            // Assuming ID is number based on interface, but hook might expect string. 
-            // api expects string in my implementation (getEmployeeById(id: string)).
-            // Let's safe cast or convert.
-            await removeEmployee(employee.employeeId.toString());
-        }
-    };
+
 
     const handleSuccess = async (data: IEmployee, isEdit: boolean) => {
         if (isEdit && editingEmployee?.employeeId) {
-            await updateEmployeeInfo(editingEmployee.employeeId.toString(), data);
+            await updateEmployeeInfo(editingEmployee.employeeId, data);
         } else {
             await addEmployee(data);
         }
@@ -90,8 +95,10 @@ export default function EmployeesContent() {
                     employees={paginatedEmployees}
                     searchQuery={searchTerm}
                     setSearchQuery={setSearchTerm}
+                    filterStatus={filterStatus}
+                    setFilterStatus={setFilterStatus}
                     onEdit={handleEdit}
-                    onDelete={handleDelete}
+                    onStatusChange={(id, checked) => updateStatus(id, checked ? 'active' : 'inactive')}
                     busy={isLoading}
                 />
 

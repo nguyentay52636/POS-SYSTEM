@@ -35,7 +35,7 @@ public class EmployeeRepository : IEmployeeRepository
     public Task<Employee?> GetByIdAsync(int id)
     {
         return _db.Employees.AsNoTracking()
-            .FirstOrDefaultAsync(e => e.EmployeeId == id && e.Status == "active");
+            .FirstOrDefaultAsync(e => e.EmployeeId == id);
     }
 
     public async Task<Employee> UpdateAsync(Employee employee)
@@ -64,10 +64,6 @@ public class EmployeeRepository : IEmployeeRepository
         if (!string.IsNullOrWhiteSpace(status))
         {
             query = query.Where(e => e.Status == status);
-        }
-        else
-        {
-            query = query.Where(e => e.Status == "active");
         }
 
         return await query.OrderBy(e => e.FullName).ToListAsync();

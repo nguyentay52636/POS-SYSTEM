@@ -9,12 +9,25 @@ export interface IEmployee {
     phone?: string
     rolePosition?: string
     role?: IRole
-    status?: string // Changed to string to match "active" and optional just in case
+    status?: string
+
+}
+export const changeStatusEmployee = async (id: number, status: string) => {
+    try {
+        const { data } = await baseApi.put(`${EMPLOYEE_URL}/${id}/status`, { status })
+        return data;
+    } catch (error: any) {
+        throw error;
+    }
 }
 export const getAllEmployeeStatus = async (status: string) => {
     try {
-        const { data } = await baseApi.get(`${EMPLOYEE_URL}/all/status/${status}`)
-        return data;
+        const { data } = await baseApi.get(`${EMPLOYEE_URL}?status=${status}`)
+        if (Array.isArray(data)) return data;
+        if (data && Array.isArray(data.data)) return data.data;
+        if (data && Array.isArray(data.items)) return data.items;
+        if (data && Array.isArray(data.content)) return data.content;
+        return [];
     } catch (error: any) {
         throw error;
     }
@@ -31,7 +44,7 @@ export const getAllEmployee = async () => {
         throw error;
     }
 }
-export const getEmployeeById = async (id: string) => {
+export const getEmployeeById = async (id: number) => {
     try {
         const { data } = await baseApi.get(`${EMPLOYEE_URL}/${id}`)
         return data;
@@ -47,7 +60,7 @@ export const createEmployee = async (employee: IEmployee) => {
         throw error;
     }
 }
-export const updateEmployee = async (id: string, employee: IEmployee) => {
+export const updateEmployee = async (id: number, employee: IEmployee) => {
     try {
         const { data } = await baseApi.put(`${EMPLOYEE_URL}/${id}`, employee)
         return data;
@@ -55,11 +68,4 @@ export const updateEmployee = async (id: string, employee: IEmployee) => {
         throw error;
     }
 }
-export const deleteEmployee = async (id: string) => {
-    try {
-        const { data } = await baseApi.delete(`${EMPLOYEE_URL}/${id}`)
-        return data;
-    } catch (error: any) {
-        throw error;
-    }
-}
+
