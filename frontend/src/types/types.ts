@@ -110,13 +110,6 @@ export interface IImportReceipt {
   supplier?: ISupplier;
   user?: IUser;
   importItems?: IImportItem[];
-
-  import_id?: number;
-  supplier_id?: number;
-  user_id?: number;
-  import_date?: string;
-  total_amount?: number;
-  import_items?: IImportItem[];
 }
 export interface IImportItem {
   importItemId: number;

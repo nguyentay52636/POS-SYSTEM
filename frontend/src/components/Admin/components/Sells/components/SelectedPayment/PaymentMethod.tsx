@@ -50,13 +50,23 @@ export default function PaymentMethod({
         if (method.logoUrl) {
             return <img src={method.logoUrl} alt={`${method.label} logo`} className="h-5 w-5 object-contain" />;
         }
-        if (method.type === 'card') {
-            return <CreditCard className="h-5 w-5 text-blue-600" />;
+
+        switch (method.type) {
+            case 'momo':
+                return <img src="/images/payment/momo.png" alt="Momo" className="h-full w-full object-cover p-0.5 rounded-full" />;
+            case 'zalopay':
+                return <img src="/images/payment/zalopay.jpeg" alt="ZaloPay" className="h-full w-full object-cover p-0.5 rounded-full" />;
+            case 'vnpay':
+                return <img src="/images/payment/vnpay.png" alt="VNPay" className="h-full w-full object-cover p-0.5 rounded-full" />;
+            case 'banking':
+                return <img src="/images/payment/banking" alt="Banking" className="h-full w-full object-cover p-0.5 rounded-full" />;
+            case 'cod':
+                return <img src="/images/payment/cash.png" alt="Cash" className="h-full w-full object-cover p-0.5 rounded-full" />;
+            case 'card':
+                return <CreditCard className="h-5 w-5 text-blue-600" />;
+            default:
+                return null;
         }
-        if (method.type === 'cod') {
-            return <Wallet className="h-5 w-5 text-green-600" />;
-        }
-        return null;
     };
 
     const getPaymentIconBg = (method: PaymentMethodType) => {
@@ -64,15 +74,11 @@ export default function PaymentMethod({
             case 'card':
                 return 'bg-blue-100';
             case 'momo':
-                return 'bg-pink-500';
-            case 'zalopay':
-                return 'bg-blue-500';
             case 'vnpay':
-                return 'bg-green-500';
             case 'banking':
-                return 'bg-green-100';
             case 'cod':
-                return 'bg-green-100';
+            case 'zalopay':
+                return 'bg-transparent';
             default:
                 return 'bg-gray-100';
         }

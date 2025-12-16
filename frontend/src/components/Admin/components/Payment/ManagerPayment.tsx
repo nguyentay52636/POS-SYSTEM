@@ -85,13 +85,13 @@ export default function ManagerPayment() {
             </div>
           </div>
 
-          <Button
+          {/* <Button
             onClick={onAdd}
             className="bg-emerald-700 hover:bg-emerald-800 text-white flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
             Thêm thanh toán
-          </Button>
+          </Button> */}
         </div>
       </div>
       <Card className="border-none shadow-md">
