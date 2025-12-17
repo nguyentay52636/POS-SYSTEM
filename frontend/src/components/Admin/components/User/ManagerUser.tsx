@@ -1,3 +1,4 @@
+"use client"
 import React from 'react'
 import { PaginationProvider } from '@/context/PaginationContext'
 import ManagerUserContent from './ManagerUserContent'

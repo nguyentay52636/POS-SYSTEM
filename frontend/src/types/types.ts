@@ -1,30 +1,6 @@
-export interface INhanVien {
-  maNhanVien: string;
-  tenNhanVien: string;
-  gioiTinh: string;
-  ngaySinh: string;
-  anhDaiDien: string;
-  soDienThoai: string;
-  vaiTro: IRole;
-  trangThai: string;
-}
-export interface IRole {
-  maVaiTro: string;
-  role: string;
-  description: string;
-}
 
 
 
-export interface IPayment {
-  payment_id: number;
-  order_id: number;
-  payment_method: string;
-  amount: number;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
 export interface IInventory {
   inventoryId: number;
   productId: number;

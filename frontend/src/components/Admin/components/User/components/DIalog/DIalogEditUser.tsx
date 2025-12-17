@@ -32,9 +32,9 @@ export default function DialogEditUser({
     roles
 }: DialogEditUserProps) {
     const [editedUser, setEditedUser] = useState<IUser>({
-        user_id: 0,
+        userId: 0,
         username: "",
-        full_name: "",
+        fullName: "",
         role: role.ADMIN,
         createdAt: "",
         updatedAt: "",
@@ -56,23 +56,23 @@ export default function DialogEditUser({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
-        
+
         try {
             const userData: UpdateUserRequest = {
                 username: editedUser.username,
                 fullName: editedUser.full_name,
                 role: editedUser.role, // This will be converted by updateUser API
             }
-            
+
             console.log("Updating user with data:", userData)
-            
+
             const updatedUser = await updateUser(editedUser.user_id, userData)
             toast.success("Cập nhật người dùng thành công!")
-            
+
             // Call the callback to refresh the list
             onUpdateUser(updatedUser)
             setIsEditDialogOpen(false)
-            
+
         } catch (error) {
             console.error("Failed to update user:", error)
             toast.error("Cập nhật người dùng thất bại!")

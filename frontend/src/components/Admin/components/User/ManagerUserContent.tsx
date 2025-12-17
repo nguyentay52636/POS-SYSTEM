@@ -6,7 +6,6 @@ import PaginationManagerUser from './components/PaginationManagerUser'
 import DialogAddUser from './components/DIalog/DialogAddUser'
 import DialogEditUser from './components/DIalog/DIalogEditUser'
 import DialogViewDetails from './components/DIalog/DIalogVIewDetails'
-import DialogConfirmDelete from './components/DIalog/DIalogConfirmDelete'
 import { usePagination } from '@/context/PaginationContext'
 import { useUser } from '@/hooks/useUser'
 import { useRole } from '@/hooks/useRole'
@@ -122,16 +121,8 @@ export default function ManagerUserContent() {
                             setIsViewDialogOpen={setIsViewDialogOpen}
                         />
 
-                        <DialogConfirmDelete
-                            user={selectedUser}
-                            isDeleteDialogOpen={isDeleteDialogOpen}
-                            setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-                            onConfirmDelete={(id) => {
-                                // Implement delete logic if needed, currently not exposed in hook 
-                                // or if handleDelete just closes dialog
-                                setIsDeleteDialogOpen(false)
-                            }}
-                        />
+
+
                     </>
                 )}
             </div>

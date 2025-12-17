@@ -112,7 +112,15 @@ export default function SellsContent() {
         const loadConfig = async () => {
             try {
                 const configs = await getConfigCustomerPoints()
-                const activeConfig = configs.find(c => c.isActive) || configs[0]
+                let activeConfig: any = null
+
+                if (Array.isArray(configs)) {
+                    activeConfig = configs.find((c: any) => c.isActive) || configs[0]
+                } else if (configs) {
+                    // Handle case where API returns single object or wrapped response
+                    const configObj = configs as any
+                    activeConfig = configObj.isActive ? configObj : null
+                }
                 if (activeConfig) {
                     setConfigPoints({
                         pointsPerUnit: activeConfig.pointsPerUnit,

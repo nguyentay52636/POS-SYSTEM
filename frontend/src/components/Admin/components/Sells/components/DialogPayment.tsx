@@ -6,11 +6,12 @@ import PaymentMethod from './SelectedPayment/PaymentMethod';
 import { PaymentMethod as PaymentMethodType } from '@/types/paymentType';
 import { CustomerInfo } from './CustomerForm';
 import { useSelector } from 'react-redux';
-import { selectSelectedCustomerId, selectCartItems, type CartItem, type IPromotion } from '@/redux/Slice/cartSlice';
+import { selectSelectedCustomerId, selectCartItems, type CartItem } from '@/redux/Slice/cartSlice';
+import { Promotion } from '@/apis/promotionsApi';
 import { getConfigCustomerPoints, ConfigCustomerPoints } from '@/apis/configCustomerPoints';
 import { addPointsToCustomer } from '@/apis/customerApi';
 import { createOrder, getOrderById, type Order, type OrderItem, type CreateOrderDto } from '@/apis/orderApi';
-import { create as createPayment, type IPayment } from '@/apis/paymentApi';
+import { create as createPayment, type IPayment, type CreatePaymentDto } from '@/apis/paymentApi';
 import { buildInvoiceHtml } from '@/lib/Invoice';
 import { updateInventoryQuantity } from '@/apis/inventoryApi';
 import { getAllInventory } from '@/apis/inventoryApi';
@@ -27,7 +28,7 @@ interface DialogPaymentProps {
     subtotal: number;
     discountAmount: number;
     customerInfo: CustomerInfo;
-    appliedPromotions: IPromotion[];
+    appliedPromotions: Promotion[];
     onPaymentComplete: () => void;
 }
 
@@ -69,7 +70,14 @@ export default function DialogPayment({
         const loadConfig = async () => {
             try {
                 const configs = await getConfigCustomerPoints()
-                const activeConfig = configs.find(c => c.isActive) || configs[0]
+                let activeConfig: ConfigCustomerPoints | null = null
+
+                if (Array.isArray(configs)) {
+                    activeConfig = configs.find(c => c.isActive) || configs[0]
+                } else if (configs) {
+                    const configObj = configs as unknown as ConfigCustomerPoints
+                    activeConfig = configObj.isActive ? configObj : null
+                }
                 if (activeConfig) {
                     setConfigPoints(activeConfig)
                 }
@@ -111,8 +119,8 @@ export default function DialogPayment({
 
             // 1. Create Order
             // Use null instead of 0 for promoId to avoid foreign key constraint violation
-            const promoId = appliedPromotions.length > 0 ? appliedPromotions[0].promo_id : null
-            const promoCode = appliedPromotions.length > 0 ? appliedPromotions[0].promo_code || null : null
+            const promoId = appliedPromotions.length > 0 ? (appliedPromotions[0].promoId ?? null) : null
+            const promoCode = appliedPromotions.length > 0 ? appliedPromotions[0].promoCode || null : null
 
             // Validate order items
             const orderItems = cart.map((item) => {
@@ -160,7 +168,7 @@ export default function DialogPayment({
             toast.success("Tạo đơn hàng thành công!")
 
             // 2. Create Payment
-            const paymentData: Omit<IPayment, "paymentId"> = {
+            const paymentData: CreatePaymentDto = {
                 orderId: createdOrder.orderId,
                 amount: total,
                 paymentMethod: selectedPaymentMethod,
@@ -224,9 +232,7 @@ export default function DialogPayment({
             if (selectedCustomerId && total > 0) {
                 try {
                     // Load config mới nhất từ API trước khi tính điểm
-                    console.log("📥 Đang load config từ API...")
                     const configsData = await getConfigCustomerPoints()
-                    console.log("📥 Configs từ API:", configsData)
 
                     // API có thể trả về object hoặc array
                     let activeConfig: ConfigCustomerPoints | null = null
@@ -241,9 +247,7 @@ export default function DialogPayment({
                     console.log("📥 Active config:", activeConfig)
 
                     if (!activeConfig || !activeConfig.isActive) {
-                        console.log("⚠️ Config tích điểm không active hoặc không tồn tại, bỏ qua tích điểm")
                     } else if (activeConfig.moneyPerUnit <= 0) {
-                        console.warn("⚠️ moneyPerUnit phải lớn hơn 0, bỏ qua tích điểm")
                     } else {
                         // Tính điểm dựa trên tổng tiền và config
                         // Công thức: (tổng tiền / moneyPerUnit) * pointsPerUnit

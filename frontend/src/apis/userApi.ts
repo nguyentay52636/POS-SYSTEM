@@ -69,7 +69,7 @@ export const getUserById = async (id: number) => {
     throw error;
   }
 }
-export const createUser = async (user: IUser) => {
+export const createUser = async (user: CreateUserRequest) => {
   try {
     const { data } = await baseApi.post(`${USER_URL}`, user)
     return data;

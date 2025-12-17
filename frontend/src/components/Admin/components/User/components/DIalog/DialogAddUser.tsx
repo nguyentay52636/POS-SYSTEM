@@ -14,6 +14,9 @@ import { toast } from "sonner"
 import { createUser, CreateUserRequest } from "@/apis/userApi"
 import { IUser } from "@/types/types"
 import type { IRole } from "@/apis/roleApi"
+import DialogSelectEmployee from "./DialogSelectEmployee"
+import { IEmployee } from "@/apis/employeeApi"
+import { Users, Eye, EyeOff } from 'lucide-react'
 
 interface DialogAddUserProps {
     isAddDialogOpen: boolean
@@ -39,6 +42,10 @@ export default function DialogAddUser({
         role: "1", // Default to admin (1)
     })
     const [isLoading, setIsLoading] = useState(false)
+    const [isSelectEmployeeOpen, setIsSelectEmployeeOpen] = useState(false)
+
+    const [selectedEmployee, setSelectedEmployee] = useState<IEmployee | null>(null)
+    const [showPassword, setShowPassword] = useState(false)
 
     const handleChange = (field: string, value: string) => {
         setUser((prev) => ({ ...prev, [field]: value }))
@@ -51,6 +58,16 @@ export default function DialogAddUser({
             full_name: "",
             role: "1",
         })
+        setSelectedEmployee(null)
+    }
+
+    const handleEmployeeSelect = (employee: IEmployee) => {
+        setSelectedEmployee(employee)
+        setUser(prev => ({
+            ...prev,
+            full_name: employee.fullName || "",
+        }))
+        setIsSelectEmployeeOpen(false)
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -62,6 +79,8 @@ export default function DialogAddUser({
                 username: user.username,
                 password: user.password,
                 fullName: user.full_name, // Try fullName instead of full_name
+                employeeId: selectedEmployee?.employeeId || 0,
+                roleId: parseInt(user.role),
                 role: user.role,
             }
 
@@ -89,7 +108,7 @@ export default function DialogAddUser({
                 resetForm()
             }
         }}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Thêm người dùng mới</DialogTitle>
                 </DialogHeader>
@@ -107,15 +126,50 @@ export default function DialogAddUser({
                     </div>
 
                     <div className="space-y-2">
+                        <Label>Nhân viên (Tùy chọn)</Label>
+                        <div className="flex gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsSelectEmployeeOpen(true)}
+                                className="w-full flex justify-between items-center"
+                            >
+                                <span className={selectedEmployee ? "text-black" : "text-gray-500"}>
+                                    {selectedEmployee
+                                        ? `${selectedEmployee.fullName} (ID: ${selectedEmployee.employeeId})`
+                                        : "Chọn nhân viên liên kết"}
+                                </span>
+                                <Users className="h-4 w-4 ml-2" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
                         <Label htmlFor="password">Mật khẩu</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            placeholder="Nhập mật khẩu"
-                            value={user.password}
-                            onChange={(e) => handleChange("password", e.target.value)}
-                            required
-                        />
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Nhập mật khẩu"
+                                value={user.password}
+                                onChange={(e) => handleChange("password", e.target.value)}
+                                required
+                                className="pr-10"
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? (
+                                    <EyeOff className="h-4 w-4 text-gray-500" />
+                                ) : (
+                                    <Eye className="h-4 w-4 text-gray-500" />
+                                )}
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="space-y-2">
@@ -126,6 +180,8 @@ export default function DialogAddUser({
                             value={user.full_name}
                             onChange={(e) => handleChange("full_name", e.target.value)}
                             required
+                            readOnly={!!selectedEmployee}
+                            className={selectedEmployee ? "bg-gray-100" : ""}
                         />
                     </div>
 
@@ -171,6 +227,15 @@ export default function DialogAddUser({
                     </div>
                 </form>
             </DialogContent>
+
+            <Dialog open={isSelectEmployeeOpen} onOpenChange={setIsSelectEmployeeOpen}>
+                <DialogContent className="max-w-4xl!">
+                    <DialogSelectEmployee
+                        onSelectEmployee={handleEmployeeSelect}
+                        onClose={() => setIsSelectEmployeeOpen(false)}
+                    />
+                </DialogContent>
+            </Dialog>
         </Dialog>
     )
 }

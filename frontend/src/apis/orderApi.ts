@@ -5,7 +5,7 @@ export interface OrderItem {
   orderItemId: number;
   orderId: number;
   productId: number;
-  product : IProduct;
+  product: IProduct;
   quantity: number;
   price: number;
 }
@@ -25,31 +25,31 @@ export interface Order {
   orderItems: OrderItem[];
 }
 
-  export interface CreateOrderRequest {
-    customerId: number;
-    userId: number;
-    promoId: number;
-    promoCode: string;
-    orderItems: IProduct[];
-    status: string;
-  }
+export interface CreateOrderRequest {
+  customerId: number;
+  userId: number;
+  promoId: number;
+  promoCode: string;
+  orderItems: IProduct[];
+  status: string;
+}
 
 
 export const getOrders = async (): Promise<Order[]> => {
-try {
-  const { data } = await baseApi.get("/Order");
-  return data;
-} catch (error) {
-  console.error('Error fetching orders:', error)
-  throw error
-}
+  try {
+    const { data } = await baseApi.get("/Order");
+    return data;
+  } catch (error) {
+    console.error('Error fetching orders:', error)
+    throw error
+  }
 };
 
 export const getOrderById = async (id: number): Promise<Order> => {
-try {
-  const { data } = await baseApi.get(`/Order/${id}`);
-  return data;
-} catch (error) {
+  try {
+    const { data } = await baseApi.get(`/Order/${id}`);
+    return data;
+  } catch (error) {
     console.error('Error fetching order:', error)
     throw error
   }
@@ -63,7 +63,7 @@ export interface CreateOrderItemDto {
 
 export interface CreateOrderDto {
   customerId: number | null; // null means no customer (guest order)
-  userId: number;
+  userId: number | null;
   promoId: number | null;
   promoCode: string | null;
   orderItems: CreateOrderItemDto[];
@@ -71,17 +71,17 @@ export interface CreateOrderDto {
 }
 
 export const createOrder = async (order: CreateOrderDto): Promise<Order> => {
- try{
-  console.log('Sending order to API:', JSON.stringify(order, null, 2))
-  const { data } = await baseApi.post("/Order", order);
-  console.log('Order created successfully:', data)
-  return data;
- }catch (error: any) {
-  console.error('Error creating order:', error)
-  console.error('Error response:', error?.response?.data)
-  console.error('Request payload:', order)
-  throw error
- }
+  try {
+    console.log('Sending order to API:', JSON.stringify(order, null, 2))
+    const { data } = await baseApi.post("/Order", order);
+    console.log('Order created successfully:', data)
+    return data;
+  } catch (error: any) {
+    console.error('Error creating order:', error)
+    console.error('Error response:', error?.response?.data)
+    console.error('Request payload:', order)
+    throw error
+  }
 };
 
 
@@ -90,7 +90,7 @@ const uiToApiStatus = (s: string) => {
   if (k === "dahuy") return "canceled";
   if (k === "daduyet") return "paid";
   if (k === "choduyet") return "pending";
-  return s; 
+  return s;
 };
 
 export interface UpdateOrderDto {
