@@ -16,6 +16,7 @@ type Props = {
     searchQuery: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
     onEdit: (employee: IEmployee) => void;
+    onView: (employee: IEmployee) => void;
     onStatusChange: (id: number, checked: boolean) => void;
     filterStatus: string;
     setFilterStatus: (status: string) => void;
@@ -27,6 +28,7 @@ export default function TableEmployees({
     searchQuery,
     setSearchQuery,
     onEdit,
+    onView,
     onStatusChange,
     filterStatus,
     setFilterStatus,
@@ -127,6 +129,7 @@ export default function TableEmployees({
                                             <ActionsEmployee
                                                 employee={emp}
                                                 onEdit={onEdit}
+                                                onView={onView}
                                                 busy={busy}
                                             />
                                         </TableCell>

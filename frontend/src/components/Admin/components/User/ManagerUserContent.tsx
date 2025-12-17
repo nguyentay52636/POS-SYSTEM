@@ -9,6 +9,7 @@ import DialogViewDetails from './components/DIalog/DIalogVIewDetails'
 import { usePagination } from '@/context/PaginationContext'
 import { useUser } from '@/hooks/useUser'
 import { useRole } from '@/hooks/useRole'
+import CardStatsUser from './components/CardStatsUser'
 
 export default function ManagerUserContent() {
     const [searchQuery, setSearchQuery] = useState("")
@@ -75,7 +76,13 @@ export default function ManagerUserContent() {
     return (
         <div className=" ">
             <div className="p-6 space-y-8">
+
                 <HeaderManagerUser onAddClick={handleOpenAddDialog} />
+                <CardStatsUser
+                    totalUsers={users.length}
+                    activeUsers={users.filter(u => u.status === 'active').length}
+                    inactiveUsers={users.filter(u => u.status === 'inactive').length}
+                />
                 {error ? (
                     <div className="rounded-md border border-red-200 bg-red-50 p-4 text-red-700">
                         {error}
@@ -112,7 +119,7 @@ export default function ManagerUserContent() {
                             user={selectedUser}
                             isEditDialogOpen={isEditDialogOpen}
                             setIsEditDialogOpen={setIsEditDialogOpen}
-                            onUpdateUser={(user) => updateUserInfo(user.userId, user)}
+                            onUpdateUser={() => refreshUsers()}
                             roles={roles}
                         />
 

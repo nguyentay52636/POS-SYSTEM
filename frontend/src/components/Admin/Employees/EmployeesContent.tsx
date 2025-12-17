@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import TableEmployees from "./components/TableEmployees";
 import PaginationEmployee from "./components/PaginationEmployee";
 import DialogAddEmployee from "./components/Dialog/AddEmployee/DialogAddEmployee";
+import DialogViewDetails from "./components/Dialog/DialogViewDetails";
 
 import { useEmployees } from "@/hooks/useEmployees";
 import { usePagination } from "@/context/PaginationContext";
@@ -28,6 +29,9 @@ export default function EmployeesContent() {
     const [searchTerm, setSearchTerm] = useState("");
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [editingEmployee, setEditingEmployee] = useState<IEmployee | null>(null);
+
+    const [viewEmployee, setViewEmployee] = useState<IEmployee | null>(null);
+    const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
     // Filter Logic
     const filteredEmployees = useMemo(() => {
@@ -56,6 +60,11 @@ export default function EmployeesContent() {
     const handleEdit = (employee: IEmployee) => {
         setEditingEmployee(employee);
         setIsAddDialogOpen(true);
+    };
+
+    const handleView = (employee: IEmployee) => {
+        setViewEmployee(employee);
+        setIsViewDialogOpen(true);
     };
 
 
@@ -98,6 +107,7 @@ export default function EmployeesContent() {
                     filterStatus={filterStatus}
                     setFilterStatus={setFilterStatus}
                     onEdit={handleEdit}
+                    onView={handleView}
                     onStatusChange={(id, checked) => updateStatus(id, checked ? 'active' : 'inactive')}
                     busy={isLoading}
                 />
@@ -110,6 +120,12 @@ export default function EmployeesContent() {
                     onSuccess={handleSuccess}
                     editingUser={editingEmployee} // Note: Dialog might still expect editingUser prop name even if type is different
                     busy={isLoading}
+                />
+
+                <DialogViewDetails
+                    employee={viewEmployee}
+                    isOpen={isViewDialogOpen}
+                    onClose={() => setIsViewDialogOpen(false)}
                 />
             </div>
         </div>

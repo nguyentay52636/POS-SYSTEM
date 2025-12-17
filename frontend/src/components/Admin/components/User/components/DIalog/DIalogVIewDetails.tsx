@@ -20,11 +20,7 @@ interface DialogViewDetailsProps {
 }
 
 export default function DialogViewDetails({ user, isViewDialogOpen, setIsViewDialogOpen }: DialogViewDetailsProps) {
-    const getRoleName = (roleValue: role) => {
-        if (roleValue === role.ADMIN) return "Admin"
-        if (roleValue === role.STAFF) return "Staff"
-        return "User"
-    }
+
 
     const formatDate = (dateString: string) => {
         if (!dateString) return ""
@@ -54,7 +50,7 @@ export default function DialogViewDetails({ user, isViewDialogOpen, setIsViewDia
                         <Label htmlFor="fullName">Họ và tên</Label>
                         <Input
                             id="fullName"
-                            value={user.full_name}
+                            value={user.fullName}
                             readOnly
                             className="bg-gray-50 dark:bg-gray-800"
                         />
@@ -63,12 +59,19 @@ export default function DialogViewDetails({ user, isViewDialogOpen, setIsViewDia
                     <div className="space-y-2">
                         <Label>Vai trò</Label>
                         <Input
-                            value={getRoleName(user.role)}
+                            value={user.roleName || (typeof user.role === 'string' ? user.role : `Role ${user.role}`)}
                             readOnly
                             className="bg-gray-50 dark:bg-gray-800"
                         />
                     </div>
-
+                    <div className="space-y-2">
+                        <Label>Trạng thái</Label>
+                        <Input
+                            value={user.status === 'active' ? 'Hoạt động' : 'Đã khóa'}
+                            readOnly
+                            className="bg-gray-50 dark:bg-gray-800"
+                        />
+                    </div>
                     <div className="space-y-2">
                         <Label htmlFor="createdAt">Ngày tạo</Label>
                         <Input

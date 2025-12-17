@@ -8,8 +8,9 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+// Remove Select imports properly if not using, or keep for potential future use but we are making role readonly
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { Edit } from "lucide-react"
+import { Edit, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 import { updateUser, UpdateUserRequest } from "@/apis/userApi"
 import { IUser, role } from "@/types/types"
@@ -20,7 +21,7 @@ interface DialogEditUserProps {
     user: IUser
     isEditDialogOpen: boolean
     setIsEditDialogOpen: (open: boolean) => void
-    onUpdateUser: (updatedUser: IUser) => void
+    onUpdateUser: () => void
     roles: IRole[]
 }
 
@@ -35,47 +36,49 @@ export default function DialogEditUser({
         userId: 0,
         username: "",
         fullName: "",
-        role: role.ADMIN,
+        role: 1,
         createdAt: "",
         updatedAt: "",
         avatar: "",
+        status: "active",
+        roleName: ""
     })
+
+    const [password, setPassword] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
     // Load user data when dialog opens
     useEffect(() => {
         if (user && isEditDialogOpen) {
             setEditedUser(user)
+            setPassword("") // Reset password field
         }
     }, [user, isEditDialogOpen])
-
-    const handleChange = (field: string, value: string) => {
-        setEditedUser((prev) => ({ ...prev, [field]: value }))
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
 
         try {
+            // Only sending password as per requirement
             const userData: UpdateUserRequest = {
-                username: editedUser.username,
-                fullName: editedUser.full_name,
-                role: editedUser.role, // This will be converted by updateUser API
+                password: password
             }
 
-            console.log("Updating user with data:", userData)
+            console.log("Updating user password:", userData)
 
-            const updatedUser = await updateUser(editedUser.user_id, userData)
-            toast.success("Cập nhật người dùng thành công!")
+            await updateUser(editedUser.userId, userData)
+            toast.success("Cập nhật mật khẩu thành công!")
 
             // Call the callback to refresh the list
-            onUpdateUser(updatedUser)
+            onUpdateUser()
             setIsEditDialogOpen(false)
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to update user:", error)
-            toast.error("Cập nhật người dùng thất bại!")
+            const msg = error?.response?.data?.message || "Cập nhật thất bại!"
+            toast.error(msg)
         } finally {
             setIsLoading(false)
         }
@@ -87,7 +90,7 @@ export default function DialogEditUser({
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Edit className="h-5 w-5" />
-                        Chỉnh sửa người dùng
+                        Chỉnh sửa tài khoản
                     </DialogTitle>
                 </DialogHeader>
 
@@ -96,51 +99,70 @@ export default function DialogEditUser({
                         <Label htmlFor="username">Tên đăng nhập</Label>
                         <Input
                             id="username"
-                            placeholder="Nhập tên đăng nhập"
                             value={editedUser.username}
-                            onChange={(e) => handleChange("username", e.target.value)}
-                            required
+                            readOnly
+                            disabled
+                            className="bg-gray-100 cursor-not-allowed"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="full_name">Họ và tên</Label>
+                        <Label htmlFor="fullName">Họ và tên</Label>
                         <Input
-                            id="full_name"
-                            placeholder="Nhập họ và tên"
-                            value={editedUser.full_name}
-                            onChange={(e) => handleChange("full_name", e.target.value)}
-                            required
+                            id="fullName"
+                            value={editedUser.fullName}
+                            readOnly
+                            disabled
+                            className="bg-gray-100 cursor-not-allowed"
                         />
                     </div>
 
                     <div className="space-y-2">
                         <Label>Vai trò</Label>
-                        <Select
-                            onValueChange={(value) => handleChange("role", value)}
-                            value={editedUser.role}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Chọn vai trò" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {roles.length > 0 ? (
-                                    roles.map((r) => (
-                                        <SelectItem
-                                            key={r.roleId}
-                                            value={editedUser.role}
-                                        >
-                                            {r.roleName}
-                                        </SelectItem>
-                                    ))
+                        <Input
+                            value={editedUser.roleName || (typeof editedUser.role === 'string' ? editedUser.role : `Role ${editedUser.role}`)}
+                            readOnly
+                            disabled
+                            className="bg-gray-100 cursor-not-allowed"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Trạng thái</Label>
+                        <Input
+                            value={editedUser.status === 'active' ? 'Hoạt động' : 'Đã khóa'}
+                            readOnly
+                            disabled
+                            className="bg-gray-100 cursor-not-allowed"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="password">Mật khẩu mới</Label>
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Nhập mật khẩu mới (để trống nếu không đổi)"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="pr-10"
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? (
+                                    <EyeOff className="h-4 w-4 text-gray-500" />
                                 ) : (
-                                    <>
-                                        <SelectItem value={role.ADMIN}>Admin</SelectItem>
-                                        <SelectItem value={role.STAFF}>Staff</SelectItem>
-                                    </>
+                                    <Eye className="h-4 w-4 text-gray-500" />
                                 )}
-                            </SelectContent>
-                        </Select>
+                            </Button>
+                        </div>
+                        <p className="text-xs text-gray-500">Chỉ nhập nếu bạn muốn thay đổi mật khẩu.</p>
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2">
@@ -152,9 +174,9 @@ export default function DialogEditUser({
                         >
                             Hủy
                         </Button>
-                        <Button type="submit" disabled={isLoading}>
+                        <Button type="submit" disabled={isLoading || !password}>
                             <Edit className="h-4 w-4 mr-2" />
-                            {isLoading ? "Đang cập nhật..." : "Cập nhật"}
+                            {isLoading ? "Đang cập nhật..." : "Cập nhật mật khẩu"}
                         </Button>
                     </div>
                 </form>

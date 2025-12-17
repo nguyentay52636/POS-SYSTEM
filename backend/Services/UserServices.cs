@@ -99,14 +99,17 @@ public class UserService : IUserService
         var existing = await _repo.GetByIdAsync(id);
         if (existing == null) return null;
 
-        _mapper.Map(dto, existing);
-        // Hash password if it was provided
+        // Check if password update is requested
         if (!string.IsNullOrWhiteSpace(dto.Password))
         {
+            
             existing.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         }
+        else
+        {
+            _mapper.Map(dto, existing);
+        }
         var updated = await _repo.UpdateAsync(existing);
-        // Reload with Role navigation property
         var reloaded = await _repo.GetByIdAsync(id);
         return _mapper.Map<UserResponseDto>(reloaded ?? updated);
     }

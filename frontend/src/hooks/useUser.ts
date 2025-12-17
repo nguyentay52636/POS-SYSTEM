@@ -7,6 +7,7 @@ import {
     updateUser,
     changeStatusUser,
     CreateUserRequest,
+    UpdateUserRequest,
 } from '@/apis/userApi';
 import { IUser } from '@/types/types';
 import { toast } from 'sonner';
@@ -52,7 +53,7 @@ export const useUser = () => {
         }
     };
 
-    const updateUserInfo = async (id: number, user: IUser) => {
+    const updateUserInfo = async (id: number, user: UpdateUserRequest) => {
         try {
             await updateUser(id, user);
             mutate();
