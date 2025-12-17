@@ -25,14 +25,6 @@ export interface Order {
   orderItems: OrderItem[];
 }
 
-export interface CreateOrderRequest {
-  customerId: number;
-  userId: number;
-  promoId: number;
-  promoCode: string;
-  orderItems: IProduct[];
-  status: string;
-}
 
 
 export const getOrders = async (): Promise<Order[]> => {

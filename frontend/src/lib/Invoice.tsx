@@ -8,7 +8,17 @@ const formatCurrency = (v: number | undefined | null) =>
 // Invoice template as a React component for better maintainability & styling
 function InvoiceDocument({ order }: { order: Order }) {
   const items = order.orderItems || []
-  const subTotal = items.reduce((s, i) => s + (i.quantity * i.price), 0)
+
+  // Ensure unique items by productId to fix duplication issue
+  const uniqueItemsMap = new Map();
+  items.forEach(item => {
+    if (!uniqueItemsMap.has(item.productId)) {
+      uniqueItemsMap.set(item.productId, item);
+    }
+  });
+  const uniqueItems = Array.from(uniqueItemsMap.values()) as typeof items;
+
+  const subTotal = uniqueItems.reduce((s, i) => s + (i.quantity * i.price), 0)
   const discount = order.discountAmount || 0
   const total = order.totalAmount || 0
   const orderDate = order.orderDate
@@ -98,7 +108,7 @@ function InvoiceDocument({ order }: { order: Order }) {
                 </tr>
               </thead>
               <tbody>
-                {items.map((it, idx) => {
+                {uniqueItems.map((it, idx) => {
                   const name = it.product?.productName || `Sản phẩm #${it.productId}`
                   const lineTotal = it.quantity * it.price
                   return (
@@ -110,7 +120,7 @@ function InvoiceDocument({ order }: { order: Order }) {
                     </tr>
                   )
                 })}
-                {items.length === 0 && (
+                {uniqueItems.length === 0 && (
                   <tr>
                     <td colSpan={4} style={{ textAlign: "center", color: "#94a3b8" }}>
                       Không có sản phẩm

@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { selectSelectedCustomerId, selectCartItems, type CartItem } from '@/redux/Slice/cartSlice';
 import { Promotion } from '@/apis/promotionsApi';
 import { getConfigCustomerPoints, ConfigCustomerPoints } from '@/apis/configCustomerPoints';
-import { getCustomerById, UpdatePointsToCustomer } from '@/apis/customerApi';
+import { getCustomerById, UpdatePointsToCustomer, getCustomers, createCustomer } from '@/apis/customerApi';
 import { createOrder, getOrderById, type Order, type OrderItem, type CreateOrderDto } from '@/apis/orderApi';
 import { create as createPayment, type IPayment, type CreatePaymentDto } from '@/apis/paymentApi';
 import { buildInvoiceHtml } from '@/lib/Invoice';
@@ -90,10 +90,18 @@ export default function DialogPayment({
         }
     }, [isOpen])
 
+    // Check if current customer is a guest/walk-in (Khách vãng lai)
+    const isGuestCustomer = !selectedCustomerId ||
+        (customerInfo?.fullName && ['khách vãng lai', 'khách lẻ'].includes(customerInfo.fullName.toLowerCase().trim()));
+
+    const isProcessingRef = React.useRef(false);
+
     // Handle payment complete - create order, payment, then add points
     const handlePaymentComplete = async () => {
         if (!selectedPaymentMethod) return
+        if (isProcessingRef.current) return;
 
+        isProcessingRef.current = true;
         setIsProcessing(true)
         try {
             const currentUser = getCurrentUser()
@@ -104,7 +112,7 @@ export default function DialogPayment({
 
             // 0. Fetch Initial Points (Before any transaction)
             let initialPoints = 0;
-            if (selectedCustomerId) {
+            if (selectedCustomerId && !isGuestCustomer) {
                 try {
                     const customer = await getCustomerById(selectedCustomerId);
                     initialPoints = customer.customerPoint || 0;
@@ -118,13 +126,17 @@ export default function DialogPayment({
             if (!userId || userId === 0) {
                 toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!")
                 setIsProcessing(false)
+                isProcessingRef.current = false;
                 return
             }
 
             console.log("Using userId:", userId)
+            console.log("Current Cart:", cart);
 
             if (cart.length === 0) {
                 toast.error("Giỏ hàng trống!")
+                setIsProcessing(false)
+                isProcessingRef.current = false;
                 return
             }
 
@@ -151,38 +163,40 @@ export default function DialogPayment({
                 }
             })
 
+            console.log("Sending OrderItems to API:", orderItems);
+
             if (orderItems.length === 0) {
                 toast.error("Không có sản phẩm hợp lệ trong giỏ hàng!")
+                setIsProcessing(false)
+                isProcessingRef.current = false;
                 return
             }
 
+            // Determine final customer ID - force null if guest
+            const finalCustomerId = isGuestCustomer ? null : selectedCustomerId;
+
+            if (!finalCustomerId) {
+                console.log("Creating guest order (no customer ID linked)");
+            }
+            // ---------------------------
+
             const orderData: CreateOrderDto = {
-                customerId: selectedCustomerId || null, // null means no customer (guest order)
+                customerId: finalCustomerId,
                 userId: userId,
-                promoId: promoId, // null if no promotion (to avoid FK constraint violation)
-                promoCode: promoCode, // null if no promotion
+                promoId: promoId,
+                promoCode: promoCode,
                 status: 'paid',
                 orderItems: orderItems,
             }
 
-            console.log("=== Order Data to Send ===")
-            // ... logs
-            console.log("Full order data:", JSON.stringify(orderData, null, 2))
+
 
             const createdOrder = await createOrder(orderData)
             console.log("Order created successfully:", createdOrder)
             toast.success("Tạo đơn hàng thành công!")
 
-            // 1.1 Check points after order
-            if (selectedCustomerId) {
-                try {
-                    const customer = await getCustomerById(selectedCustomerId);
-                    const pointsAfterOrder = customer.customerPoint
-
-                } catch (e) {
-                    console.error("[Debug] Failed to fetch points after order", e)
-                }
-            }
+            // 1.1 Check points logic - SKIPPED FOR GUEST
+            // Logic moved to step 4 (after inventory update) to match original flow
 
             // 2. Create Payment
             const paymentData: CreatePaymentDto = {
@@ -241,10 +255,10 @@ export default function DialogPayment({
 
 
             // console.log("=== Kiểm tra điều kiện tích điểm ===")
-            // console.log("selectedCustomerId:", selectedCustomerId)
             console.log("total:", total)
 
-            if (selectedCustomerId && total > 0) {
+            // ONLY ADD POINTS IF NOT GUEST
+            if (finalCustomerId && !isGuestCustomer && total > 0) {
                 try {
                     // Load config mới nhất từ API trước khi tính điểm
                     const configsData = await getConfigCustomerPoints()
@@ -271,10 +285,10 @@ export default function DialogPayment({
                             const finalPoints = initialPoints + pointsFromOrder;
 
                             console.log(`[Points Logic] Initial (Pre-Order): ${initialPoints}, From Order: ${pointsFromOrder} (Total: ${total} / ${activeConfig.moneyPerUnit} * ${activeConfig.pointsPerUnit})`);
-                            console.log(`[Points Logic] Updating Customer ${selectedCustomerId} to NEW Total: ${finalPoints}`);
+                            console.log(`[Points Logic] Updating Customer ${finalCustomerId} to NEW Total: ${finalPoints}`);
 
                             // 3. Gọi API cập nhật điểm
-                            const result = await UpdatePointsToCustomer(selectedCustomerId, { points: finalPoints })
+                            const result = await UpdatePointsToCustomer(finalCustomerId!, { points: finalPoints }) // finalCustomerId is checked above
 
                             toast.success(`Đã tích ${pointsFromOrder} điểm cho khách hàng! (Tổng: ${finalPoints})`)
                         } else {
@@ -291,21 +305,10 @@ export default function DialogPayment({
                     // Không throw error - thanh toán đã thành công, chỉ log lỗi
                 }
             } else {
-                // console.log("=== Bỏ qua tích điểm ===")
-                // console.log("Customer ID:", selectedCustomerId || "Không có")
-                // console.log("Tổng tiền:", total.toLocaleString("vi-VN"), "VNĐ")
-                if (!selectedCustomerId) {
-                    // console.log("Lý do: Chưa chọn khách hàng")
-                }
-                if (total <= 0) {
-                    // console.log("Lý do: Tổng tiền <= 0")
-                }
             }
 
-            // 5. Show success message
 
 
-            // 6. Generate and open invoice in new tab
             try {
                 // Get full order details from API
                 const fullOrder = await getOrderById(createdOrder.orderId)
@@ -346,6 +349,7 @@ export default function DialogPayment({
             toast.error(errorMessage)
         } finally {
             setIsProcessing(false)
+            isProcessingRef.current = false;
         }
     }
 
@@ -377,7 +381,7 @@ export default function DialogPayment({
                         customerInfo={customerInfo}
                     />
 
-                    {selectedCustomerId && configPoints?.isActive && (
+                    {!isGuestCustomer && selectedCustomerId && configPoints?.isActive && (
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                             <p className="text-sm text-blue-800">
                                 <span className="font-semibold">Tích điểm:</span> Khách hàng sẽ nhận được{' '}

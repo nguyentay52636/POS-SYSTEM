@@ -15,7 +15,8 @@ public class OrderMappings : Profile
             .ForMember(dest => dest.OrderId, opt => opt.Ignore())
             .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => DateTime.Now))
             .ForMember(dest => dest.DiscountAmount, opt => opt.MapFrom(src => 0))
-            .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => 0));
+            .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => 0))
+            .ForMember(dest => dest.OrderItems, opt => opt.Ignore());
 
         CreateMap<OrderItem, OrderItemResponseDto>();
 
