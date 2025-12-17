@@ -1,18 +1,18 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { getOrders, updateOrderStatus, Order, OrderItem } from "@/apis/orderApi"
+import { getOrders, updateOrderStatus, cancelOrder, Order, OrderItem } from "@/apis/orderApi"
 import { toast } from "sonner"
 
-export type UiStatus = "ALL" | "ChoDuyet" | "DaDuyet" | "DaHuy"
+export type UiStatus = "ALL" | "DaDuyet" | "DaHuy"
 
 /**
  * Convert API status to UI status
  */
 const toUiStatus = (s: string): UiStatus => {
   const k = (s || "").toLowerCase()
-  if (k === "pending" || k === "choduyet") return "ChoDuyet"
-  if (k === "paid" || k === "approved" || k === "daduyet") return "DaDuyet"
+  // Chỉ còn 2 trạng thái: Đã Hủy hoặc Đã Duyệt (mặc định)
   if (k === "canceled" || k === "cancelled" || k === "dahuy") return "DaHuy"
-  return "ChoDuyet"
+  // Pending, Paid, Approved, DaDuyet... -> DaDuyet
+  return "DaDuyet"
 }
 
 export const calculateGross = (items: OrderItem[]) =>
@@ -123,6 +123,21 @@ export const useOrder = () => {
     [fetchOrders]
   )
 
+  const handleCancelOrder = useCallback(
+    async (orderId: number, reason: string) => {
+      try {
+        await cancelOrder(orderId, reason)
+        await fetchOrders()
+        toast.success("Đã hủy đơn hàng thành công")
+      } catch (error: any) {
+        console.error("Cancel order error:", error)
+        toast.error("Hủy đơn hàng thất bại")
+        throw error
+      }
+    },
+    [fetchOrders]
+  )
+
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page)
   }, [])
@@ -162,7 +177,8 @@ export const useOrder = () => {
 
     // Handlers
     fetchOrders,
-    handleDelete,
+    handleDelete, // Keep this if used elsewhere, but maybe we should prefer handleCancelOrder
+    handleCancelOrder,
     handleViewDetails,
     handleStatusChange,
     handlePageChange,

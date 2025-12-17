@@ -7,18 +7,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Eye,
   ShoppingCart,
 } from "lucide-react";
-import type { Order } from "@/apis/orderApi";
 import DialogConfirm from "../Dialog/DialogConfirm";
+import DialogCancel from "../Dialog/DialogCancel";
 import { toast } from "sonner";
 import ActionsOnTableOrder from "./ActionsOnTableOrder";
+import type { Order } from "@/apis/orderApi";
 
-export type UiStatus = "ALL" | "ChoDuyet" | "DaDuyet" | "DaHuy";
+export type UiStatus = "ALL" | "DaDuyet" | "DaHuy";
 
 export interface OrderTableProps {
   paginatedpayments: Order[];                                // danh sách gốc (chưa lọc)
@@ -27,10 +27,10 @@ export interface OrderTableProps {
   handleViewDetails: (order: Order) => void;
   handleDelete: (id: number) => void;
   onStatusChange?: (orderId: number, newStatus: string) => void | Promise<void>;
+  handleCancelOrder?: (orderId: number, reason: string) => Promise<void>;
   loading?: boolean;
 
-  /** ⬇️ Thêm 2 props tùy chọn để table tự lọc */
-  statusFilter?: UiStatus;            // "ALL" | "ChoDuyet" | "DaDuyet" | "DaHuy"
+  statusFilter?: UiStatus;            // "ALL" | "DaDuyet" | "DaHuy"
   searchKeyword?: string;             // từ khóa tìm kiếm (mã, tên KH, người tạo, promoCode)
   // Optional: parent can control which row is selected (for export) and receive selection changes
   selectedRowId?: number | null;
@@ -38,12 +38,11 @@ export interface OrderTableProps {
 }
 
 // Chuẩn hoá mọi biến thể về key UI
-const toUiStatus = (s: string) => {
+const toUiStatus = (s: string): UiStatus => {
   const k = (s || "").toLowerCase();
-  if (k === "pending" || k === "choduyet") return "ChoDuyet";
-  if (k === "paid" || k === "approved" || k === "daduyet") return "DaDuyet";
+  // Chỉ còn 2 trạng thái: Đã Hủy hoặc Đã Duyệt (mặc định)
   if (k === "canceled" || k === "cancelled" || k === "dahuy") return "DaHuy";
-  return "ChoDuyet";
+  return "DaDuyet";
 };
 
 export default function OrderTable({
@@ -53,6 +52,7 @@ export default function OrderTable({
   handleViewDetails,
   handleDelete,
   onStatusChange,
+  handleCancelOrder,
   loading,
   statusFilter = "ALL",
   searchKeyword = "",
@@ -63,8 +63,16 @@ export default function OrderTable({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
 
   const handleStatusChangeLocal = async (orderId: number, newStatus: string) => {
+    // Intercept cancellation
+    if (newStatus === "DaHuy") {
+      const order = paginatedpayments.find((o) => o.orderId === orderId);
+      if (order) setOrderToCancel(order);
+      return;
+    }
+
     setIsUpdating(true);
     try {
       if (onStatusChange) await onStatusChange(orderId, newStatus); // PHẢI await
@@ -72,6 +80,17 @@ export default function OrderTable({
       setIsUpdating(false);
     }
   };
+
+  const handleConfirmCancel = async (reason: string) => {
+    if (!orderToCancel || !handleCancelOrder) return;
+    try {
+      setIsUpdating(true);
+      await handleCancelOrder(orderToCancel.orderId, reason);
+      setOrderToCancel(null);
+    } finally {
+      setIsUpdating(false);
+    }
+  }
 
   const handleDeleteOrder = async () => {
     if (!orderToDelete) return;
@@ -85,9 +104,7 @@ export default function OrderTable({
     }
   };
 
-  /* ===========================
-     Lọc theo trạng thái & từ khóa
-     =========================== */
+
   const rows = useMemo(() => {
     const keyword = (searchKeyword || "").trim().toLowerCase();
 
@@ -131,7 +148,6 @@ export default function OrderTable({
             </TableHead>
             <TableHead className="font-semibold">Mã hoá đơn</TableHead>
             <TableHead className="font-semibold">Khách hàng</TableHead>
-            <TableHead className="font-semibold">Sản phẩm</TableHead>
             <TableHead className="font-semibold">Giá</TableHead>
             <TableHead className="font-semibold">Trạng thái</TableHead>
             <TableHead className="w-[50px] font-semibold">Thao tác</TableHead>
@@ -148,7 +164,6 @@ export default function OrderTable({
                   <Checkbox
                     checked={selectedRowId === order.orderId}
                     onCheckedChange={(val: boolean) => {
-                      // notify parent selection change
                       if (val) {
                         onRowSelect?.(order);
                       } else {
@@ -172,7 +187,7 @@ export default function OrderTable({
                   </div>
                 </TableCell>
 
-                <TableCell>
+                {/* <TableCell>
                   <div className="space-y-2">
                     {order.orderItems && order.orderItems.length > 0 ? (
                       order.orderItems.slice(0, 3).map((item) => (
@@ -213,7 +228,7 @@ export default function OrderTable({
                       <span className="text-xs">Xem tất cả</span>
                     </Button>
                   </div>
-                </TableCell>
+                </TableCell> */}
 
                 <TableCell>
                   {getNetAmount(order).toLocaleString("vi-VN")} đ
@@ -234,7 +249,6 @@ export default function OrderTable({
         </TableBody>
       </Table>
 
-      {/* Details dialog is rendered by parent (OrderManager) from its selectedOrder state */}
 
       <DialogConfirm
         isOpen={!!orderToDelete}
@@ -245,6 +259,13 @@ export default function OrderTable({
         confirmText="Hủy đơn"
         cancelText="Đóng"
         isLoading={isDeleting}
+      />
+
+      <DialogCancel
+        isOpen={!!orderToCancel}
+        onClose={() => setOrderToCancel(null)}
+        onConfirm={handleConfirmCancel}
+        isLoading={isUpdating}
       />
     </div>
   );

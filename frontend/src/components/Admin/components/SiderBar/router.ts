@@ -46,19 +46,19 @@ export const navigation = (pathname: string) => [
 
 
     {
-        name: "Quản lý đơn hàng",
+        name: "Hoá đơn bán hàng",
         href: "/admin/orders",
-        icon: ShoppingCart,
+        icon: FileDiff,
         current: pathname === "/admin/orders",
         badge: null,
     },
-    {
-        name: "Hoá đơn bán hàng",
-        href: "/admin/invoices",
-        icon: FileDiff,
-        current: pathname === "/admin/invoices",
-        badge: null,
-    },
+    // {
+    //     name: "Hoá đơn bán hàng",
+    //     href: "/admin/invoices",
+    //     icon: FileDiff,
+    //     current: pathname === "/admin/invoices",
+    //     badge: null,
+    // },
     {
         name: "Quản lý nhà cung cấp",
         href: "/admin/suppliers",

@@ -29,7 +29,7 @@ export default function OrderActions({
   // Bọc handler vì Select trả về string
   const handleStatusChange = (val: string) => {
     // chỉ nhận các giá trị hợp lệ
-    if (val === "ALL" || val === "ChoDuyet" || val === "DaDuyet" || val === "DaHuy") {
+    if (val === "ALL" || val === "DaDuyet" || val === "DaHuy") {
       setStatusFilter(val as UiStatus);
     }
   };
@@ -72,7 +72,6 @@ export default function OrderActions({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">Tất cả</SelectItem>
-            <SelectItem value="ChoDuyet">Chờ Duyệt</SelectItem>
             <SelectItem value="DaDuyet">Đã Duyệt</SelectItem>
             <SelectItem value="DaHuy">Đã Hủy</SelectItem>
           </SelectContent>

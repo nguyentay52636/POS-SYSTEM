@@ -77,6 +77,9 @@ public class InventoryRepository : IInventoryRepository
         }
         else
         {
+            // Detach navigation properties to prevent tracking conflicts
+            inventory.Product = null;
+
             // Attach and mark properties as modified
             _db.Inventories.Attach(inventory);
             _db.Entry(inventory).Property(x => x.Quantity).IsModified = true;

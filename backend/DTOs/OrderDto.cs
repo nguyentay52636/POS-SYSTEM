@@ -62,7 +62,7 @@ public class UpdateOrderStatusDto
 public class CancelOrderDto
 {
     [Required(ErrorMessage = "Cancellation reason is required")]
-    [StringLength(500, MinimumLength = 5, ErrorMessage = "Cancellation reason must be between 5 and 500 characters")]
+    [StringLength(500, MinimumLength = 3, ErrorMessage = "Cancellation reason must be between 3 and 500 characters")]
     public string CancellationReason { get; set; } = string.Empty;
 }
 

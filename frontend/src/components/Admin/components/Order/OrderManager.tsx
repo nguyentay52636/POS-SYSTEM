@@ -26,6 +26,7 @@ export default function OrderManager() {
     selectedForExport,
     setSelectedForExport,
     handleDelete,
+    handleCancelOrder,
     handleViewDetails,
     handleStatusChange,
     handlePageChange,
@@ -79,6 +80,7 @@ export default function OrderManager() {
           searchKeyword={searchTerm}            // nếu Table tự lọc thêm
           selectedRowId={selectedForExport?.orderId ?? selectedOrder?.orderId ?? null}
           onRowSelect={(order) => setSelectedForExport(order)}
+          handleCancelOrder={handleCancelOrder}
         />
 
         {/* Phân trang */}

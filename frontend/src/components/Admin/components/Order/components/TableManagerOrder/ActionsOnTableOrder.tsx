@@ -14,12 +14,12 @@ import {
     ChevronDown,
     Trash2,
     Check,
+    FileDiff,
 } from 'lucide-react'
 import type { Order } from '@/apis/orderApi'
 
 // Status options
 const STATUS_OPTIONS = [
-    { ui: "ChoDuyet", api: "pending", label: "Chờ Duyệt" },
     { ui: "DaDuyet", api: "paid", label: "Đã Duyệt" },
     { ui: "DaHuy", api: "canceled", label: "Đã Hủy" },
 ]
@@ -30,8 +30,7 @@ const getStatusLabel = (ui: string) =>
 
 const getStatusBadgeClass = (ui: string) => {
     switch (ui) {
-        case "ChoDuyet":
-            return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+
         case "DaDuyet":
             return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
         case "DaHuy":
@@ -125,6 +124,14 @@ export default function ActionsOnTableOrder({
                         >
                             <Eye className="h-4 w-4 text-green-600" />
                             <span className="ml-2">Xem chi tiết</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => {
+
+                            }}
+                        >
+                            <FileDiff className="h-4 w-4 text-green-600" />
+                            <span className="ml-2">Xem lý do hủy</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             onClick={() => setOrderToDelete(order)}

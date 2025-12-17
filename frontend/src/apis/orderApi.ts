@@ -89,8 +89,7 @@ const uiToApiStatus = (s: string) => {
   const k = (s || "").toLowerCase();
   if (k === "dahuy") return "canceled";
   if (k === "daduyet") return "paid";
-  if (k === "choduyet") return "pending";
-  return s;
+  return "paid";
 };
 
 export interface UpdateOrderDto {
@@ -110,7 +109,6 @@ export interface UpdateOrderDto {
 };
 
 
-// PUT full body – dùng cho đổi trạng thái hoặc sửa items
 export const updateOrder = async (
   id: number,
   patch: Partial<Order>
@@ -118,7 +116,6 @@ export const updateOrder = async (
   // 1) Lấy bản hiện tại
   const cur = await getOrderById(id);
 
-  // 2) Map sang DTO BE chấp nhận (chỉ các field cần thiết)
   const items = (patch.orderItems ?? cur.orderItems ?? []).map((it) => ({
     orderItemId: it.orderItemId,
     orderId: id,
@@ -166,4 +163,28 @@ export const getOrderPayments = async (id: number): Promise<any[]> => {
   const res = await baseApi.get(`/Order/${id}/payments`);
   return res.data;
 };
+//huy don
+//huy don
+export const cancelOrder = async (orderId: number, cancellationReason: string) => {
+  try {
+    const { data } = await baseApi.put(`/Order/${orderId}/cancel`, { cancellationReason }, {
+    });
+    return data;
+  } catch (error: any) {
+    console.error("Error canceling order:", error);
+    if (error.response && error.response.data) {
+      console.error("Backend error response:", error.response.data);
+    }
+    throw error;
+  }
+}
+//ly do huy don hang
+export const getCancelReasons = async (orderId: number): Promise<string[]> => {
+  try {
+    const { data } = await baseApi.get(`/OrderCancellationHistory/order/${orderId}`);
+    return data;
+  } catch (error: any) {
+    throw error
+  }
+}
 
