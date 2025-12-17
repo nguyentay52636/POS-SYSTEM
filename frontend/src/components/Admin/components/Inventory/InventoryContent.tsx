@@ -12,7 +12,7 @@ import { usePagination } from "@/context/PaginationContext"
 import { useInventory } from "@/hooks/useInventory"
 
 export default function InventoryContent() {
-    const { inventories, loading, addInventory, updateInventory, deleteInventory } = useInventory()
+    const { inventories, loading, addInventory, updateInventory, deleteInventory, updateInventoryStatus } = useInventory()
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedInventory, setSelectedInventory] = useState<IInventory | null>(null)
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -65,6 +65,14 @@ export default function InventoryContent() {
         }
     }
 
+    const handleStatusChangeWrapper = async (productId: number, status: boolean) => {
+        try {
+            await updateInventoryStatus(productId)
+        } catch (error) {
+            // Error handled in hook
+        }
+    }
+
     const handleDeleteInventoryWrapper = async (inventoryId: number) => {
         if (!confirm("Bạn có chắc chắn muốn xóa tồn kho này?")) return
 
@@ -110,6 +118,7 @@ export default function InventoryContent() {
                     setIsDetailDialogOpen={setIsDetailDialogOpen}
                     setIsEditDialogOpen={setIsEditDialogOpen}
                     handleDeleteInventory={handleDeleteInventoryWrapper}
+                    onStatusChange={handleStatusChangeWrapper}
                 />
 
                 <PaginationInventory totalItems={filteredInventories.length} />

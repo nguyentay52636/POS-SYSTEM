@@ -14,7 +14,7 @@ public interface IInventoryService
     Task<InventoryResponseDto[]> ListAllAsync();
     Task<InventoryResponseDto?> GetByProductIdAsync(int productId);
     Task<InventoryResponseDto?> UpdateAsync(int inventoryId, UpdateInventoryDto dto);
-    Task<InventoryResponseDto?> UpdateStatusAsync(int productId, string status);
+    Task<InventoryResponseDto?> ToggleStatusAsync(int productId);
     Task<InventoryResponseDto?> CreateAsync(CreateInventoryDto dto);
     Task<bool> DeleteAsync(int productId);
 }
@@ -83,16 +83,17 @@ public class InventoryService : IInventoryService
         return resultDto;
     }
     
-    public async Task<InventoryResponseDto?> UpdateStatusAsync(int productId, string status)
+    public async Task<InventoryResponseDto?> ToggleStatusAsync(int productId)
     {
         var inventory = await _repo.GetByProductIdAsync(productId);
         if (inventory == null) return null;
 
-        inventory.Status = status;
+        // Toggle Status
+        inventory.Status = inventory.Status == "available" ? "unavailable" : "available";
         var updated = await _repo.UpdateAsync(inventory);
         
         // Sync to Product
-        await _syncService.SyncInventoryToProductAsync(productId, status);
+        await _syncService.SyncInventoryToProductAsync(productId, inventory.Status);
         
         return _mapper.Map<InventoryResponseDto>(updated);
     }

@@ -74,7 +74,7 @@ export const navigation = (pathname: string) => [
         badge: null,
     },
     {
-        name: "Quản lý tồn kho",
+        name: "Quản lý kho hàng",
         href: "/admin/inventorys",
         icon: Warehouse,
         current: pathname === "/admin/inventorys",

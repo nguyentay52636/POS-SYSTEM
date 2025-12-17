@@ -1,6 +1,8 @@
 import { IInventory } from "@/types/types"
 import baseApi from "./baseApi"
 
+export interface updateStatusProductInventory {
+}
 export const getAllInventory = async () => {
     try {
         const { data } = await baseApi.get('/Inventory')
@@ -49,6 +51,14 @@ export const updateInventoryQuantity = async (inventoryId: number, quantity: num
             quantity: quantity,
             productId: productId
         })
+        return data
+    } catch (error: any) {
+        throw error
+    }
+}
+export const updateStatusProductInventory = async (productId: number) => {
+    try {
+        const { data } = await baseApi.put(`/Inventory/${productId}/status`)
         return data
     } catch (error: any) {
         throw error

@@ -7,6 +7,7 @@ export interface IInventory {
   quantity: number;
   product?: IProduct;
   productName?: string;
+  status: string
   updatedAt: string;
 
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { IInventory } from "@/types/types"
-import { getAllInventory, addInventory as apiAddInventory, updateInventory as apiUpdateInventory, deleteInventory as apiDeleteInventory, getInventoryById } from "@/apis/inventoryApi"
+import { getAllInventory, addInventory as apiAddInventory, updateInventory as apiUpdateInventory, deleteInventory as apiDeleteInventory, getInventoryById, updateStatusProductInventory } from "@/apis/inventoryApi"
 import { toast } from "sonner"
 
 export const useInventory = () => {
@@ -64,12 +64,27 @@ export const useInventory = () => {
         }
     }
 
+    const updateInventoryStatus = async (productId: number) => {
+        try {
+            await updateStatusProductInventory(productId)
+            setInventories((prev) => prev.map((i) =>
+                i.productId === productId ? { ...i, status: i.status === "available" ? "inactive" : "available" } : i
+            ))
+            toast.success("Cập nhật trạng thái thành công!")
+        } catch (error) {
+            console.error("Error updating inventory status:", error)
+            toast.error("Không thể cập nhật trạng thái")
+            throw error
+        }
+    }
+
     return {
         inventories,
         loading,
         fetchInventories,
         addInventory,
         updateInventory,
-        deleteInventory
+        deleteInventory,
+        updateInventoryStatus
     }
 }

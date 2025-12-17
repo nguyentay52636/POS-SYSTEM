@@ -130,22 +130,15 @@ public class InventoryController : ControllerBase
     }
 
     /// <summary>
-    /// Update inventory status (available/unavailable) with automatic product sync.
+    /// Toggle inventory status (available/unavailable) with automatic product sync.
     /// </summary>
     /// <param name="productId">Product ID</param>
-    /// <param name="dto">Status update data</param>
     [HttpPut("{productId:int}/status")]
     [ProducesResponseType(typeof(InventoryResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<InventoryResponseDto>> UpdateStatus(int productId, [FromBody] UpdateInventoryStatusDto dto)
+    public async Task<ActionResult<InventoryResponseDto>> ToggleStatus(int productId)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var updated = await _service.UpdateStatusAsync(productId, dto.Status);
+        var updated = await _service.ToggleStatusAsync(productId);
         if (updated == null) return NotFound();
         return Ok(updated);
     }

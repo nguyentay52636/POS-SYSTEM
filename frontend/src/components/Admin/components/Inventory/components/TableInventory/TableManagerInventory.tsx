@@ -4,6 +4,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { Button } from '@/components/ui/button'
 import { Package, Eye, Edit, Trash2 } from 'lucide-react'
 import { IInventory } from '@/types/types'
+import { Switch } from '@/components/ui/switch'
 
 
 interface TableManagerInventoryProps {
@@ -13,6 +14,7 @@ interface TableManagerInventoryProps {
     setIsDetailDialogOpen: (open: boolean) => void
     setIsEditDialogOpen: (open: boolean) => void
     handleDeleteInventory: (inventoryId: number) => void
+    onStatusChange: (id: number, status: boolean) => void
 }
 
 export default function TableManagerInventory({
@@ -21,7 +23,8 @@ export default function TableManagerInventory({
     setSelectedInventory,
     setIsDetailDialogOpen,
     setIsEditDialogOpen,
-    handleDeleteInventory
+    handleDeleteInventory,
+    onStatusChange
 }: TableManagerInventoryProps) {
     return (
         <>
@@ -38,6 +41,7 @@ export default function TableManagerInventory({
                                     <TableHead className="font-semibold text-gray-900">Sản phẩm</TableHead>
                                     <TableHead className="font-semibold text-gray-900">Nhà cung cấp</TableHead>
                                     <TableHead className="font-semibold text-gray-900">Số lượng</TableHead>
+                                    <TableHead className="font-semibold text-gray-900">Trạng thái</TableHead>
                                     <TableHead className="font-semibold text-gray-900">Ngày cập nhật</TableHead>
                                     <TableHead className="text-right font-semibold text-gray-900">Thao tác</TableHead>
                                 </TableRow>
@@ -89,6 +93,22 @@ export default function TableManagerInventory({
                                                 }`}>
                                                 {inventory.quantity}
                                             </span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center space-x-2">
+                                                <Switch
+                                                    checked={inventory.status === "available"}
+                                                    onCheckedChange={(checked) => {
+                                                        onStatusChange(inventory.productId, checked);
+                                                    }}
+                                                />
+                                                <span className={`text-sm ${inventory.status === "available"
+                                                    ? "text-green-600 dark:text-green-400"
+                                                    : "text-gray-500 dark:text-gray-400"
+                                                    }`}>
+                                                    {inventory.status === "available" ? "Hoạt động" : "Ngừng hoạt động"}
+                                                </span>
+                                            </div>
                                         </TableCell>
                                         <TableCell className="text-gray-600">
                                             {inventory.updatedAt ? new Date(inventory.updatedAt).toLocaleDateString('vi-VN') : 'N/A'}

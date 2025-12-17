@@ -81,6 +81,7 @@ public class InventoryRepository : IInventoryRepository
             _db.Inventories.Attach(inventory);
             _db.Entry(inventory).Property(x => x.Quantity).IsModified = true;
             _db.Entry(inventory).Property(x => x.UpdatedAt).IsModified = true;
+            _db.Entry(inventory).Property(x => x.Status).IsModified = true;
         }
         
         await _db.SaveChangesAsync();
