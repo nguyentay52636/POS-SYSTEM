@@ -20,9 +20,6 @@ public class CreateUserDto
     public int EmployeeId { get; set; }
 
     public int? RoleId { get; set; }
-    
-    [StringLength(10, ErrorMessage = "Role cannot exceed 10 characters")]
-    public string? Role { get; set; }
 }
 
 public class UpdateUserDto

@@ -8,6 +8,7 @@ public class EmployeeDTO
     public DateOnly? BirthDate { get; set; }
     public string? Phone { get; set; }
     public string? RolePosition { get; set; }
+    public RoleResponseDto? Role { get; set; }
     public string Status { get; set; } = "active";
 }
 

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Search, X } from 'lucide-react'
 import { getAllEmployee, getAllEmployeeStatus, IEmployee } from '@/apis/employeeApi'
 import { toast } from 'sonner'
+import PaginationSelectEmployee from './PaginationSelectEmployee'
 
 interface DialogSelectEmployeeProps {
     onSelectEmployee?: (employee: IEmployee) => void
@@ -129,6 +130,7 @@ export default function DialogSelectEmployee({ onSelectEmployee, onClose }: Dial
                         )}
                     </TableBody>
                 </Table>
+                <PaginationSelectEmployee totalItems={employees.length} />
             </div>
         </div>
     )

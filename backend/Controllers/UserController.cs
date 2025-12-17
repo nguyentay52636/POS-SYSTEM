@@ -15,10 +15,12 @@ namespace backend.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserService _service;
+    private readonly IJwtService _jwtService;
 
-    public UserController(IUserService service)
+    public UserController(IUserService service, IJwtService jwtService)
     {
         _service = service;
+        _jwtService = jwtService;
     }
 
     /// <summary>
@@ -107,7 +109,7 @@ public class UserController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<UserResponseDto>> Create([FromBody] CreateUserDto dto)
+    public async Task<ActionResult<object>> Create([FromBody] CreateUserDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -117,7 +119,23 @@ public class UserController : ControllerBase
         try
         {
             var created = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.UserId }, created);
+            
+            // Password hashing is handled in UserService.CreateAsync (Lines 70-71)
+
+            // Generate JWT token
+            var (token, expiresAt) = _jwtService.GenerateToken(
+                created.Username ?? string.Empty,
+                created.UserId.ToString(),
+                created.RoleName
+            );
+
+            // Return user + token
+            return CreatedAtAction(nameof(GetById), new { id = created.UserId }, new 
+            {
+                User = created,
+                Token = token,
+                ExpiresAt = expiresAt
+            });
         }
         catch (ArgumentException ex)
         {

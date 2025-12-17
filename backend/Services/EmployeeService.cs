@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using backend.Models;
 using backend.DTOs;
 using backend.Repositories;
+using backend.Enums;
 
 namespace backend.Services;
 
@@ -114,6 +115,16 @@ public class EmployeeService : IEmployeeService
 
     private static EmployeeDTO MapToDTO(Employee employee)
     {
+        var user = employee.Users.FirstOrDefault();
+        var roleDto = user?.Role == null ? null : new RoleResponseDto
+        {
+            RoleId = user.Role.RoleId,
+            Description = user.Role.Description,
+            RoleName = !string.IsNullOrEmpty(user.Role.Description) 
+                       ? user.Role.Description 
+                       : UserRoleHelper.GetRoleName(user.Role.RoleId)
+        };
+
         return new EmployeeDTO
         {
             EmployeeId = employee.EmployeeId,
@@ -122,7 +133,8 @@ public class EmployeeService : IEmployeeService
             BirthDate = employee.BirthDate,
             Phone = employee.Phone,
             RolePosition = employee.RolePosition,
-            Status = employee.Status
+            Status = employee.Status,
+            Role = roleDto
         };
     }
 }

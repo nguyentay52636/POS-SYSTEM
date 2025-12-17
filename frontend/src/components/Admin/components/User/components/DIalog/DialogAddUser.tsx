@@ -14,7 +14,7 @@ import { toast } from "sonner"
 import { createUser, CreateUserRequest } from "@/apis/userApi"
 import { IUser } from "@/types/types"
 import type { IRole } from "@/apis/roleApi"
-import DialogSelectEmployee from "./DialogSelectEmployee"
+import DialogSelectEmployee from "./DialogSelectEmployee/DialogSelectEmployee"
 import { IEmployee } from "@/apis/employeeApi"
 import { Users, Eye, EyeOff } from 'lucide-react'
 
@@ -63,11 +63,32 @@ export default function DialogAddUser({
 
     const handleEmployeeSelect = (employee: IEmployee) => {
         setSelectedEmployee(employee)
+
+        // Prioritize getting roleId from the employee's role object
+        let roleId = user.role;
+
+        if (employee.role && employee.role.roleId) {
+            roleId = String(employee.role.roleId);
+        } else {
+            // Fallback: Find matching role by name validation 
+            // (Only if employee.role is missing for some reason)
+            const matchedRole = roles.find(r => r.roleName.toLowerCase() === employee.rolePosition?.toLowerCase())
+            if (matchedRole) {
+                roleId = String(matchedRole.roleId);
+            }
+        }
+
         setUser(prev => ({
             ...prev,
             full_name: employee.fullName || "",
+            role: roleId
         }))
         setIsSelectEmployeeOpen(false)
+
+        // Warning if no role could be determined from the employee
+        if (!employee.role && !roles.some(r => String(r.roleId) === roleId) && employee.rolePosition) {
+            toast.warning(`Không tìm thấy vai trò "${employee.rolePosition}" trong hệ thống. Vui lòng chọn thủ công.`)
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -81,7 +102,7 @@ export default function DialogAddUser({
                 fullName: user.full_name, // Try fullName instead of full_name
                 employeeId: selectedEmployee?.employeeId || 0,
                 roleId: parseInt(user.role),
-                role: user.role,
+
             }
 
             console.log("Sending user data:", userData) // Debug log
@@ -93,9 +114,10 @@ export default function DialogAddUser({
             resetForm()
             setIsAddDialogOpen(false)
 
-        } catch (error) {
-            console.error("Failed to create user:", error)
-            toast.error("Tạo tài khoản thất bại!")
+        } catch (error: any) {
+            console.error("Failed to create user:", error.response?.data || error)
+            const errorMessage = typeof error.response?.data === 'string' ? error.response.data : "Tạo tài khoản thất bại!"
+            toast.error(errorMessage)
         } finally {
             setIsLoading(false)
         }
@@ -187,37 +209,20 @@ export default function DialogAddUser({
 
                     <div className="space-y-2">
                         <Label>Vai trò</Label>
-                        <Select
-                            onValueChange={(value) => handleChange("role", value)}
-                            value={user.role}
-                            disabled={loadingRoles}
-                        >
-                            <SelectTrigger>
-                                <SelectValue
-                                    placeholder={
-                                        loadingRoles
-                                            ? "Đang tải vai trò..."
-                                            : errorRoles
-                                                ? "Lỗi tải vai trò"
-                                                : "Chọn vai trò"
-                                    }
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {roles.length > 0 ? (
-                                    roles.map((r) => (
-                                        <SelectItem key={r.roleId} value={String(r.roleId)}>
-                                            {r.roleName}
-                                        </SelectItem>
-                                    ))
-                                ) : (
-                                    <>
-                                        <SelectItem value="1">Admin</SelectItem>
-                                        <SelectItem value="2">Staff</SelectItem>
-                                    </>
-                                )}
-                            </SelectContent>
-                        </Select>
+                        {selectedEmployee ? (
+                            <Input
+                                value={selectedEmployee.role?.description || selectedEmployee.role?.roleName || selectedEmployee.rolePosition || "Chưa có chức vụ"}
+                                readOnly
+                                className="bg-gray-100"
+                            />
+                        ) : (
+                            <Input
+                                value={"Chưa có chức vụ"}
+                                readOnly
+                                className="bg-gray-100"
+                            />
+
+                        )}
                     </div>
 
                     <div className="flex justify-end pt-2">
@@ -229,7 +234,10 @@ export default function DialogAddUser({
             </DialogContent>
 
             <Dialog open={isSelectEmployeeOpen} onOpenChange={setIsSelectEmployeeOpen}>
-                <DialogContent className="max-w-4xl!">
+                <DialogContent className="max-w-4xl! ">
+                    <DialogHeader className="sr-only">
+                        <DialogTitle>Chọn nhân viên</DialogTitle>
+                    </DialogHeader>
                     <DialogSelectEmployee
                         onSelectEmployee={handleEmployeeSelect}
                         onClose={() => setIsSelectEmployeeOpen(false)}

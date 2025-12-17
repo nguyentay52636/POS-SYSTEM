@@ -35,6 +35,8 @@ public class EmployeeRepository : IEmployeeRepository
     public Task<Employee?> GetByIdAsync(int id)
     {
         return _db.Employees.AsNoTracking()
+            .Include(e => e.Users)
+            .ThenInclude(u => u.Role)
             .FirstOrDefaultAsync(e => e.EmployeeId == id);
     }
 
@@ -66,6 +68,10 @@ public class EmployeeRepository : IEmployeeRepository
             query = query.Where(e => e.Status == status);
         }
 
-        return await query.OrderBy(e => e.FullName).ToListAsync();
+        return await query
+            .Include(e => e.Users)
+            .ThenInclude(u => u.Role)
+            .OrderBy(e => e.FullName)
+            .ToListAsync();
     }
 }

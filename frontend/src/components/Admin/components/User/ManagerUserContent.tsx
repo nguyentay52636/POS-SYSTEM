@@ -35,7 +35,8 @@ export default function ManagerUserContent() {
         updateUserInfo,
         updateStatus,
         filterStatus,
-        setFilterStatus
+        setFilterStatus,
+        refreshUsers
     } = useUser()
 
     const { roles, loading: loadingRoles, error: errorRoles } = useRole()
@@ -99,7 +100,7 @@ export default function ManagerUserContent() {
                 <DialogAddUser
                     isAddDialogOpen={isAddDialogOpen}
                     setIsAddDialogOpen={setIsAddDialogOpen}
-                    onUserAdded={addUser}
+                    onUserAdded={() => refreshUsers()}
                     roles={roles}
                     loadingRoles={loadingRoles}
                     errorRoles={errorRoles}

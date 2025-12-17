@@ -6,9 +6,11 @@ import {
     createUser,
     updateUser,
     changeStatusUser,
+    CreateUserRequest,
 } from '@/apis/userApi';
 import { IUser } from '@/types/types';
 import { toast } from 'sonner';
+
 
 export const useUser = () => {
     const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -38,7 +40,7 @@ export const useUser = () => {
 
     const users = usersData || [];
 
-    const addUser = async (user: IUser) => {
+    const addUser = async (user: CreateUserRequest) => {
         try {
             await createUser(user);
             mutate();

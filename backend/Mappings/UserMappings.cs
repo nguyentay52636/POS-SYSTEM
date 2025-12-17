@@ -17,8 +17,7 @@ public class UserMappings : Profile
         CreateMap<CreateUserDto, User>()
             .ForMember(dest => dest.UserId, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
-            .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src =>
-                UserRoleHelper.GetRoleValue(src.Role ?? "staff")))
+            .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => src.RoleId ?? 2)) // Default to staff (2) if null
             .ForMember(dest => dest.Role, opt => opt.Ignore());
 
         CreateMap<UpdateUserDto, User>()

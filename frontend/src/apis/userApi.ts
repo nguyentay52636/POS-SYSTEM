@@ -22,7 +22,7 @@ export interface CreateUserRequest {
   fullName: string;
   employeeId: number;
   roleId: number;
-  role: string
+
 }
 
 
