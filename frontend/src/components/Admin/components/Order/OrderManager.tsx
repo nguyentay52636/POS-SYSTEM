@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import OrderTable from "./components/TableManagerOrder/TableManagerOrder";
-import DialogViewDetails from "./components/Dialog/DialogViewDetails";
+import DialogViewDetails from "./components/Dialog/DialogViewDetails/DialogViewDetails";
 import { toast } from "sonner";
 import ActionOrder from "./components/TableManagerOrder/OrderActions";
 import { getOrderById } from "@/apis/orderApi";

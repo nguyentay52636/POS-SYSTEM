@@ -219,20 +219,20 @@ public class CustomerController : ControllerBase
     }
 
     /// <summary>
-    /// Thêm điểm cho khách hàng
+    /// Cập nhật điểm cho khách hàng
     /// </summary>
-    [HttpPost("{id:int}/points")]
+    [HttpPut("{id:int}/points")]
     [ProducesResponseType(typeof(CustomerResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<CustomerResponseDto>> AddPoints(int id, [FromBody] AddCustomerPointDto dto)
+    public async Task<ActionResult<CustomerResponseDto>> UpdatePoints(int id, [FromBody] UpdateCustomerPointDto dto)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var updated = await _service.AddPointsAsync(id, dto.Points);
+        var updated = await _service.UpdatePointsAsync(id, dto.Points);
         if (updated == null) return NotFound();
         return Ok(updated);
     }

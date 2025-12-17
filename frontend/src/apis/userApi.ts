@@ -33,7 +33,7 @@ export interface UpdateUserRequest {
 }
 const USER_URL = '/User';
 
-export const changeStatusUser = async (id: number, status: string) => {
+export const changeStatusAccount = async (id: number, status: string) => {
   try {
     const { data } = await baseApi.put(`${USER_URL}/${id}/status`, { status })
     return data;

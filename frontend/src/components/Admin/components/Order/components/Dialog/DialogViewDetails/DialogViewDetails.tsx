@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Order, OrderItem } from "@/apis/orderApi";
 import { Image as ImageIcon, User, Calendar, Package } from "lucide-react";
+import ProductComponentViewDetails from "./ProductComponentViewDetails";
 
 interface DialogViewDetailsProps {
   selectedOrder: Order | null;
@@ -18,13 +19,8 @@ export default function DialogViewDetails({
     if (selectedOrder) setIsOpen(true);
   }, [selectedOrder]);
 
-  // Hỗ trợ cả VN lẫn EN
   const getStatusLabel = (status: string) => {
     switch ((status || "").toLowerCase()) {
-      case "choduyet":
-      case "pending":
-        return "Chờ duyệt";
-      case "daduyet":
       case "paid":
       case "approved":
         return "Đã duyệt";
@@ -39,10 +35,6 @@ export default function DialogViewDetails({
 
   const getStatusColor = (status: string) => {
     switch ((status || "").toLowerCase()) {
-      case "choduyet":
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
-      case "daduyet":
       case "paid":
       case "approved":
         return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
@@ -171,39 +163,7 @@ export default function DialogViewDetails({
                 </div>
               </div>
             </div>
-
-            {/* Sản phẩm */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center space-x-2">
-                <Package className="h-5 w-5 text-green-600" />
-                <span>Danh sách sản phẩm ({selectedOrder.orderItems.length})</span>
-              </h3>
-              <div className="space-y-3">
-                {selectedOrder.orderItems.map((it) => (
-                  <div
-                    key={it.orderItemId}
-                    className="flex items-center gap-4 p-4 border rounded-lg"
-                  >
-                    <div className="w-20 h-20 flex items-center justify-center bg-green-100 rounded-md">
-                      <img src={it.product.imageUrl} alt={it.product.productName} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm text-green-700">
-                        SP: #{it.productId}
-                      </div>
-                      <div className="text-lg font-semibold">{it.product.productName}</div>
-                      <div className="text-sm text-gray-600">
-                        SL: {it.quantity} • Giá:{" "}
-                        {it.price.toLocaleString("vi-VN")} đ
-                      </div>
-                    </div>
-                    <div className="text-lg font-semibold text-green-700">
-                      {(it.quantity * it.price).toLocaleString("vi-VN")} đ
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ProductComponentViewDetails selectedOrder={selectedOrder} />
           </div>
         )}
       </DialogContent>

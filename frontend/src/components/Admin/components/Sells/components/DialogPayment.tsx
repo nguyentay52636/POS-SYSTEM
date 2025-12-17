@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { selectSelectedCustomerId, selectCartItems, type CartItem } from '@/redux/Slice/cartSlice';
 import { Promotion } from '@/apis/promotionsApi';
 import { getConfigCustomerPoints, ConfigCustomerPoints } from '@/apis/configCustomerPoints';
-import { addPointsToCustomer } from '@/apis/customerApi';
+import { getCustomerById, UpdatePointsToCustomer } from '@/apis/customerApi';
 import { createOrder, getOrderById, type Order, type OrderItem, type CreateOrderDto } from '@/apis/orderApi';
 import { create as createPayment, type IPayment, type CreatePaymentDto } from '@/apis/paymentApi';
 import { buildInvoiceHtml } from '@/lib/Invoice';
@@ -100,11 +100,22 @@ export default function DialogPayment({
             console.log("Current user from localStorage:", currentUser)
 
             // Try multiple possible user ID fields
-            const userId = currentUser?.userId || currentUser?.user_id || currentUser?.id || null
+            const userId = currentUser?.userId || null
+
+            // 0. Fetch Initial Points (Before any transaction)
+            let initialPoints = 0;
+            if (selectedCustomerId) {
+                try {
+                    const customer = await getCustomerById(selectedCustomerId);
+                    initialPoints = customer.customerPoint || 0;
+                    console.log(`[Points Logic] Initial Points fetched: ${initialPoints}`);
+                } catch (err) {
+                    console.error("Failed to fetch initial points", err);
+                }
+            }
 
             // Validate required fields
             if (!userId || userId === 0) {
-                console.error("Invalid userId:", userId)
                 toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!")
                 setIsProcessing(false)
                 return
@@ -117,8 +128,8 @@ export default function DialogPayment({
                 return
             }
 
+
             // 1. Create Order
-            // Use null instead of 0 for promoId to avoid foreign key constraint violation
             const promoId = appliedPromotions.length > 0 ? (appliedPromotions[0].promoId ?? null) : null
             const promoCode = appliedPromotions.length > 0 ? appliedPromotions[0].promoCode || null : null
 
@@ -155,17 +166,23 @@ export default function DialogPayment({
             }
 
             console.log("=== Order Data to Send ===")
+            // ... logs
             console.log("Full order data:", JSON.stringify(orderData, null, 2))
-            console.log("Order items count:", orderItems.length)
-            console.log("Customer ID:", orderData.customerId)
-            console.log("User ID:", orderData.userId)
-            console.log("Promo ID:", orderData.promoId)
-            console.log("Promo Code:", orderData.promoCode)
-            console.log("Status:", orderData.status)
 
             const createdOrder = await createOrder(orderData)
             console.log("Order created successfully:", createdOrder)
             toast.success("Tạo đơn hàng thành công!")
+
+            // 1.1 Check points after order
+            if (selectedCustomerId) {
+                try {
+                    const customer = await getCustomerById(selectedCustomerId);
+                    const pointsAfterOrder = customer.customerPoint
+
+                } catch (e) {
+                    console.error("[Debug] Failed to fetch points after order", e)
+                }
+            }
 
             // 2. Create Payment
             const paymentData: CreatePaymentDto = {
@@ -180,7 +197,7 @@ export default function DialogPayment({
 
             // 3. Update inventory quantities (subtract sold quantities)
             try {
-                console.log("=== Updating Inventory ===")
+                // console.log("=== Updating Inventory ===")
                 // Get all inventories to find inventoryId by productId
                 const allInventories = await getAllInventory()
 
@@ -197,7 +214,7 @@ export default function DialogPayment({
                         const newQuantity = inventory.quantity - cartItem.quantity
 
                         if (newQuantity < 0) {
-                            console.warn(`Warning: Insufficient inventory for product ${cartItem.product.productName}. Current: ${inventory.quantity}, Requested: ${cartItem.quantity}`)
+                            // console.warn(`Warning: Insufficient inventory for product ${cartItem.product.productName}. Current: ${inventory.quantity}, Requested: ${cartItem.quantity}`)
                             toast.warning(`Cảnh báo: Tồn kho không đủ cho sản phẩm ${cartItem.product.productName}`)
                         }
 
@@ -209,7 +226,7 @@ export default function DialogPayment({
                             inventory.productId
                         )
                     } else {
-                        console.warn(`Inventory not found for product ${cartItem.product.productName} (ID: ${cartItem.product.productId})`)
+                        // console.warn(`Inventory not found for product ${cartItem.product.productName} (ID: ${cartItem.product.productId})`)
                     }
                 }
                 console.log("Inventory updated successfully")
@@ -222,11 +239,9 @@ export default function DialogPayment({
                 toast.error(`Lỗi cập nhật tồn kho: ${errorMessage}`)
             }
 
-            // 4. Add points to customer if customer is selected and config is active
-            // Đối chiếu với config từ API: pointsPerUnit = 1, moneyPerUnit = 10000
-            // Ví dụ: 100000 VNĐ / 10000 * 1 = 10 điểm
-            console.log("=== Kiểm tra điều kiện tích điểm ===")
-            console.log("selectedCustomerId:", selectedCustomerId)
+
+            // console.log("=== Kiểm tra điều kiện tích điểm ===")
+            // console.log("selectedCustomerId:", selectedCustomerId)
             console.log("total:", total)
 
             if (selectedCustomerId && total > 0) {
@@ -249,34 +264,21 @@ export default function DialogPayment({
                     if (!activeConfig || !activeConfig.isActive) {
                     } else if (activeConfig.moneyPerUnit <= 0) {
                     } else {
-                        // Tính điểm dựa trên tổng tiền và config
-                        // Công thức: (tổng tiền / moneyPerUnit) * pointsPerUnit
-                        // Ví dụ: 100000 / 10000 * 1 = 10 điểm
-                        const pointsToAdd = Math.floor((total / activeConfig.moneyPerUnit) * activeConfig.pointsPerUnit)
+                        const pointsFromOrder = Math.floor((total / activeConfig.moneyPerUnit) * activeConfig.pointsPerUnit)
 
-                        console.log("=== Tính điểm cho khách hàng ===")
-                        console.log("Customer ID:", selectedCustomerId)
-                        console.log("Tổng tiền:", total.toLocaleString("vi-VN"), "VNĐ")
-                        console.log("Config từ API:")
-                        console.log("  - moneyPerUnit:", activeConfig.moneyPerUnit.toLocaleString("vi-VN"), "VNĐ")
-                        console.log("  - pointsPerUnit:", activeConfig.pointsPerUnit)
-                        console.log("  - isActive:", activeConfig.isActive)
-                        console.log("Điểm tính được:", pointsToAdd, "điểm")
-                        console.log("Công thức:", `${total} / ${activeConfig.moneyPerUnit} * ${activeConfig.pointsPerUnit} = ${pointsToAdd}`)
+                        if (pointsFromOrder > 0) {
+                            // 2. Tính tổng điểm mới = Điểm cũ (lấy từ trước khi tạo đơn) + Điểm mới từ đơn hàng
+                            const finalPoints = initialPoints + pointsFromOrder;
 
-                        if (pointsToAdd > 0) {
-                            // Gọi API cập nhật điểm cho khách hàng
-                            // POST /Customer/{customerId}/points với body { points: pointsToAdd }
-                            console.log(`📤 Gọi API cộng điểm: POST /Customer/${selectedCustomerId}/points`)
-                            console.log(`📤 Request body:`, { points: pointsToAdd })
+                            console.log(`[Points Logic] Initial (Pre-Order): ${initialPoints}, From Order: ${pointsFromOrder} (Total: ${total} / ${activeConfig.moneyPerUnit} * ${activeConfig.pointsPerUnit})`);
+                            console.log(`[Points Logic] Updating Customer ${selectedCustomerId} to NEW Total: ${finalPoints}`);
 
-                            const result = await addPointsToCustomer(selectedCustomerId, { points: pointsToAdd })
+                            // 3. Gọi API cập nhật điểm
+                            const result = await UpdatePointsToCustomer(selectedCustomerId, { points: finalPoints })
 
-                            console.log(`✅ Response từ API:`, result)
-                            console.log(`✅ Đã cộng ${pointsToAdd} điểm cho khách hàng ${selectedCustomerId}`)
-                            toast.success(`Đã tích ${pointsToAdd} điểm cho khách hàng!`)
+                            toast.success(`Đã tích ${pointsFromOrder} điểm cho khách hàng! (Tổng: ${finalPoints})`)
                         } else {
-                            console.log("⚠️ Điểm tính được = 0, bỏ qua...")
+                            // console.log("⚠️ Điểm tính được = 0, bỏ qua...")
                         }
                     }
                 } catch (error: any) {
@@ -289,19 +291,19 @@ export default function DialogPayment({
                     // Không throw error - thanh toán đã thành công, chỉ log lỗi
                 }
             } else {
-                console.log("=== Bỏ qua tích điểm ===")
-                console.log("Customer ID:", selectedCustomerId || "Không có")
-                console.log("Tổng tiền:", total.toLocaleString("vi-VN"), "VNĐ")
+                // console.log("=== Bỏ qua tích điểm ===")
+                // console.log("Customer ID:", selectedCustomerId || "Không có")
+                // console.log("Tổng tiền:", total.toLocaleString("vi-VN"), "VNĐ")
                 if (!selectedCustomerId) {
-                    console.log("Lý do: Chưa chọn khách hàng")
+                    // console.log("Lý do: Chưa chọn khách hàng")
                 }
                 if (total <= 0) {
-                    console.log("Lý do: Tổng tiền <= 0")
+                    // console.log("Lý do: Tổng tiền <= 0")
                 }
             }
 
             // 5. Show success message
-            toast.success("Thanh toán thành công!")
+
 
             // 6. Generate and open invoice in new tab
             try {

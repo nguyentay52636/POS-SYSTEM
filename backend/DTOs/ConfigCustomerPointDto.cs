@@ -22,9 +22,9 @@ public class UpdateConfigCustomerPointDto
     public decimal MoneyPerUnit { get; set; }
 }
 
-public class AddCustomerPointDto
+public class UpdateCustomerPointDto
 {
     [Required(ErrorMessage = "Points is required")]
-    [Range(0.01, double.MaxValue, ErrorMessage = "Points must be greater than 0")]
+    [Range(0, double.MaxValue, ErrorMessage = "Points must be greater than or equal to 0")]
     public decimal Points { get; set; }
 }

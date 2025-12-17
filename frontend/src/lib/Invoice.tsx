@@ -20,7 +20,7 @@ function InvoiceDocument({ order }: { order: Order }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <title>Hoá đơn #{order.orderId}</title>
+        <title>{`Hoá đơn #${order.orderId}`}</title>
         <style>{`
           :root {
             color-scheme: light;
