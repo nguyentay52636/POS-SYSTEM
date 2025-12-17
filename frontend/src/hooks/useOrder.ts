@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { getOrders, updateOrderStatus, cancelOrder, Order, OrderItem } from "@/apis/orderApi"
+import { getOrders, updateOrderStatus, cancelOrder, getCancelReasons, Order, OrderItem, CancellationHistory } from "@/apis/orderApi"
 import { toast } from "sonner"
 
 export type UiStatus = "ALL" | "DaDuyet" | "DaHuy"
@@ -147,12 +147,26 @@ export const useOrder = () => {
     setCurrentPage(1)
   }, [])
 
+  const [cancellationHistory, setCancellationHistory] = useState<CancellationHistory[]>([])
+  const [selectedOrderForCancelView, setSelectedOrderForCancelView] = useState<Order | null>(null)
+
+  const handleGetCancellationHistory = useCallback(async (orderId: number) => {
+    try {
+      const data = await getCancelReasons(orderId)
+      setCancellationHistory(data)
+    } catch (error) {
+      console.error("Error fetching cancellation history:", error)
+      toast.error("Không thể tải lịch sử hủy đơn")
+    }
+  }, [])
+
   return {
     // Data
     orders,
     filteredOrders,
     paginatedOrders,
     loading,
+    cancellationHistory,
 
     // Filter state
     statusFilter,
@@ -174,11 +188,14 @@ export const useOrder = () => {
     setSelectedOrder,
     selectedForExport,
     setSelectedForExport,
+    selectedOrderForCancelView,
+    setSelectedOrderForCancelView,
 
     // Handlers
     fetchOrders,
-    handleDelete, // Keep this if used elsewhere, but maybe we should prefer handleCancelOrder
+    handleDelete,
     handleCancelOrder,
+    handleGetCancellationHistory,
     handleViewDetails,
     handleStatusChange,
     handlePageChange,

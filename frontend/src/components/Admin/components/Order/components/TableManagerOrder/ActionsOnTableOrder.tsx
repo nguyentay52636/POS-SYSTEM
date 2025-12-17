@@ -48,6 +48,7 @@ interface ActionsOnTableOrderProps {
     setOrderToDelete: (order: Order | null) => void
     onRowSelect?: (order: Order | null) => void
     isUpdating?: boolean
+    onViewCancelReason?: (orderId: number) => void
 }
 
 export default function ActionsOnTableOrder({
@@ -58,6 +59,7 @@ export default function ActionsOnTableOrder({
     setOrderToDelete,
     onRowSelect,
     isUpdating = false,
+    onViewCancelReason,
 }: ActionsOnTableOrderProps) {
     const handleStatusChangeLocal = async (orderId: number, newStatus: string) => {
         await onStatusChange(orderId, newStatus)
@@ -127,7 +129,7 @@ export default function ActionsOnTableOrder({
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             onClick={() => {
-
+                                onViewCancelReason?.(order.orderId)
                             }}
                         >
                             <FileDiff className="h-4 w-4 text-green-600" />

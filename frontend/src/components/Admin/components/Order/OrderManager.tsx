@@ -9,6 +9,8 @@ import { buildInvoiceHtml } from "@/lib/Invoice";
 import PaginationManagerOrder from "./components/PaginationManagerOrder";
 import { useOrder, calculateGross, calculateNet } from "@/hooks/useOrder";
 
+import DialogCancelView from "./components/Dialog/DialogCancelView";
+
 export default function OrderManager() {
   const {
     paginatedOrders,
@@ -31,6 +33,11 @@ export default function OrderManager() {
     handleStatusChange,
     handlePageChange,
     handleRowsPerPageChange,
+    // Cancel View
+    selectedOrderForCancelView,
+    setSelectedOrderForCancelView,
+    handleGetCancellationHistory,
+    cancellationHistory,
   } = useOrder();
 
   return (
@@ -81,6 +88,16 @@ export default function OrderManager() {
           selectedRowId={selectedForExport?.orderId ?? selectedOrder?.orderId ?? null}
           onRowSelect={(order) => setSelectedForExport(order)}
           handleCancelOrder={handleCancelOrder}
+          onViewCancelReason={async (orderId) => {
+            // We need to set the selected order for the dialog to open, 
+            // and fetch data.
+            // Ideally we find the order from list to have context if needed, 
+            // but orderId is enough for fetching.
+            // We'll set a dummy object or find it.
+            const order = paginatedOrders.find(o => o.orderId === orderId);
+            if (order) setSelectedOrderForCancelView(order);
+            await handleGetCancellationHistory(orderId);
+          }}
         />
 
         {/* Phân trang */}
@@ -100,6 +117,14 @@ export default function OrderManager() {
             setSelectedOrder={() => setSelectedOrder(null)}
           />
         )}
+
+        {/* Dialog xem lịch sử hủy */}
+        <DialogCancelView
+          isOpen={!!selectedOrderForCancelView}
+          onClose={() => setSelectedOrderForCancelView(null)}
+          history={cancellationHistory}
+          orderId={selectedOrderForCancelView?.orderId}
+        />
       </div>
     </div>
   );

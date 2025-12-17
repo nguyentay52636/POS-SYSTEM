@@ -178,12 +178,37 @@ export const cancelOrder = async (orderId: number, cancellationReason: string) =
     throw error;
   }
 }
+export interface CancellationHistory {
+  cancellationId: number;
+  orderId?: number;
+  cancellationReason: string;
+  canceledBy: string;
+  canceledByEmployeeId: number;
+  canceledByEmployeeName: string;
+  cancellationDate: string;
+}
+
 //ly do huy don hang
-export const getCancelReasons = async (orderId: number): Promise<string[]> => {
+export const getCancelReasons = async (orderId: number): Promise<CancellationHistory[]> => {
   try {
+    console.log(`[getCancelReasons] Fetching history for orderId: ${orderId}`);
     const { data } = await baseApi.get(`/OrderCancellationHistory/order/${orderId}`);
-    return data;
+    console.log(`[getCancelReasons] Data received:`, data);
+
+    // Check if response is wrapped in { success: true, data: [...] }
+    if (data && data.success === true && Array.isArray(data.data)) {
+      return data.data;
+    }
+
+    // Check if response is direct array
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    // Fallback: wrap single object in array if relevant
+    return data ? [data] : [];
   } catch (error: any) {
+    console.error(`[getCancelReasons] Error:`, error);
     throw error
   }
 }

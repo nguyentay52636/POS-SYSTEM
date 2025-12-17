@@ -35,6 +35,7 @@ export interface OrderTableProps {
   // Optional: parent can control which row is selected (for export) and receive selection changes
   selectedRowId?: number | null;
   onRowSelect?: (order: Order | null) => void;
+  onViewCancelReason?: (orderId: number) => void;
 }
 
 // Chuẩn hoá mọi biến thể về key UI
@@ -58,6 +59,7 @@ export default function OrderTable({
   searchKeyword = "",
   selectedRowId = null,
   onRowSelect,
+  onViewCancelReason,
 }: OrderTableProps) {
   // selection is lifted to parent via onRowSelect (if provided)
   const [isUpdating, setIsUpdating] = useState(false);
@@ -242,6 +244,7 @@ export default function OrderTable({
                   setOrderToDelete={setOrderToDelete}
                   onRowSelect={onRowSelect}
                   isUpdating={isUpdating}
+                  onViewCancelReason={onViewCancelReason}
                 />
               </TableRow>
             );
