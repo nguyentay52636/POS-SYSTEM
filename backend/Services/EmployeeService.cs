@@ -41,13 +41,18 @@ public class EmployeeService : IEmployeeService
         employee.Status = newStatus;
 
         // Sync User Status
-        var users = await _userRepo.GetByEmployeeIdAsync(id);
-        foreach (var user in users)
+        // Since GetByIdAsync includes Users, we can update them directly
+        // WARNING: employee is AsNoTracking, so all entities (employee + users) are Detached.
+        // We must update the status on these detached instances, and then UpdateAsync(employee) 
+        // will attach the whole graph and mark modified entities.
+        if (employee.Users != null)
         {
-            user.Status = newStatus;
-            await _userRepo.UpdateAsync(user);
+            foreach (var user in employee.Users)
+            {
+                user.Status = newStatus;
+            }
         }
-
+        
         var updated = await _repo.UpdateAsync(employee);
         return MapToDTO(updated);
     }

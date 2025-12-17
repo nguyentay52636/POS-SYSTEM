@@ -34,7 +34,7 @@ public class EmployeeRepository : IEmployeeRepository
 
     public Task<Employee?> GetByIdAsync(int id)
     {
-        return _db.Employees.AsNoTracking()
+        return _db.Employees
             .Include(e => e.Users)
             .ThenInclude(u => u.Role)
             .FirstOrDefaultAsync(e => e.EmployeeId == id);
@@ -42,7 +42,14 @@ public class EmployeeRepository : IEmployeeRepository
 
     public async Task<Employee> UpdateAsync(Employee employee)
     {
-        _db.Employees.Update(employee);
+        // If the entity is detached (e.g. created from DTO), attach it.
+        // If it is already tracked (e.g. loaded via GetById), we don't need to call Update() 
+        // as it would force a graph update and might cause identity resolution conflicts.
+        if (_db.Entry(employee).State == EntityState.Detached)
+        {
+            _db.Employees.Update(employee);
+        }
+        
         await _db.SaveChangesAsync();
         return employee;
     }
@@ -61,7 +68,7 @@ public class EmployeeRepository : IEmployeeRepository
 
     public async Task<IReadOnlyList<Employee>> ListAllAsync(string? status = null)
     {
-        IQueryable<Employee> query = _db.Employees.AsNoTracking();
+        IQueryable<Employee> query = _db.Employees;
         
         if (!string.IsNullOrWhiteSpace(status))
         {

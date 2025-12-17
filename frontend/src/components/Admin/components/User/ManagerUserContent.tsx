@@ -98,6 +98,8 @@ export default function ManagerUserContent() {
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             onStatusChange={(id, checked) => updateStatus(id, checked ? 'active' : 'inactive')}
+                            filterStatus={filterStatus}
+                            setFilterStatus={setFilterStatus}
                         />
                         <PaginationManagerUser totalItems={filteredUsers.length} />
                     </>

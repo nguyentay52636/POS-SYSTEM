@@ -21,6 +21,8 @@ interface TableManagerUserProps {
     onEdit: (user: IUser) => void;
     onDelete: (user: IUser) => void;
     onStatusChange: (id: number, checked: boolean) => void;
+    filterStatus: string;
+    setFilterStatus: (status: string) => void;
 }
 
 const getRoleName = (userRole: string, roles: IRole[]): string => {
@@ -35,7 +37,7 @@ const getRoleName = (userRole: string, roles: IRole[]): string => {
     return userRole
 }
 
-export default function TableManagerUser({ users, roles, searchQuery, setSearchQuery, onView, onEdit, onDelete, onStatusChange }: TableManagerUserProps) {
+export default function TableManagerUser({ users, roles, searchQuery, setSearchQuery, onView, onEdit, onDelete, onStatusChange, filterStatus, setFilterStatus }: TableManagerUserProps) {
 
     const handleExportExcel = () => {
         if (users.length === 0) {
@@ -95,7 +97,13 @@ export default function TableManagerUser({ users, roles, searchQuery, setSearchQ
                             Quản lý tài khoản hệ thống ({users.length} tài khoản)
                         </CardDescription>
                     </div>
-                    <FilterSearchUser />
+                    <FilterSearchUser
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        handleExportExcel={handleExportExcel}
+                        filterStatus={filterStatus}
+                        setFilterStatus={setFilterStatus}
+                    />
                 </div>
             </CardHeader>
             <CardContent>

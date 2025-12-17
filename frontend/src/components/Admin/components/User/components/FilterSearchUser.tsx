@@ -2,14 +2,16 @@ import React from 'react'
 import { Search, Filter, Download } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 interface FilterSearchUserProps {
     searchQuery: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
     handleExportExcel: () => void;
+    filterStatus: string;
+    setFilterStatus: (status: string) => void;
 }
 
-export default function FilterSearchUser({ searchQuery, setSearchQuery, handleExportExcel }: FilterSearchUserProps) {
+export default function FilterSearchUser({ searchQuery, setSearchQuery, handleExportExcel, filterStatus, setFilterStatus }: FilterSearchUserProps) {
     return (
         <>
             <div className="flex items-center space-x-3">
@@ -22,9 +24,23 @@ export default function FilterSearchUser({ searchQuery, setSearchQuery, handleEx
                         className="pl-10 w-140 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400"
                     />
                 </div>
-                <Button variant="outline" size="sm" className="hover:bg-gray-50 dark:hover:bg-gray-800 bg-transparent">
-                    <Filter className="h-4 w-4 mr-2" />
-                    Lọc
+                <Select defaultValue="all" value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Trạng thái" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                        <SelectItem value="active">Đang làm việc</SelectItem>
+                        <SelectItem value="inactive">Đã nghỉ</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                    <Filter className="h-4 w-4" />
                 </Button>
                 <Button
                     variant="outline"
