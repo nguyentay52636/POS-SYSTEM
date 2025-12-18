@@ -71,9 +71,10 @@ export const useProduct = () => {
                 await deleteProduct(parseInt(productId))
                 setProducts((prev) => prev.filter((p) => p.productId !== parseInt(productId)))
                 toast.success("Đã xóa sản phẩm thành công")
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Lỗi xóa sản phẩm:", error)
-                toast.error("Không thể xóa sản phẩm")
+                const backendMessage = error.response?.data?.message || "Không thể xóa sản phẩm"
+                toast.error(backendMessage)
             }
         },
         []

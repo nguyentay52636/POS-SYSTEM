@@ -30,7 +30,6 @@ export default function ChoiceProduct({ products = [], loading = false, onSelect
         { value: "all", label: "Tất cả trạng thái" },
         { value: "active", label: "Đang bán" },
         { value: "inactive", label: "Ngừng bán" },
-        { value: "out-of-stock", label: "Hết hàng" },
     ]
 
     const filteredProducts = useMemo(() => {
@@ -52,11 +51,13 @@ export default function ChoiceProduct({ products = [], loading = false, onSelect
                 selectedCategory === "all" || categoryName === selectedCategory
 
             const status = p.status || ""
+
+            // Automatically exclude inactive products
+            if (status === 'inactive') return false
+
             const matchesStatus =
                 selectedStatus === "all" ||
-                (selectedStatus === "out-of-stock"
-                    ? p.unit === 0
-                    : status === selectedStatus)
+                status === selectedStatus
 
             return matchesSearch && matchesCategory && matchesStatus
         })

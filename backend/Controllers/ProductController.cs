@@ -217,9 +217,16 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
-        var ok = await _service.DeleteAsync(id);
-        if (!ok) return NotFound();
-        return NoContent();
+        try 
+        {
+            var ok = await _service.DeleteAsync(id);
+            if (!ok) return NotFound();
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>

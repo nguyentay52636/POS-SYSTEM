@@ -75,6 +75,15 @@ public class ProductRepository : IProductRepository
         var existing = await _db.Products.FindAsync(id);
         if (existing == null) return false;
         
+        // Check if product is used in any Import Receipt or Order
+        bool isUsedInImports = await _db.ImportItems.AnyAsync(ii => ii.ProductId == id);
+        bool isUsedInOrders = await _db.OrderItems.AnyAsync(oi => oi.ProductId == id);
+
+        if (isUsedInImports || isUsedInOrders)
+        {
+            throw new InvalidOperationException("Cannot delete product because it has associated import or order history. Please lock (deactivate) the product instead.");
+        }
+
         // Explicitly delete dependent records (Inventory, ProfitRule) if not cascaded by DB
         var inventories = _db.Inventories.Where(i => i.ProductId == id);
         _db.Inventories.RemoveRange(inventories);
