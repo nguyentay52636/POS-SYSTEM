@@ -106,6 +106,10 @@ public class ProfitConfigurationController : ControllerBase
             var config = await _service.UpdateConfigurationAsync(dto);
             return Ok(new { success = true, data = config });
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
         catch (Exception ex)
         {
             return StatusCode(500, new { success = false, message = ex.Message });

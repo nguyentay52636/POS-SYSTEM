@@ -22,9 +22,10 @@ export function CommonConfigTab() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const data = await getProfitConfigurationGlobal()
-        if (data?.defaultProfitPercentage !== undefined) {
-          setGlobalProfit(data.defaultProfitPercentage.toString())
+        const response = await getProfitConfigurationGlobal()
+        const configData = response?.data || response;
+        if (configData?.defaultProfitPercentage !== undefined) {
+          setGlobalProfit(configData.defaultProfitPercentage.toString())
         }
       } catch (error) {
         console.error("Failed to fetch profit config:", error)

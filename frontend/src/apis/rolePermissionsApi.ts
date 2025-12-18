@@ -23,29 +23,29 @@ export interface IUpdateRolePermissionsRequest {
 export type PermissionType = "view" | "create" | "edit" | "delete" | "print" | "export"
 
 export interface FeaturePermission {
-  featureId: number
-  featureName: string
-  permissions: {
-    [key in PermissionType]: boolean
-  }
+    featureId: number
+    featureName: string
+    permissions: {
+        [key in PermissionType]: boolean
+    }
 }
 
 // Interface mới cho API update
 export interface IUpdateRolePermissionsDto {
-  featurePermissions: {
-    featureId: number;
-    permissionTypeIds: number[];
-  }[];
+    featurePermissions: {
+        featureId: number;
+        permissionTypeIds: number[];
+    }[];
 }
 
 // Mapping PermissionType code sang PermissionTypeId
 const permissionTypeToIdMap: Record<PermissionType, number> = {
-  "view": 1,
-  "create": 2,
-  "edit": 3,
-  "delete": 4,
-  "print": 5,
-  "export": 6,
+    "view": 1,
+    "create": 2,
+    "edit": 3,
+    "delete": 4,
+    "print": 5,
+    "export": 6,
 };
 
 export const permissionTypes = [
@@ -129,7 +129,7 @@ export const updateRolePermissionsV2 = async (
             featurePermissions: featurePermissions.map(fp => {
                 // Lấy danh sách permissionTypeIds từ permissions object
                 const permissionTypeIds: number[] = [];
-                
+
                 (Object.keys(fp.permissions) as PermissionType[]).forEach(permissionType => {
                     if (fp.permissions[permissionType]) {
                         const permissionTypeId = permissionTypeToIdMap[permissionType];
@@ -153,7 +153,7 @@ export const updateRolePermissionsV2 = async (
         });
 
         const { data } = await baseApi.put(`/RolePermissions/role/${roleId}/update`, requestData);
-        
+
         console.log("✅ Role permissions updated successfully:", data);
         return data;
     } catch (error: any) {
@@ -194,7 +194,7 @@ export const convertPermissionsToFeaturePermissions = (
         }
 
         const feature = featureMap.get(perm.featureId)!;
-        
+
         // Map permissionCode sang PermissionType và set true nếu isAllowed
         const permissionType = perm.permissionCode.toLowerCase() as PermissionType;
         if (permissionType in feature.permissions && perm.isAllowed) {

@@ -45,6 +45,17 @@ public class ProfitConfigurationService : IProfitConfigurationService
 
     public async Task<ProfitConfigurationDTO> UpdateConfigurationAsync(UpdateProfitConfigurationDTO dto)
     {
+        // Validate Employee if ID is provided
+        if (dto.UpdatedByEmployeeId.HasValue)
+        {
+            var employeeExists = await _db.Employees.AnyAsync(e => e.EmployeeId == dto.UpdatedByEmployeeId.Value);
+            if (!employeeExists)
+            {
+                // Instead of failing, just unlink the employee for this update since the user ID might be stale
+                dto.UpdatedByEmployeeId = null;
+            }
+        }
+
         var config = new ProfitConfiguration
         {
             DefaultProfitPercentage = dto.DefaultProfitPercentage,

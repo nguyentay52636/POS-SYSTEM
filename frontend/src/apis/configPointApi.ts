@@ -5,7 +5,8 @@ export interface IConfigPoint {
     pointsPerUnit: number,
     moneyPerUnit: number,
     isActive: boolean,
-    updatedAt: string
+    updatedAt: string,
+    updatedByEmployeeId?: number
 }
 
 export const getConfigPoint = async () => {
@@ -16,9 +17,11 @@ export const getConfigPoint = async () => {
         console.log(error)
     }
 }
+
 export interface IUpdateConfigPoint {
     pointsPerUnit: number,
-    moneyPerUnit: number
+    moneyPerUnit: number,
+    updatedByEmployeeId?: number
 }
 export const updateConfigPoint = async (configPoint: IConfigPoint) => {
     try {

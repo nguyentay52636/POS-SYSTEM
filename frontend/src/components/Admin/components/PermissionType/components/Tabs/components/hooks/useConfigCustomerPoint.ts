@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react"
 import { getConfigPoint, updateConfigPoint, type IConfigPoint } from "@/apis/configPointApi"
 import { type PointsConfig, DEFAULT_CONFIG } from "../PointsConversion/types"
+import { useSelector } from "react-redux"
+import { selectAuth } from "@/redux/Slice/authSlice"
 
 export const useConfigCustomerPoint = () => {
     const [config, setConfig] = useState<PointsConfig>(DEFAULT_CONFIG)
@@ -39,6 +41,8 @@ export const useConfigCustomerPoint = () => {
         fetchConfig()
     }, [fetchConfig])
 
+    const { user } = useSelector(selectAuth)
+
     const updateConfig = async (newConfig: PointsConfig) => {
         setLoading(true)
         try {
@@ -47,11 +51,14 @@ export const useConfigCustomerPoint = () => {
                 return false
             }
 
+            const currentEmployeeId = user?.employeeId ?? user?.userId ?? 1;
+
             const payload: IConfigPoint = {
                 ...apiConfig,
                 pointsPerUnit: newConfig.points,
                 moneyPerUnit: newConfig.amount,
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                updatedByEmployeeId: currentEmployeeId
             }
 
             await updateConfigPoint(payload)

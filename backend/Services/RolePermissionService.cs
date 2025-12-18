@@ -34,13 +34,16 @@ public class RolePermissionService : IRolePermissionService
     public async Task<RolePermissionResponseDto[]> GetAllAsync()
     {
         var items = await _repo.GetAllAsync();
-        return _mapper.Map<RolePermissionResponseDto[]>(items);
+        var validItems = items.Where(rp => rp.Feature != null && rp.PermissionType != null);
+        return _mapper.Map<RolePermissionResponseDto[]>(validItems);
     }
 
     public async Task<RolePermissionResponseDto[]> GetByRoleIdAsync(int roleId)
     {
         var items = await _repo.GetByRoleIdAsync(roleId);
-        return _mapper.Map<RolePermissionResponseDto[]>(items);
+        // Filter out items with missing Feature or PermissionType to prevent 500 errors
+        var validItems = items.Where(rp => rp.Feature != null && rp.PermissionType != null);
+        return _mapper.Map<RolePermissionResponseDto[]>(validItems);
     }
 
     public async Task<RolePermissionResponseDto?> GetByIdAsync(int roleId, int featureId, int permissionTypeId)
