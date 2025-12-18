@@ -14,9 +14,10 @@ interface ConfigTabProps {
     setTempConfig: (config: PointsConfig) => void
     onConfirm: () => void
     saved: boolean
+    loading?: boolean
 }
 
-export function ConfigTab({ tempConfig, setTempConfig, onConfirm, saved }: ConfigTabProps) {
+export function ConfigTab({ tempConfig, setTempConfig, onConfirm, saved, loading }: ConfigTabProps) {
     return (
         <Card>
             <CardHeader>
@@ -45,7 +46,7 @@ export function ConfigTab({ tempConfig, setTempConfig, onConfirm, saved }: Confi
                                 type="number"
                                 min="1"
                                 value={tempConfig.points}
-                                onChange={(e) => setTempConfig({ ...tempConfig, points: Number.parseInt(e.target.value) || 0 })}
+                                onChange={(e) => setTempConfig({ ...tempConfig, points: Number.parseInt(e.target.value) })}
                                 className="text-lg"
                             />
                         </div>
@@ -55,10 +56,10 @@ export function ConfigTab({ tempConfig, setTempConfig, onConfirm, saved }: Confi
                             <Input
                                 id="amount"
                                 type="number"
-                                min="0"
+
                                 step="1000"
                                 value={tempConfig.amount}
-                                onChange={(e) => setTempConfig({ ...tempConfig, amount: Number.parseInt(e.target.value) || 0 })}
+                                onChange={(e) => setTempConfig({ ...tempConfig, amount: Number.parseInt(e.target.value) })}
                                 className="text-lg"
                             />
                         </div>
@@ -135,8 +136,8 @@ export function ConfigTab({ tempConfig, setTempConfig, onConfirm, saved }: Confi
                     )}
                 </div>
 
-                <Button onClick={onConfirm} size="lg" className="w-full md:w-auto">
-                    Lưu cấu hình
+                <Button onClick={onConfirm} size="lg" className="w-full md:w-auto" disabled={loading}>
+                    {loading ? "Đang lưu..." : "Lưu cấu hình"}
                 </Button>
 
                 {saved && (

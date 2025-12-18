@@ -7,10 +7,7 @@ export interface IConfigPoint {
     isActive: boolean,
     updatedAt: string
 }
-export interface IUpdateConfigPoint {
-    pointsPerUnit: number,
-    moneyPerUnit: number
-}
+
 export const getConfigPoint = async () => {
     try {
         const { data } = await baseApi.get('/ConfigCustomerPoint')
@@ -19,9 +16,13 @@ export const getConfigPoint = async () => {
         console.log(error)
     }
 }
+export interface IUpdateConfigPoint {
+    pointsPerUnit: number,
+    moneyPerUnit: number
+}
 export const updateConfigPoint = async (configPoint: IConfigPoint) => {
     try {
-        const { data } = await baseApi.put(`/ConfigCustomerPoint/${configPoint.configId}`, configPoint)
+        const { data } = await baseApi.put(`/ConfigCustomerPoint`, configPoint)
         return data
     } catch (error) {
         console.log(error)

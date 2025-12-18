@@ -102,7 +102,7 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
             const updatedUser = await updateUser(userId, {
                 ...user,
                 avatar: newAvatarUrl,
-                full_name: (user as any).full_name ?? user.full_name ?? user.username,
+                fullName: (user as any).full_name ?? user.fullName ?? user.username,
             } as any)
 
             if (updatedUser) {
@@ -136,9 +136,9 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
                     {/* Avatar with upload */}
                     <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
                         <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-primary/10">
-                            <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={user.full_name || user.username || "user"} />
+                            <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={user.fullName || user.username || "user"} />
                             <AvatarFallback className="text-3xl md:text-4xl font-bold bg-gradient-to-br from-primary to-purple-600 text-white">
-                                {user.full_name?.charAt(0) || user.username?.charAt(0) || "U"}
+                                {user.fullName?.charAt(0) || user.username?.charAt(0) || "U"}
                             </AvatarFallback>
                         </Avatar>
                         {/* Overlay */}
@@ -163,7 +163,7 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
                     <div className="flex-1 space-y-3">
                         <div className="space-y-2">
                             <div className="flex items-center gap-3 flex-wrap">
-                                <h1 className="text-2xl md:text-3xl font-bold">{user.full_name || user.username}</h1>
+                                <h1 className="text-2xl md:text-3xl font-bold">{user.fullName || user.username}</h1>
                                 <Badge className={getRoleBadgeColor(roleName)} variant="outline">
                                     <Shield className="h-3 w-3 mr-1" />
                                     {getRoleLabel(roleName)}

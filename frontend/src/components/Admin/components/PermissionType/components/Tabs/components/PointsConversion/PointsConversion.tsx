@@ -1,5 +1,7 @@
 "use client"
 
+import { toast } from "sonner"
+// ... keep existing imports ...
 import { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { History, Settings, TrendingUp } from "lucide-react"
@@ -47,6 +49,7 @@ export function PointsConversion() {
     const handleConfirm = async () => {
         const success = await updateConfig(tempConfig)
         if (success) {
+            toast.success("Cấu hình đã được lưu thành công!")
             setSaved(true)
             setTimeout(() => setSaved(false), 3000)
         }
@@ -77,6 +80,7 @@ export function PointsConversion() {
                         setTempConfig={setTempConfig}
                         onConfirm={handleConfirm}
                         saved={saved}
+                        loading={loading}
                     />
                     <CurrentConfigCard config={config} />
                 </TabsContent>
