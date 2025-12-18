@@ -1,6 +1,6 @@
 import React from 'react'
 import { Store, TrendingUp } from 'lucide-react'
-import { IProduct } from './SellsContent'
+import { IProduct } from '@/types/types'
 
 interface CartItem {
     product: IProduct

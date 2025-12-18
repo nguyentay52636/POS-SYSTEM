@@ -91,7 +91,7 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
         if (fromApi) return fromApi
         if (
             editingProduct?.category &&
-            editingProduct.category.categoryId.toString() === formValues.categoryId
+            editingProduct.category.categoryId?.toString() === formValues.categoryId
         ) {
             return editingProduct.category
         }

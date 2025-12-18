@@ -51,13 +51,10 @@ import {
     type CartItem,
 } from "@/redux/Slice/cartSlice"
 import type { AppDispatch } from "@/redux/store"
-import { useInventory } from "@/hooks/useInventory"
-import { useCategory } from "@/hooks/useCategory"
 import { getConfigCustomerPoints } from "@/apis/configCustomerPoints"
 import { mockPaymentMethods } from "@/utils/MethodPayment"
 import { usePromotions } from "@/hooks/usePromotions"
 import type { Promotion } from "@/apis/promotionsApi"
-
 export interface Transaction {
     transaction_id: string
     items: CartItem[]
@@ -79,8 +76,6 @@ export interface Transaction {
 
 export default function SellsContent() {
     const dispatch = useDispatch<AppDispatch>()
-    const { inventories, loading, fetchInventories } = useInventory()
-    const { categories, loading: categoryLoading } = useCategory()
     // khuyen mai 
     const { promotions, loading: promotionLoading, fetchPromotions } = usePromotions()
 
@@ -100,8 +95,8 @@ export default function SellsContent() {
     const receivedAmount = useSelector(selectReceivedAmount)
 
     // Local state for UI
-    const [searchTerm, setSearchTerm] = useState("")
-    const [selectedCategory, setSelectedCategory] = useState<number | "all">("all")
+    // Local state for UI
+    const [refreshKey, setRefreshKey] = useState(0)
     const [isChoiceDialogOpen, setIsChoiceDialogOpen] = useState(false)
     const [isCustomerPointsOpen, setIsCustomerPointsOpen] = useState(false)
     const [isNewCustomerDialogOpen, setIsNewCustomerDialogOpen] = useState(false)
@@ -135,28 +130,6 @@ export default function SellsContent() {
         loadConfig()
     }, [])
 
-    const filteredInventories: IInventory[] = inventories.filter((inventory) => {
-        const name =
-            inventory.product?.productName ??
-            inventory.productName ??
-            ""
-        const barcode = inventory.product?.barcode ?? ""
-        const categoryId = inventory.product?.categoryId
-        const status = inventory.product?.status
-
-        // Chỉ hiển thị sản phẩm có status "active"
-        const isActive = status === "active"
-
-        const matchesSearch =
-            name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            barcode.toLowerCase().includes(searchTerm.toLowerCase())
-
-        const matchesCategory =
-            selectedCategory === "all" ||
-            (categoryId !== undefined && categoryId === selectedCategory)
-
-        return isActive && matchesSearch && matchesCategory
-    })
 
     const handleAddToCart = (inventory: IInventory) => {
         const product = inventory.product
@@ -282,13 +255,9 @@ export default function SellsContent() {
         dispatch(resetPaymentState())
 
         // Reload inventory data after successful payment
-        try {
-            await fetchInventories()
-            console.log("✅ Đã cập nhật lại danh sách tồn kho sau khi thanh toán")
-        } catch (error) {
-            console.error("❌ Lỗi khi tải lại danh sách tồn kho:", error)
-            // Không hiển thị toast error vì thanh toán đã thành công
-        }
+        // Reload inventory data after successful payment
+        setRefreshKey((prev) => prev + 1)
+        console.log("✅ Đã cập nhật lại danh sách tồn kho sau khi thanh toán")
     }
 
     // Apply promotion code
@@ -385,13 +354,8 @@ export default function SellsContent() {
                 {/* Left Panel - Products */}
                 <div className="flex-1 min-w-0">
                     <LeftPanelSells
-                        searchTerm={searchTerm}
-                        setSearchTerm={setSearchTerm}
-                        selectedCategory={selectedCategory}
-                        setSelectedCategory={setSelectedCategory}
-                        filteredInventories={filteredInventories}
-                        mockCategories={categories}
                         addToCart={handleAddToCart}
+                        refreshKey={refreshKey}
                     />
                 </div>
 

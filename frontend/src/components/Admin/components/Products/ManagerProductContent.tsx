@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import ManagerProductHeader from "./components/ManagerProductHeader"
 import CardsStatProduct from "./components/CardsStatProduct"
 import { IProduct } from "@/types/types"
-import { mockCategories } from "@/components/Admin/components/Products/mock/data"
 import ActionHeaderTitle from "./components/Handler/ActionHeaderTitle"
 import SearchCategoryProduct from "./components/Handler/SearchCategoryProduct"
 import { FormProduct } from "./components/Dialog/FormProduct"
@@ -13,6 +12,7 @@ import PaginationManagerProduct from "./components/PaginationManagerProduct"
 import ManagerTableProducts from "./components/ManagerTableProducts"
 import { usePagination } from "@/context/PaginationContext"
 import { useProduct } from "@/hooks/useProduct"
+import { useCategory } from "@/hooks/useCategory"
 import { exportToExcel, formatCurrencyVN, formatDateVN, ExcelColumn } from "@/utils/Export/ExcelExport"
 import { toast } from "sonner"
 
@@ -42,10 +42,9 @@ export default function ManagerProductContent() {
         handleToggleStatus: handleToggleStatusProduct,
     } = useProduct()
 
-    const categories = useMemo(
-        () => ["all", ...mockCategories.map((cat) => cat.categoryName).filter((name): name is string => Boolean(name))],
-        []
-    )
+    const { categories } = useCategory()
+
+
 
     const { paginationState } = usePagination()
 
@@ -133,7 +132,7 @@ export default function ManagerProductContent() {
                             setSearchTerm={setSearchTerm}
                             selectedCategory={selectedCategory}
                             setSelectedCategory={setSelectedCategory}
-                            categories={categories}
+                            categories={categories.map((c) => c.categoryName || "")}
                             statuses={STATUSES}
                             selectedStatus={selectedStatus}
                             setSelectedStatus={setSelectedStatus}

@@ -8,7 +8,7 @@ import {
     changeStatusEmployee,
     IEmployee
 } from '../apis/employeeApi';
-import { changeStatusAccount } from '../apis/userApi';
+import { changeStatusUser } from '../apis/userApi';
 import { toast } from 'sonner';
 
 export const useEmployees = () => {
@@ -60,7 +60,7 @@ export const useEmployees = () => {
             await changeStatusEmployee(id, status);
             // Sync status with account
             try {
-                await changeStatusAccount(id, status);
+                await changeStatusUser(id, status);
             } catch (accountError) {
                 console.warn('Failed to update account status:', accountError);
                 // Optional: decide if we should fail the whole operation or just warn

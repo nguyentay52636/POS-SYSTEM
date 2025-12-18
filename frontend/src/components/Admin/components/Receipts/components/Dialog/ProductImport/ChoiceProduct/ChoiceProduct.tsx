@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import TableChoiceProduct from "./components/TableChoiceProduct"
 import type { IProduct } from "@/types/types"
-import { mockCategories } from "@/components/Admin/components/Products/mock/data"
 
 interface ChoiceProductProps {
     products?: IProduct[]
@@ -21,10 +20,7 @@ export default function ChoiceProduct({ products = [], loading = false, onSelect
     const [selectedStatus, setSelectedStatus] = useState<string>("all")
     const [selectedIds, setSelectedIds] = useState<number[]>([])
 
-    const categories = useMemo(
-        () => ["all", ...mockCategories.map((cat) => cat.categoryName).filter((name): name is string => Boolean(name))],
-        []
-    )
+
 
     const STATUSES: { value: string; label: string }[] = [
         { value: "all", label: "Tất cả trạng thái" },
@@ -112,13 +108,7 @@ export default function ChoiceProduct({ products = [], loading = false, onSelect
                                 <SelectTrigger className="w-48">
                                     <SelectValue placeholder="Danh mục" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    {categories.map((cat) => (
-                                        <SelectItem key={cat} value={cat}>
-                                            {cat === "all" ? "Tất cả danh mục" : cat}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
+
                             </Select>
 
                             <Select

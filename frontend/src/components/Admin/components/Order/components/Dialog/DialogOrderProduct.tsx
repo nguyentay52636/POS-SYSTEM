@@ -39,7 +39,7 @@ export default function DialogOrderProduct({
               </div>
               <div className="flex-1">
                 <div className="font-medium text-green-700">Mã SP: #{item.productId}</div>
-                <div className="text-lg font-semibold">{item.productName}</div>
+                <div className="text-lg font-semibold">{item.product?.productName || 'Sản phẩm ' + item.productId}</div>
                 <div className="text-sm text-green-600">Số lượng: {item.quantity}</div>
                 <div className="text-sm text-green-600">
                   Giá: {item.price.toLocaleString('vi-VN')} đ

@@ -20,6 +20,7 @@ export default function CustomerFormDialog({ open, onClose, onSave, editing, bus
     phone: "",
     email: "",
     address: "",
+    customerPoint: 0,
   });
 
   React.useEffect(() => {
@@ -29,14 +30,15 @@ export default function CustomerFormDialog({ open, onClose, onSave, editing, bus
         phone: editing.phone ?? "",
         email: editing.email ?? "",
         address: editing.address ?? "",
+        customerPoint: editing.customerPoint ?? 0,
       });
     } else {
-      setForm({ name: "", phone: "", email: "", address: "" });
+      setForm({ name: "", phone: "", email: "", address: "", customerPoint: 0 });
     }
   }, [editing]);
 
   const handleChange =
-    (k: keyof CustomerInput) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    (k: keyof Omit<CustomerInput, "customerPoint">) => (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((s) => ({ ...s, [k]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,6 +50,7 @@ export default function CustomerFormDialog({ open, onClose, onSave, editing, bus
       phone: form.phone.trim(),
       email: form.email.trim(),
       address: form.address.trim(),
+      customerPoint: form.customerPoint,
     });
   };
 

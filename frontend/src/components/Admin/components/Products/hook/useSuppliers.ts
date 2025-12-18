@@ -13,7 +13,6 @@ export function useSuppliers() {
     )
 
     return {
-      supplier_id: supplierId,
       supplierId,
       name: rawSupplier?.name ?? rawSupplier?.supplierName ?? `Nhà cung cấp ${fallbackId}`,
       phone: rawSupplier?.phone ?? "",
