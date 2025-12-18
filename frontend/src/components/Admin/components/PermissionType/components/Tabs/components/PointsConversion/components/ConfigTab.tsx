@@ -63,33 +63,7 @@ export function ConfigTab({ tempConfig, setTempConfig, onConfirm, saved }: Confi
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="minPoints">Số điểm tối thiểu:</Label>
-                            <Input
-                                id="minPoints"
-                                type="number"
-                                min="1"
-                                value={tempConfig.minPoints}
-                                onChange={(e) =>
-                                    setTempConfig({ ...tempConfig, minPoints: Number.parseInt(e.target.value) || 0 })
-                                }
-                            />
-                            <p className="text-xs text-muted-foreground">Số điểm tối thiểu khách hàng cần có để sử dụng</p>
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="maxPoints">Số điểm tối đa:</Label>
-                            <Input
-                                id="maxPoints"
-                                type="number"
-                                min="1"
-                                value={tempConfig.maxPoints}
-                                onChange={(e) =>
-                                    setTempConfig({ ...tempConfig, maxPoints: Number.parseInt(e.target.value) || 0 })
-                                }
-                            />
-                            <p className="text-xs text-muted-foreground">Số điểm tối đa khách hàng có thể sử dụng mỗi lần</p>
-                        </div>
                     </div>
                 </div>
 

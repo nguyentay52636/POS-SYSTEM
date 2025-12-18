@@ -1,16 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { History, Settings, TrendingUp } from "lucide-react"
 import { ConfigTab, CurrentConfigCard, PreviewTab, HistoryTab } from "./components"
 import type { PointsConfig, ConfigHistory } from "./types"
 import { DEFAULT_CONFIG } from "./types"
+import { useConfigCustomerPoint } from "../hooks/useConfigCustomerPoint"
 
 export function PointsConversion() {
-    const [config, setConfig] = useState<PointsConfig>(DEFAULT_CONFIG)
-    const [tempConfig, setTempConfig] = useState<PointsConfig>({ ...config })
+    const { config, loading, updateConfig } = useConfigCustomerPoint()
+    const [tempConfig, setTempConfig] = useState<PointsConfig>(DEFAULT_CONFIG)
     const [saved, setSaved] = useState(false)
+
+    // Update tempConfig when data loads from API
+    useEffect(() => {
+        if (config) {
+            setTempConfig(config)
+        }
+    }, [config])
 
     const [history] = useState<ConfigHistory[]>([
         {
@@ -36,10 +44,12 @@ export function PointsConversion() {
         },
     ])
 
-    const handleConfirm = () => {
-        setConfig({ ...tempConfig })
-        setSaved(true)
-        setTimeout(() => setSaved(false), 3000)
+    const handleConfirm = async () => {
+        const success = await updateConfig(tempConfig)
+        if (success) {
+            setSaved(true)
+            setTimeout(() => setSaved(false), 3000)
+        }
     }
 
     return (
