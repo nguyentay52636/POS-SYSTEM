@@ -85,7 +85,7 @@ export default function ManagerUserContent() {
                 />
                 {error ? (
                     <div className="rounded-md border border-red-200 bg-red-50 p-4 text-red-700">
-                        {error}
+                        {error instanceof Error ? error.message : String(error)}
                     </div>
                 ) : (
                     <>
