@@ -16,7 +16,7 @@ export interface IProduct {
   productName: string;
   imageUrl: string;
   price: number;
-  unit: number;
+  unit: string;
   categoryId?: number;
   category: ICategory
   supplierId?: number;

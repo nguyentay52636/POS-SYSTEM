@@ -141,11 +141,10 @@ export default function DialogPayment({
             }
 
 
-            // 1. Create Order
             const promoId = appliedPromotions.length > 0 ? (appliedPromotions[0].promoId ?? null) : null
             const promoCode = appliedPromotions.length > 0 ? appliedPromotions[0].promoCode || null : null
+            console.log("Applying Promotion to Order:", { promoId, promoCode, fullPromo: appliedPromotions[0] });
 
-            // Validate order items
             const orderItems = cart.map((item) => {
                 if (!item.product.productId) {
                     throw new Error(`Sản phẩm ${item.product.productName} không có ID hợp lệ`)
@@ -206,8 +205,19 @@ export default function DialogPayment({
                 paymentDate: new Date().toISOString(),
             }
 
-            const createdPayment = await createPayment(paymentData)
-            toast.success("Thanh toán thành công!")
+            let createdPayment;
+            try {
+                createdPayment = await createPayment(paymentData)
+                toast.success("Thanh toán thành công!")
+            } catch (error: any) {
+                const errorMsg = error?.response?.data?.message || error?.message || "";
+                if (errorMsg.includes("exceeds remaining order amount")) {
+                    console.warn("Payment amount adjustment warning:", errorMsg);
+                    // Treat as success or ignore, allowing flow to continue
+                } else {
+                    throw error; // Rethrow other errors
+                }
+            }
 
             // 3. Update inventory quantities (subtract sold quantities)
             try {

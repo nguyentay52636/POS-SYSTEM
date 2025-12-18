@@ -48,16 +48,22 @@ const mapProductToFormValues = (product?: IProduct | null): ProductFormValues =>
     productName: product?.productName ?? "",
     barcode: product?.barcode ?? "",
     price: product?.price != null ? product.price.toString() : "",
-    unit: product?.unit != null ? product.unit.toString() : "",
+    unit: product?.unit || "",
     status: product?.status ?? "active",
     imageUrl: product?.imageUrl ?? "",
     categoryId: product?.category?.categoryId ? product.category.categoryId.toString() : (product?.categoryId?.toString() || ""),
     supplierId: product?.supplier?.supplierId ? product.supplier.supplierId.toString() : (product?.supplierId?.toString() || "")
 })
 
+import { uploadLocalImage } from "@/apis/uploadApi"
+import { toast } from "sonner"
+
+// ... existing code ...
+
 export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: ProductFormProps) {
     const [formValues, setFormValues] = useState<ProductFormValues>(createEmptyFormValues)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isUploading, setIsUploading] = useState(false)
 
     const { categories, loading: loadingCategories } = useCategories()
     const { suppliers, loading: loadingSuppliers } = useSuppliers()
@@ -105,16 +111,36 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
         return undefined
     }, [suppliers, editingProduct, formValues.supplierId])
 
+    const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        try {
+            setIsUploading(true)
+            const response = await uploadLocalImage(file)
+            if (response && response.url) {
+                setFormValues(prev => ({ ...prev, imageUrl: response.url }))
+                toast.success("Tải ảnh lên thành công")
+            }
+        } catch (error) {
+            console.error("Upload error:", error)
+            toast.error("Tải ảnh thất bại")
+        } finally {
+            setIsUploading(false)
+            // Reset input value to allow selecting same file again
+            e.target.value = ''
+        }
+    }
+
     const isValidForm = useMemo(() => {
         const numericFieldsValid =
             !!formValues.price &&
-            !!formValues.unit &&
-            !Number.isNaN(Number(formValues.price)) &&
-            !Number.isNaN(Number(formValues.unit))
+            !Number.isNaN(Number(formValues.price))
 
         return (
             numericFieldsValid &&
             formValues.productName.trim().length > 0 &&
+            formValues.unit.trim().length > 0 &&
             formValues.barcode.trim().length > 0 &&
             formValues.imageUrl.trim().length > 0 &&
             formValues.categoryId !== "" &&
@@ -131,7 +157,7 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
             productName: formValues.productName.trim(),
             barcode: formValues.barcode.trim(),
             price: Number(formValues.price),
-            unit: Number(formValues.unit),
+            unit: formValues.unit.trim(),  // Changed to string
             status: formValues.status,
             imageUrl: formValues.imageUrl.trim(),
             category: selectedCategory,
@@ -217,12 +243,11 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="unit">Số lượng/Đơn vị *</Label>
+                                <Label htmlFor="unit">Đơn vị tính *</Label>
                                 <Input
                                     id="unit"
-                                    type="number"
-                                    min="0"
-                                    placeholder="Nhập số lượng trong kho"
+                                    type="text"
+                                    placeholder="Ví dụ: Cái, Hộp, Chai..."
                                     value={formValues.unit}
                                     onChange={handleInputChange("unit")}
                                     required
@@ -339,16 +364,42 @@ export function FormProduct({ editingProduct, isOpen, onOpenChange, onSubmit }: 
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="imageUrl">URL ảnh *</Label>
-                                <Input
-                                    id="imageUrl"
-                                    type="url"
-                                    placeholder="https://example.com/image.jpg"
-                                    value={formValues.imageUrl}
-                                    onChange={handleInputChange("imageUrl")}
-                                    required
-                                />
+                                <div className="flex gap-2">
+                                    <Input
+                                        id="imageUrl"
+                                        type="url"
+                                        placeholder="https://example.com/image.jpg"
+                                        value={formValues.imageUrl}
+                                        onChange={handleInputChange("imageUrl")}
+                                        required
+                                        className="flex-1"
+                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            id="file-upload"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            disabled={isUploading}
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="icon"
+                                            disabled={isUploading}
+                                            onClick={() => document.getElementById('file-upload')?.click()}
+                                        >
+                                            {isUploading ? (
+                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                            ) : (
+                                                <Upload className="h-4 w-4" />
+                                            )}
+                                        </Button>
+                                    </div>
+                                </div>
                                 <p className="text-xs text-gray-500">
-                                    Hỗ trợ PNG, JPG, JPEG. Lưu ý ảnh nên có kích thước tối thiểu 600x600px.
+                                    Nhập URL hoặc tải ảnh lên. Hỗ trợ PNG, JPG, JPEG.
                                 </p>
                             </div>
                             <div className="rounded-lg border bg-gray-50 p-4 text-center">

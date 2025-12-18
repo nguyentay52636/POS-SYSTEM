@@ -54,6 +54,7 @@ export default function PromotionCodeSells({
                                 setPromoError("")
                                 // Gọi handler trực tiếp với dữ liệu promotion
                                 if (onSelectPromotion) {
+                                    setPromoCode(promo.promoCode)
                                     onSelectPromotion(promo)
                                 } else {
                                     // Fallback: set promo code và apply

@@ -26,6 +26,7 @@ export const getProductById = async (productId: number): Promise<IProduct> => {
 export const createProduct = async (product: IProduct): Promise<IProduct> => {
     try {
         const { data } = await baseApi.post('/Product', product)
+        console.log(data);
         return data;
     } catch (error) {
         console.error('Error creating product:', error)

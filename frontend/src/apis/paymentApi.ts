@@ -43,7 +43,7 @@ export interface CreatePaymentDto {
 
 export async function create(payload: CreatePaymentDto): Promise<IPayment> {
   try {
-    const { data } = await baseApi.post<IPayment>(PREFIX, normalize(payload));
+    const { data } = await baseApi.post<IPayment>(PREFIX, payload);
     return data;
   } catch (error: any) {
     console.error('Error creating payment:', error)
