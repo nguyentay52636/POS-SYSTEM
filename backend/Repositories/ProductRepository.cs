@@ -75,8 +75,14 @@ public class ProductRepository : IProductRepository
         var existing = await _db.Products.FindAsync(id);
         if (existing == null) return false;
         
-        // Soft delete: set status to inactive
-        existing.Status = "inactive";
+        // Explicitly delete dependent records (Inventory, ProfitRule) if not cascaded by DB
+        var inventories = _db.Inventories.Where(i => i.ProductId == id);
+        _db.Inventories.RemoveRange(inventories);
+
+        var profitRules = _db.ProfitRules.Where(r => r.ProductId == id);
+        _db.ProfitRules.RemoveRange(profitRules);
+        
+        _db.Products.Remove(existing);
         await _db.SaveChangesAsync();
         return true;
     }

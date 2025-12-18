@@ -37,10 +37,14 @@ const getAllImportReceipts = async (): Promise<IImportReceipt[]> => {
 
 const addImportReceipt = async (receiptData: CreateImportReceiptDTO): Promise<IImportReceipt> => {
     try {
+        console.log("Creating import receipt payload:", JSON.stringify(receiptData, null, 2))
         const { data } = await baseApi.post('/imports', receiptData)
         return data
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error adding import receipt:', error)
+        if (error.response?.data) {
+            console.error('Backend error details:', JSON.stringify(error.response.data, null, 2))
+        }
         throw error
     }
 }
@@ -73,24 +77,24 @@ const getImportReceiptById = async (receiptId: number): Promise<IImportReceipt> 
         throw error
     }
 }
-const  getAllProductBySupplierId = async (supplierId: number) =>{
+const getAllProductBySupplierId = async (supplierId: number) => {
     try {
-        const {data}  = await baseApi.get(`/Product/supplier/${supplierId}`)
+        const { data } = await baseApi.get(`/Product/supplier/${supplierId}`)
         return data
-    }catch(error) {
+    } catch (error) {
         console.error('Error fetching products by supplier:', error)
         throw error
     }
 }
 const updateStatusImportReceipt = async (receiptId: number, status: string): Promise<IImportReceipt> => {
-try {
+    try {
         const { data } = await baseApi.patch(`/imports/${receiptId}/status`, { status })
- return data
+        return data
     } catch (error: any) {
-    console.error('Error updating status import receipt:', error)
-    throw error
-}
+        console.error('Error updating status import receipt:', error)
+        throw error
+    }
 }
 
-export {updateStatusImportReceipt,getAllProductBySupplierId, getAllImportReceipts, addImportReceipt, updateImportReceipt, deleteImportReceipt, getImportReceiptById }
+export { updateStatusImportReceipt, getAllProductBySupplierId, getAllImportReceipts, addImportReceipt, updateImportReceipt, deleteImportReceipt, getImportReceiptById }
 

@@ -78,12 +78,8 @@ public class ImportReceiptService : IImportReceiptService
                     throw new ArgumentException($"Product with ID {productId} not found");
                 }
                 
-                // Validate product is active
-                if (product.Status == "inactive")
-                {
-                    await _importRepo.DeleteAsync(created.ImportId);
-                    throw new ArgumentException($"Product '{product.ProductName}' (ID: {productId}) is inactive and cannot be imported");
-                }
+                // Removed check for inactive product status to allow importing inactive items
+                // This allows restocking discontinued products if needed
             }
 
             var importItems = dto.Items.Select(item => new ImportItem
@@ -312,11 +308,8 @@ public class ImportReceiptService : IImportReceiptService
                 throw new ArgumentException($"Product with ID {productId} not found");
             }
             
-            // Validate product is active
-            if (product.Status == "inactive")
-            {
-                throw new ArgumentException($"Product '{product.ProductName}' (ID: {productId}) is inactive and cannot be imported");
-            }
+            // Removed check for inactive product status to allow adding inactive items to receipt
+            // This allows restocking discontinued products if needed
         }
 
         // Create import items

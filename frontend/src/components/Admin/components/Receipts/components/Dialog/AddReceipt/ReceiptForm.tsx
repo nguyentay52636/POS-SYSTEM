@@ -9,6 +9,7 @@ import { CreateImportReceiptDTO } from "@/apis/importReceiptApi"
 import { IProduct } from "@/types/types"
 import { useSupplier } from "@/hooks/useSupplier"
 import { useDispatch, useSelector } from "react-redux"
+import { selectAuth } from "@/redux/Slice/authSlice"
 import { AppDispatch } from "@/redux/store"
 import {
     addItem,
@@ -47,6 +48,7 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
     const dispatch = useDispatch<AppDispatch>()
 
     // Redux state
+    const { user } = useSelector(selectAuth)
     const items = useSelector(selectReceiptItems)
     const products = useSelector(selectReceiptProducts)
     const supplierProducts = useSelector(selectSupplierProducts)
@@ -61,13 +63,19 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
     } = useForm<ReceiptFormData>({
         resolver: zodResolver(receiptSchema),
         defaultValues: {
-            userId: 1, // TODO: Get from auth context
+            userId: user?.userId || 0,
             status: 'pending',
         }
     })
 
     const { suppliers } = useSupplier()
     const supplierId = watch("supplierId")
+
+    useEffect(() => {
+        if (user?.userId) {
+            setValue("userId", user.userId)
+        }
+    }, [user, setValue])
 
     // Reset receipt when component unmounts or form is cancelled
     useEffect(() => {
@@ -90,9 +98,26 @@ export function ReceiptForm({ onSubmit, onCancel }: ReceiptFormProps) {
     }
 
     const onSubmitForm = async (data: ReceiptFormData) => {
+        // Validation: Check valid userId
+        if (!user?.userId) {
+            // Try to use data.userId if set, otherwise error
+            if (!data.userId) {
+                // Import toast if needed or just alert
+                alert("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.")
+                return
+            }
+        }
+
+        // Validation: Check items validity
+        const invalidItems = items.filter(item => item.quantity <= 0 || item.unitPrice <= 0)
+        if (invalidItems.length > 0) {
+            alert("Vui lòng kiểm tra lại sản phẩm: Số lượng và Đơn giá phải lớn hơn 0.")
+            return
+        }
+
         const receiptData: CreateImportReceiptDTO = {
             supplierId: data.supplierId,
-            userId: data.userId,
+            userId: user?.userId || data.userId,
             status: data.status,
             note: data.note,
             items: items.map(item => ({

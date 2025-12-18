@@ -103,9 +103,9 @@ export interface IImportItem {
   quantity: number;
   unitPrice: number;
   subtotal: number;
+  // Backend returns these flattened fields
+  productName?: string;
+  barcode?: string;
+  // Optional, might not be populated by all endpoints
   product?: IProduct;
-  import_item_id?: number;
-  import_id?: number;
-  product_id?: number;
-  unit_price?: number;
 }

@@ -38,7 +38,7 @@ export const useImportReceipt = () => {
 
     const filteredReceipts = useMemo(() => {
         return receipts.filter((receipt) => {
-            const receiptId = (receipt.importId || receipt.import_id || 0).toString()
+            const receiptId = (receipt.importId || 0).toString()
             const matchesSearch =
                 receiptId.includes(searchTerm.toLowerCase()) ||
                 (receipt.supplierName || receipt.supplier?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -67,9 +67,15 @@ export const useImportReceipt = () => {
             setIsAddDialogOpen(false)
             toast.success("Thêm phiếu nhập thành công!")
             fetchReceipts()
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error adding receipt:", error)
-            toast.error("Không thể thêm phiếu nhập")
+
+            // Extract specific message from backend response if available
+            const backendMessage = error.response?.data?.message ||
+                error.response?.data?.error ||
+                "Không thể thêm phiếu nhập"
+
+            toast.error(backendMessage)
             throw error
         }
     }
@@ -77,12 +83,12 @@ export const useImportReceipt = () => {
     const handleEditReceipt = async (data: UpdateImportReceiptDTO) => {
         if (!selectedReceipt) return
 
-        const receiptId = selectedReceipt.importId || selectedReceipt.import_id
+        const receiptId = selectedReceipt.importId
         if (!receiptId) return
 
         try {
             const updatedReceipt = await updateImportReceipt(receiptId, data)
-            const currentReceiptId = (r: IImportReceipt) => r.importId || r.import_id
+            const currentReceiptId = (r: IImportReceipt) => r.importId
             setReceipts(receipts.map((r) =>
                 currentReceiptId(r) === receiptId ? updatedReceipt : r
             ))
@@ -101,7 +107,7 @@ export const useImportReceipt = () => {
 
         try {
             await deleteImportReceipt(receiptId)
-            setReceipts(receipts.filter((r) => (r.importId || r.import_id) !== receiptId))
+            setReceipts(receipts.filter((r) => r.importId !== receiptId))
             toast.success("Xóa phiếu nhập thành công!")
             fetchReceipts()
         } catch (error) {
@@ -113,12 +119,12 @@ export const useImportReceipt = () => {
     const handleUpdateStatus = async (receiptId: number, status: string) => {
         try {
             // Lấy thông tin receipt hiện tại để kiểm tra status cũ
-            const currentReceipt = receipts.find((r) => (r.importId || r.import_id) === receiptId)
+            const currentReceipt = receipts.find((r) => r.importId === receiptId)
             const oldStatus = currentReceipt?.status
 
             // Cập nhật trạng thái
             const updatedReceipt = await updateStatusImportReceipt(receiptId, status)
-            const currentReceiptId = (r: IImportReceipt) => r.importId || r.import_id
+            const currentReceiptId = (r: IImportReceipt) => r.importId
             setReceipts(receipts.map((r) =>
                 currentReceiptId(r) === receiptId ? updatedReceipt : r
             ))
@@ -130,8 +136,8 @@ export const useImportReceipt = () => {
                     console.log("=== Cập nhật tồn kho sau khi duyệt phiếu nhập ===")
                     // Lấy thông tin đầy đủ của receipt (bao gồm items)
                     const fullReceipt = await getImportReceiptById(receiptId)
-                    const items = fullReceipt.importItems || fullReceipt.import_items || []
-                    
+                    const items = fullReceipt.importItems || []
+
                     if (items.length === 0) {
                         console.warn("⚠️ Phiếu nhập không có items, bỏ qua cập nhật tồn kho")
                         fetchReceipts()
@@ -144,9 +150,9 @@ export const useImportReceipt = () => {
                     // Cập nhật inventory cho từng item
                     let successCount = 0
                     let errorCount = 0
-                    
+
                     for (const item of items) {
-                        const productId = item.productId || item.product_id
+                        const productId = item.productId
                         const quantity = item.quantity || 0
 
                         if (!productId) {
@@ -190,6 +196,7 @@ export const useImportReceipt = () => {
                                     inventoryId: 0, // Will be set by backend
                                     productId: productId,
                                     quantity: quantity, // Số lượng nhập vào
+                                    status: 'available',
                                     updatedAt: new Date().toISOString()
                                 }
 

@@ -118,12 +118,7 @@ public class ProductService : IProductService
 
         var result = await _repo.DeleteAsync(id);
         
-        // Sync to Inventory: Product inactive → Inventory unavailable
-        if (result)
-        {
-            await _syncService.SyncProductToInventoryAsync(id, "inactive");
-        }
-        
+        // If hard delete successful, no need to sync status as record is gone
         return result;
     }
 

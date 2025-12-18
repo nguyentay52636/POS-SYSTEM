@@ -39,8 +39,8 @@ export default function ReceiptItemsTable({
     }
 
     const validateUnitPrice = (value: number): number => {
-        if (isNaN(value) || value < 0) return 0
-        return Math.max(0, value)
+        if (isNaN(value) || value <= 0) return 0.01 // Minimum valid value
+        return value
     }
 
     const handleQuantityChange = (index: number, newValue: number) => {
